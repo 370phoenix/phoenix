@@ -3,12 +3,12 @@ import { StyleSheet } from "react-native";
 import { View, Text, Button } from "../components/Themed";
 import { RootStackParamList } from "../types";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Login">;
+type Props = NativeStackScreenProps<RootStackParamList, "Create">;
 
-export default function LoginScreen({ navigation }: Props) {
+export default function CreateScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
-            <Text>Login</Text>
+            <Text>Create</Text>
             <Button title="Go back" onPress={() => navigation.goBack()} color="blue" light />
         </View>
     );

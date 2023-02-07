@@ -37,7 +37,7 @@ type ThemeProps = {
 
 type ButtonOnly = {
     title: string;
-    light: boolean;
+    light: boolean | null;
     color: string;
     onPress: (event?: any) => any;
 };

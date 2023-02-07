@@ -13,13 +13,15 @@ import { ColorSchemeName, Pressable } from "react-native";
 import Colors from "../constants/Colors";
 import { AuthContext } from "../firebase/auth";
 import useColorScheme from "../hooks/useColorScheme";
-import LoginScreen from "../screens/LoginScreen";
+import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TabOneScreen from "../screens/TabOneScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import CreateScreen from "../screens/CreateScreen";
+import LoginScreen from "../screens/LoginScreen";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -59,11 +61,23 @@ function RootNavigator() {
                     </Stack.Group>
                 </>
             ) : (
-                <Stack.Screen
-                    name="SignIn"
-                    component={LoginScreen}
-                    options={{ headerShown: false }}
-                />
+                <>
+                    <Stack.Screen
+                        name="SignIn"
+                        component={SignInScreen}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="Create"
+                        component={CreateScreen}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false }}
+                    />
+                </>
             )}
         </Stack.Navigator>
     );
