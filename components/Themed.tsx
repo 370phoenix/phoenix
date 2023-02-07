@@ -37,7 +37,7 @@ type ThemeProps = {
 
 type ButtonOnly = {
     title: string;
-    light: boolean | null;
+    light?: boolean;
     color: string;
     onPress: (event?: any) => any;
 };
@@ -61,6 +61,7 @@ export function View(props: ViewProps) {
 }
 
 export function Button(props: ButtonProps) {
+    const { style, ..._ } = props;
     const Touchable: any = Platform.OS === "android" ? TouchableNativeFeedback : TouchableOpacity;
     const buttonStyles: Array<any> = [buttonComponentStyles.button];
     const textStyles: Array<any> = [buttonComponentStyles.text];
@@ -73,7 +74,7 @@ export function Button(props: ButtonProps) {
     }
 
     return (
-        <Touchable onPress={props.onPress}>
+        <Touchable onPress={props.onPress} style={style}>
             <View style={buttonStyles}>
                 <Text style={textStyles}>{props.title}</Text>
             </View>
@@ -83,5 +84,5 @@ export function Button(props: ButtonProps) {
 
 const buttonComponentStyles = StyleSheet.create({
     button: { elevation: 4, borderRadius: 3 },
-    text: { textAlign: "center", margin: 8, fontSize: 18 },
+    text: { textAlign: "center", margin: 8, fontSize: 26 },
 });
