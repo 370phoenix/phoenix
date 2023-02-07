@@ -1,5 +1,5 @@
-import { Button, FlatList, Pressable, StyleSheet, TextInput } from "react-native";
-import { Text, View } from "../components/Themed";
+import { FlatList, Pressable, StyleSheet, TextInput } from "react-native";
+import { Text, View, Button } from "../components/Themed";
 
 export default function LoginScreen() {
     const onCreateAccount = () => {};
@@ -8,12 +8,8 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={onCreateAccount}>
-                <Text style={styles.create}>Create Acccount</Text>
-            </Pressable>
-            <Pressable onPress={onLogin}>
-                <Text style={styles.login}>Login</Text>
-            </Pressable>
+            <Button onPress={onCreateAccount} title="Create Account" light={false} color="green" />
+            <Button onPress={onLogin} title="Login" color="green" light />
         </View>
     );
 }
