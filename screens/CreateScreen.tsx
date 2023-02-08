@@ -11,7 +11,7 @@ import {
     TextInput,
 } from "react-native";
 import { View, Text, Button } from "../components/Themed";
-import { AuthContext, getVerificationId, Message, signIn } from "../firebase/auth";
+import { getVerificationId, Message, signIn } from "../firebase/auth";
 import { RootStackParamList } from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Create">;
@@ -22,7 +22,6 @@ export default function CreateScreen({ navigation }: Props) {
     const [vId, setVId] = React.useState<string | null>(null);
     const [message, setMessage] = React.useState<Message | null>(null);
     const captchaRef = React.useRef<FirebaseRecaptchaVerifierModal>(null);
-    const [_, authDispatch] = React.useContext(AuthContext);
 
     const app = getApp();
 
@@ -50,10 +49,6 @@ export default function CreateScreen({ navigation }: Props) {
         if (vId && otp) {
             const res = await signIn({ verificationId: vId, verificationCode: otp });
             setMessage(res);
-
-            if (res.data && authDispatch) {
-                authDispatch({ type: "SIGN_IN", user: res.data });
-            }
         } else {
             setMessage({
                 message: "Error: missing code",

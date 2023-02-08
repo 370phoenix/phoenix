@@ -52,10 +52,7 @@ export function authReducer(prevState: AuthState | undefined, action: AuthAction
     }
 }
 
-export const AuthContext = createContext<[AuthState | null, Dispatch<AuthAction> | null]>([
-    null,
-    null,
-]);
+export const AuthContext = createContext<AuthState | null>(null);
 
 type GetVerificationParams = {
     phoneNumber: string;

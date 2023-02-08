@@ -11,7 +11,7 @@ import * as React from "react";
 import { ColorSchemeName, Pressable } from "react-native";
 
 import Colors from "../constants/Colors";
-import { AuthContext } from "../firebase/auth";
+import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
 import useColorScheme from "../hooks/useColorScheme";
 import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
@@ -22,6 +22,8 @@ import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../typ
 import LinkingConfiguration from "./LinkingConfiguration";
 import CreateScreen from "../screens/CreateScreen";
 import LoginScreen from "../screens/LoginScreen";
+import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
+import { Text } from "../components/Themed";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -40,46 +42,69 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const [authState, _] = React.useContext(AuthContext);
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    const initialAuth = {
+        signedIn: currentUser ? true : false,
+        user: currentUser ? currentUser : null,
+    };
+
+    const [authState, authDispatch] = React.useReducer<React.Reducer<AuthState, AuthAction>>(
+        authReducer,
+        initialAuth as AuthState
+    );
+
+    React.useEffect(() => {
+        const subscriber = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                authDispatch({ type: "SIGN_IN", user: user });
+            } else {
+                authDispatch({ type: "SIGN_OUT" });
+            }
+        });
+        return subscriber;
+    }, []);
 
     return (
-        <Stack.Navigator>
-            {authState && authState.signedIn == true ? (
-                <>
-                    <Stack.Screen
-                        name="Root"
-                        component={BottomTabNavigator}
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="NotFound"
-                        component={NotFoundScreen}
-                        options={{ title: "Oops!" }}
-                    />
-                    <Stack.Group screenOptions={{ presentation: "modal" }}>
-                        <Stack.Screen name="Modal" component={ModalScreen} />
-                    </Stack.Group>
-                </>
-            ) : (
-                <>
-                    <Stack.Screen
-                        name="SignIn"
-                        component={SignInScreen}
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="Create"
-                        component={CreateScreen}
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="Login"
-                        component={LoginScreen}
-                        options={{ headerShown: false }}
-                    />
-                </>
-            )}
-        </Stack.Navigator>
+        <AuthContext.Provider value={authState}>
+            <Stack.Navigator>
+                {authState.signedIn ? (
+                    <>
+                        <Stack.Screen
+                            name="Root"
+                            component={BottomTabNavigator}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="NotFound"
+                            component={NotFoundScreen}
+                            options={{ title: "Oops!" }}
+                        />
+                        <Stack.Group screenOptions={{ presentation: "modal" }}>
+                            <Stack.Screen name="Modal" component={ModalScreen} />
+                        </Stack.Group>
+                    </>
+                ) : (
+                    <>
+                        <Stack.Screen
+                            name="SignIn"
+                            component={SignInScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Create"
+                            component={CreateScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{ headerShown: false }}
+                        />
+                    </>
+                )}
+            </Stack.Navigator>
+        </AuthContext.Provider>
     );
 }
 
@@ -91,6 +116,7 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
     const colorScheme = useColorScheme();
+    const auth = getAuth();
 
     return (
         <BottomTab.Navigator
@@ -106,16 +132,13 @@ function BottomTabNavigator() {
                     tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
                     headerRight: () => (
                         <Pressable
-                            onPress={() => navigation.navigate("Modal")}
+                            onPress={() => auth.signOut()}
                             style={({ pressed }) => ({
                                 opacity: pressed ? 0.5 : 1,
                             })}>
-                            <FontAwesome
-                                name="info-circle"
-                                size={25}
-                                color={Colors[colorScheme].text}
-                                style={{ marginRight: 15 }}
-                            />
+                            <Text style={{ paddingHorizontal: 10, color: "blue", fontSize: 16 }}>
+                                Log out
+                            </Text>
                         </Pressable>
                     ),
                 })}
