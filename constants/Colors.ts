@@ -1,6 +1,7 @@
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 
+
 export default {
   light: {
     text: '#000',
@@ -17,3 +18,10 @@ export default {
     tabIconSelected: tintColorDark,
   },
 };
+
+const brandColors = {
+  lightPurple: 'rgba(200,168,214,1)',
+  darkPurple: 'rgba(64,46,90,1)'
+}
+
+export {brandColors}

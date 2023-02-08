@@ -1,15 +1,13 @@
 import { initializeApp } from "firebase/app";
 
-require("dotenv").config();
-
 // Initialize Firebase
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
+    apiKey: "AIzaSyAp0HRCSDXpcF-hrU39-5NrFusN6DWvUlY",
     authDomain: "phoenix-370.firebaseapp.com",
     projectId: "phoenix-370",
     storageBucket: "phoenix-370.appspot.com",
-    messagingSenderId: process.env.FIREBASE_MSG_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID,
+    messagingSenderId: "816203081042",
+    appId: "1:816203081042:web:a12db79bba73ff204f468b"
 };
 
 const fire = initializeApp(firebaseConfig);
