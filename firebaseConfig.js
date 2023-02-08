@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 
 // Initialize Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAp0HRCSDXpcF-hrU39-5NrFusN6DWvUlY",
+    apiKey: process.env.FIREBASE_API_KEY,
     authDomain: "phoenix-370.firebaseapp.com",
     projectId: "phoenix-370",
     storageBucket: "phoenix-370.appspot.com",
-    messagingSenderId: "816203081042",
-    appId: "1:816203081042:web:a12db79bba73ff204f468b"
+    messagingSenderId: process.env.FIREBASE_MSG_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
 };
 
 const fire = initializeApp(firebaseConfig);
