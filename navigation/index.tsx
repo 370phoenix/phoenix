@@ -40,11 +40,11 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const auth = React.useContext(AuthContext);
+    const [authState, _] = React.useContext(AuthContext);
 
     return (
         <Stack.Navigator>
-            {auth.signedIn == true ? (
+            {authState && authState.signedIn == true ? (
                 <>
                     <Stack.Screen
                         name="Root"

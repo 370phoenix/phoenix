@@ -73,8 +73,10 @@ export function Button(props: ButtonProps) {
         textStyles.push({ color: "white" });
     }
 
+    if (Platform.OS == "android") buttonStyles.push(style);
+
     return (
-        <Touchable onPress={props.onPress} style={style}>
+        <Touchable onPress={props.onPress} style={Platform.OS == "ios" ? style : null}>
             <View style={buttonStyles}>
                 <Text style={textStyles}>{props.title}</Text>
             </View>
