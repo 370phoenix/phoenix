@@ -5,11 +5,10 @@ import {
     getReactNativePersistence,
     PhoneAuthProvider,
     signInWithCredential,
-    onAuthStateChanged,
     User,
 } from "firebase/auth/react-native";
 
-import { createContext, Dispatch } from "react";
+import { createContext } from "react";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -59,6 +58,7 @@ type GetVerificationParams = {
     captchaRef: React.RefObject<FirebaseRecaptchaVerifierModal>;
 };
 
+// Data type used for returning responses to the UI layer
 export type Message = {
     message?: string;
     data?: any;

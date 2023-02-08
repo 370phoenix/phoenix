@@ -49,6 +49,7 @@ function RootNavigator() {
         user: currentUser ? currentUser : null,
     };
 
+    // Reducer in /firebase/auth.ts
     const [authState, authDispatch] = React.useReducer<React.Reducer<AuthState, AuthAction>>(
         authReducer,
         initialAuth as AuthState
@@ -57,11 +58,15 @@ function RootNavigator() {
     React.useEffect(() => {
         const subscriber = onAuthStateChanged(auth, (user) => {
             if (user) {
+                // User is signed in
                 authDispatch({ type: "SIGN_IN", user: user });
             } else {
+                // User is signed out
                 authDispatch({ type: "SIGN_OUT" });
             }
         });
+
+        // Stop listening to the updates when component unmounts
         return subscriber;
     }, []);
 

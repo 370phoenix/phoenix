@@ -16,6 +16,7 @@ import {
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 
+// TODO: Remove these color-themed components
 export function useThemeColor(
     props: { light?: string; dark?: string },
     colorName: keyof typeof Colors.light & keyof typeof Colors.dark
@@ -46,6 +47,7 @@ export type TextProps = ThemeProps & DefaultText["props"];
 export type ViewProps = ThemeProps & DefaultView["props"];
 export type ButtonProps = ThemeProps & DefaultView["props"] & ButtonOnly;
 
+// Still worth keeping custom text, but with our own props
 export function Text(props: TextProps) {
     const { style, lightColor, darkColor, ...otherProps } = props;
     const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
@@ -53,6 +55,7 @@ export function Text(props: TextProps) {
     return <DefaultText style={[{ color }, style]} {...otherProps} />;
 }
 
+// Same here
 export function View(props: ViewProps) {
     const { style, lightColor, darkColor, ...otherProps } = props;
     const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, "background");
@@ -60,6 +63,9 @@ export function View(props: ViewProps) {
     return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
+// title: text displayed in button
+// light: No background, color text if true. reverse if false.
+// color: background or text color depending on light
 export function Button(props: ButtonProps) {
     const { style, ..._ } = props;
     const Touchable: any = Platform.OS === "android" ? TouchableNativeFeedback : TouchableOpacity;

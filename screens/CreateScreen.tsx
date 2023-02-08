@@ -25,6 +25,7 @@ export default function CreateScreen({ navigation }: Props) {
 
     const app = getApp();
 
+    // Reset flow if user goes back
     const onGoBack = () => {
         setPhone("");
         setVId(null);
