@@ -73,5 +73,6 @@
             "prettier/prettier": 0
         }
     },
-    "private": true
+    "private": true,
+    "type": "module"
 }

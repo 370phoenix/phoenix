@@ -9,6 +9,7 @@ import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
 
 export default function PostCard({ post }: { post: postObject }) {
+    // Toggle ride/location badge and MoreInfo component
     const [display, setDisplay] = useState("front");
     return (
         <View style={styles.cardContainer}>
@@ -16,22 +17,30 @@ export default function PostCard({ post }: { post: postObject }) {
                 onPress={() => {
                     setDisplay(display === "front" ? "back" : "front");
                 }}>
-                <View>{display === 'front'? <CardFront post={post}></CardFront> : <MoreInfo post={post}></MoreInfo>}</View>
+                <View>
+                    {display === "front" ? (
+                        <BasicInfo post={post}></BasicInfo>
+                    ) : (
+                        <MoreInfo post={post}></MoreInfo>
+                    )}
+                </View>
             </Pressable>
             <MatchButton />
         </View>
     );
 }
 
-function CardFront({ post }: { post: postObject }) {
+// Component containing rider and location badges
+function BasicInfo({ post }: { post: postObject }) {
     return (
-        <View style={styles.badgeContainer}>
+        <View style={styles.badgesContainer}>
             <LocationBadge post={post}></LocationBadge>
             <RiderBadge post={post}></RiderBadge>
         </View>
     );
 }
 
+// Component containing other information for post
 function MoreInfo({ post }: { post: postObject }) {
     const riders = post.riders;
     const listItems = riders.map((rider) => (
@@ -39,7 +48,15 @@ function MoreInfo({ post }: { post: postObject }) {
             Gender: {rider.gender}, Grad Year: {rider.gradYear}
         </Text>
     ));
-    return <View style={styles.moreInfo}>{listItems}</View>;
+    return (
+        <View style={styles.moreInfoContainer}>
+            <View style={styles.moreInfo}>
+                <Text>More Information: </Text>
+                <View style={styles.separator} lightColor="#eee" darkColor="rgba(0,0,0,0.1)" />
+                {listItems}
+            </View>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -49,15 +66,24 @@ const styles = StyleSheet.create({
         backgroundColor: brandColors.lightPurple,
         borderRadius: 16,
     },
-    badgeContainer: {
+    badgesContainer: {
         backgroundColor: brandColors.lightPurple,
         flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
     },
     moreInfo: {
         backgroundColor: "white",
         borderRadius: 8,
         padding: 8,
-        width: '90%',
-        margin: 8
-    }
+        margin: 8,
+    },
+    moreInfoContainer: {
+        backgroundColor: brandColors.lightPurple
+    },
+    separator: {
+        marginVertical: 5,
+        height: 1,
+        width: '80%'
+    },
 });
