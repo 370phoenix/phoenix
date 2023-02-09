@@ -2,11 +2,11 @@
   "posts": [
     {
       "dropoffLocation": "Publix",
-      "latestTime": "3PM",
+      "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "latestTime": "3PM",
       "pickupLocation": "Eagle Hall",
-      "earliestTime": "1PM",
       "remainingSpots": {
         "capacity": 4,
         "filled": 2
@@ -16,28 +16,28 @@
       ],
       "riders": [
         {
-          "userID": 10001,
           "first": "Greg",
           "gender": "M",
           "gradYear": 2024,
-          "last": "Fenves"
+          "last": "Fenves",
+          "userID": 10001
         },
         {
-          "userID": 10002,
           "first": "Gordon",
           "gender": "T",
           "gradYear": 2020,
-          "last": "Mezli"
+          "last": "Mezli",
+          "userID": 10002
         }
       ]
     },
     {
       "dropoffLocation": "Airport",
-      "latestTime": "4PM",
+      "earliestTime": "2PM",
       "isMatched": false,
       "isRequested": false,
+      "latestTime": "4PM",
       "pickupLocation": "Alabama Hall",
-      "earliestTime": "2PM",
       "remainingSpots": {
         "capacity": 4,
         "filled": 1
@@ -47,21 +47,21 @@
       ],
       "riders": [
         {
-          "userID": 10002,
           "first": "Gordon",
           "gender": "T",
           "gradYear": 2020,
-          "last": "Mezli"
+          "last": "Mezli",
+          "userID": 10002
         }
       ]
     },
     {
       "dropoffLocation": "Publix",
-      "latestTime": "3PM",
+      "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "latestTime": "3PM",
       "pickupLocation": "Eagle Hall",
-      "earliestTime": "1PM",
       "remainingSpots": {
         "capacity": 2,
         "filled": 2
@@ -71,28 +71,28 @@
       ],
       "riders": [
         {
-          "userID": 10004,
           "first": "Connie",
           "gender": "M",
           "gradYear": 2024,
-          "last": "Lingus"
+          "last": "Lingus",
+          "userID": 10004
         },
         {
-          "userID": 10003,
           "first": "Dooley",
           "gender": "T",
           "gradYear": 1969,
-          "last": "Skeleton"
+          "last": "Skeleton",
+          "userID": 10003
         }
       ]
     },
     {
       "dropoffLocation": "Dick's",
-      "latestTime": "4:20PM",
+      "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "latestTime": "4:20PM",
       "pickupLocation": "Cox",
-      "earliestTime": "1PM",
       "remainingSpots": {
         "capacity": 1,
         "filled": 1
@@ -102,21 +102,21 @@
       ],
       "riders": [
         {
-          "userID": 10002,
           "first": "Gordon",
           "gender": "T",
           "gradYear": 2020,
-          "last": "Mezli"
+          "last": "Mezli",
+          "userID": 10002
         }
       ]
     },
     {
       "dropoffLocation": "Raoul",
-      "latestTime": "3PM",
+      "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "latestTime": "3PM",
       "pickupLocation": "Publix",
-      "earliestTime": "1PM",
       "remainingSpots": {
         "capacity": 4,
         "filled": 2
@@ -126,18 +126,18 @@
       ],
       "riders": [
         {
-          "userID": 10001,
           "first": "Greg",
           "gender": "M",
           "gradYear": 2024,
-          "last": "Fenves"
+          "last": "Fenves",
+          "userID": 10001
         },
         {
-          "userID": 10002,
           "first": "Gordon",
           "gender": "T",
           "gradYear": 2020,
-          "last": "Mezli"
+          "last": "Mezli",
+          "userID": 10002
         }
       ]
     }

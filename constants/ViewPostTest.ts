@@ -2,15 +2,24 @@ import { userProfile, remainingSpotsObject, postObject } from "./Types";
 
 let testProfile1: userProfile = {
     gradYear: 2024,
-    gender: 'M'
+    gender: 'M',
+    first: 'Greg',
+    last: 'Fenves',
+    userID: 1
 };
 let testProfile2: userProfile = {
     gradYear: 1999,
-    gender: 'T'
+    gender: 'T',
+    first: 'Gordon',
+    last: 'Mezli',
+    userID: 3
 };
 let testProfile3: userProfile = {
     gradYear: 1900,
-    gender: 'F'
+    gender: 'F',
+    first: 'Deez',
+    last: 'Nuts',
+    userID: 2
 };
 
 let remSpots1: remainingSpotsObject = {
@@ -24,8 +33,8 @@ let remSpots2: remainingSpotsObject = {
 };
 
 let testPost1: postObject = {
-    pickupTime: "1PM",
-    dropoffTime: "3PM",
+    earliestTime: "1PM",
+    latestTime: "3PM",
     pickupLocation: "Eagle Hall",
     dropoffLocation: "Publix",
     riders: [testProfile1, testProfile2, testProfile3],
@@ -36,8 +45,8 @@ let testPost1: postObject = {
 };
 
 let testPost2: postObject = {
-    pickupTime: "4PM",
-    dropoffTime: "10PM",
+    earliestTime: "4PM",
+    latestTime: "10PM",
     pickupLocation: "Your Mom's House",
     dropoffLocation: "Cox",
     riders: [testProfile2, testProfile3],
@@ -48,8 +57,8 @@ let testPost2: postObject = {
 };
 
 let testPost3: postObject = {
-    pickupTime: "6AM",
-    dropoffTime: "7AM",
+    earliestTime: "6AM",
+    latestTime: "7AM",
     pickupLocation: "Raoul Circle",
     dropoffLocation: "Hartsfield Jackson",
     riders: [testProfile1, testProfile3],

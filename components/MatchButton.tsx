@@ -4,22 +4,23 @@ import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "./Themed";
 
 export default function MatchButton() {
-    const [requested, setRequested] = useState(false);
+    // state variables for onClick event, change status of match and appearance of button
+    const [status, setStatus] = useState('default');
     const [color, setColor] = useState("black");
 
     useEffect(() => {
-        setColor(requested ? "red" : "black");
-    }, [requested]);
+        setColor(status === 'default'? "black" : "red");
+    }, [status]);
 
     return (
         <Pressable
             onPress={() => {
-                // TODO: update isRequested variable in database
-                setRequested(requested ? false : true);
+                // TODO: update status variable in database
+                setStatus(status === 'default' ? 'requested' : 'default');
             }}>
             <View style={styles.matchButton}>
                 <Text style={[styles.buttonText, { color: color }]}>
-                    {!requested ? "Match!" : "Cancel Match"}
+                    {status === 'default' ? "Match!" : "Cancel Match"}
                 </Text>
             </View>
         </Pressable>

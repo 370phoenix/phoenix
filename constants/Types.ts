@@ -1,23 +1,26 @@
 type userProfile = {
+    first: string;
+    last: string;
+    userID: number;
     gradYear: number;
-    gender: string
-}
+    gender: string;
+};
 
 type remainingSpotsObject = {
     capacity: number;
     filled: number;
-}
+};
 
 type postObject = {
-    pickupTime : string;
-    dropoffTime: string;
-    pickupLocation: string;
     dropoffLocation: string;
-    riders: userProfile[];
-    remainingSpots: remainingSpotsObject;
-    rideNotes: string[];
+    earliestTime: string;
     isMatched: boolean;
     isRequested: boolean;
-}
+    latestTime: string;
+    pickupLocation: string;
+    remainingSpots: remainingSpotsObject;
+    rideNotes: string[];
+    riders: userProfile[];
+};
 
-export {userProfile, remainingSpotsObject, postObject}
+export { userProfile, remainingSpotsObject, postObject };

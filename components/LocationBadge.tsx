@@ -11,7 +11,7 @@ export default function LocationBadge({ post }: { post: postObject }) {
                     Trip: {post.pickupLocation} to {post.dropoffLocation}
                 </Text>
                 <Text style={styles.locationText}>
-                    Between: {post.pickupTime} - {post.dropoffTime}
+                    Between: {post.earliestTime} - {post.latestTime}
                 </Text>
         </View>
     );
