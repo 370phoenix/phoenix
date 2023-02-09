@@ -14,7 +14,7 @@ export default function App() {
         return null;
     } else {
         return (
-            <SafeAreaProvider>
+            <SafeAreaProvider style={{ flex: 1, backgroundColor: "#fff" }}>
                 <Navigation colorScheme={colorScheme} />
                 <StatusBar />
             </SafeAreaProvider>
