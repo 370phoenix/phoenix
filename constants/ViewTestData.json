@@ -1,0 +1,145 @@
+{
+  "posts": [
+    {
+      "dropoffLocation": "Publix",
+      "earliestTime": "1PM",
+      "isMatched": false,
+      "isRequested": false,
+      "latestTime": "3PM",
+      "pickupLocation": "Eagle Hall",
+      "remainingSpots": {
+        "capacity": 4,
+        "filled": 2
+      },
+      "rideNotes": [
+        "This is a note example!"
+      ],
+      "riders": [
+        {
+          "first": "Greg",
+          "gender": "M",
+          "gradYear": 2024,
+          "last": "Fenves",
+          "userID": 10001
+        },
+        {
+          "first": "Gordon",
+          "gender": "T",
+          "gradYear": 2020,
+          "last": "Mezli",
+          "userID": 10002
+        }
+      ]
+    },
+    {
+      "dropoffLocation": "Airport",
+      "earliestTime": "2PM",
+      "isMatched": false,
+      "isRequested": false,
+      "latestTime": "4PM",
+      "pickupLocation": "Alabama Hall",
+      "remainingSpots": {
+        "capacity": 4,
+        "filled": 1
+      },
+      "rideNotes": [
+        "I will be riding with my pet bear"
+      ],
+      "riders": [
+        {
+          "first": "Gordon",
+          "gender": "T",
+          "gradYear": 2020,
+          "last": "Mezli",
+          "userID": 10002
+        }
+      ]
+    },
+    {
+      "dropoffLocation": "Publix",
+      "earliestTime": "1PM",
+      "isMatched": false,
+      "isRequested": false,
+      "latestTime": "3PM",
+      "pickupLocation": "Eagle Hall",
+      "remainingSpots": {
+        "capacity": 2,
+        "filled": 2
+      },
+      "rideNotes": [
+        "This is a note example!"
+      ],
+      "riders": [
+        {
+          "first": "Connie",
+          "gender": "M",
+          "gradYear": 2024,
+          "last": "Lingus",
+          "userID": 10004
+        },
+        {
+          "first": "Dooley",
+          "gender": "T",
+          "gradYear": 1969,
+          "last": "Skeleton",
+          "userID": 10003
+        }
+      ]
+    },
+    {
+      "dropoffLocation": "Dick's",
+      "earliestTime": "1PM",
+      "isMatched": false,
+      "isRequested": false,
+      "latestTime": "4:20PM",
+      "pickupLocation": "Cox",
+      "remainingSpots": {
+        "capacity": 1,
+        "filled": 1
+      },
+      "rideNotes": [
+        "This is a note example!"
+      ],
+      "riders": [
+        {
+          "first": "Gordon",
+          "gender": "T",
+          "gradYear": 2020,
+          "last": "Mezli",
+          "userID": 10002
+        }
+      ]
+    },
+    {
+      "dropoffLocation": "Raoul",
+      "earliestTime": "1PM",
+      "isMatched": false,
+      "isRequested": false,
+      "latestTime": "3PM",
+      "pickupLocation": "Publix",
+      "remainingSpots": {
+        "capacity": 4,
+        "filled": 2
+      },
+      "rideNotes": [
+        "Cole Smiff"
+      ],
+      "riders": [
+        {
+          "first": "Greg",
+          "gender": "M",
+          "gradYear": 2024,
+          "last": "Fenves",
+          "userID": 10001
+        },
+        {
+          "first": "Gordon",
+          "gender": "T",
+          "gradYear": 2020,
+          "last": "Mezli",
+          "userID": 10002
+        }
+      ]
+    }
+  ]
+}

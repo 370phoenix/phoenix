@@ -17,7 +17,7 @@ import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
-import TabOneScreen from "../screens/TabOneScreen";
+import ViewPostsScreen from "../screens/ViewPostScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
@@ -118,12 +118,12 @@ function BottomTabNavigator() {
     const auth = getAuth();
 
     return (
-        <BottomTab.Navigator initialRouteName="TabOne">
+        <BottomTab.Navigator initialRouteName="ViewPosts">
             <BottomTab.Screen
-                name="TabOne"
-                component={TabOneScreen}
-                options={({ navigation }: RootTabScreenProps<"TabOne">) => ({
-                    title: "Tab One",
+                name="ViewPosts"
+                component={ViewPostsScreen}
+                options={({ navigation }: RootTabScreenProps<"ViewPosts">) => ({
+                    title: "View Posts",
                     tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
                     headerRight: () => (
                         <Pressable
