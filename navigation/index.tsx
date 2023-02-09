@@ -13,6 +13,7 @@ import { ColorSchemeName, Pressable } from "react-native";
 import Colors from "../constants/Colors";
 import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
 import useColorScheme from "../hooks/useColorScheme";
+import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -20,8 +21,6 @@ import TabOneScreen from "../screens/TabOneScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import CreateScreen from "../screens/CreateScreen";
-import LoginScreen from "../screens/LoginScreen";
 import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
 import { Text } from "../components/Themed";
 
@@ -92,18 +91,13 @@ function RootNavigator() {
                 ) : (
                     <>
                         <Stack.Screen
+                            name="Welcome"
+                            component={WelcomeScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
                             name="SignIn"
                             component={SignInScreen}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="Create"
-                            component={CreateScreen}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="Login"
-                            component={LoginScreen}
                             options={{ headerShown: false }}
                         />
                     </>
@@ -124,11 +118,7 @@ function BottomTabNavigator() {
     const auth = getAuth();
 
     return (
-        <BottomTab.Navigator
-            initialRouteName="TabOne"
-            screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme].tint,
-            }}>
+        <BottomTab.Navigator initialRouteName="TabOne">
             <BottomTab.Screen
                 name="TabOne"
                 component={TabOneScreen}
