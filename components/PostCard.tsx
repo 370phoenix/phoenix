@@ -10,9 +10,19 @@ import RiderBadge from "./RiderBadge";
 
 export default function PostCard({ post }: { post: postObject }) {
     // Toggle ride/location badge and MoreInfo component
+    const [showMore, setShowMore] = useState(false);
+
     return (
         <View style={styles.cardContainer}>
-            <BasicInfo post={post}></BasicInfo>
+            <View>
+                <Pressable onPress={() => setShowMore(!showMore)}>
+                    {!showMore ? (
+                        <BasicInfo post={post}></BasicInfo>
+                    ) : (
+                        <MoreInfo post={post}></MoreInfo>
+                    )}
+                </Pressable>
+            </View>
             <MatchButton />
         </View>
     );
