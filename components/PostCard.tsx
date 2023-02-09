@@ -2,11 +2,11 @@ import { useState } from "react";
 import { StyleSheet, Pressable, Text } from "react-native";
 import LocationBadge from "./LocationBadge";
 
-import { brandColors } from "../constants/Colors";
 import { View } from "./Themed";
 import { postObject } from "../constants/Types";
 import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
+import Colors from "../constants/Colors";
 
 export default function PostCard({ post }: { post: postObject }) {
     // Toggle ride/location badge and MoreInfo component
@@ -50,7 +50,7 @@ function MoreInfo({ post }: { post: postObject }) {
         <View style={styles.moreInfoContainer}>
             <View style={styles.moreInfo}>
                 <Text>More Information: </Text>
-                <View style={styles.separator} lightColor="#eee" darkColor="rgba(0,0,0,0.1)" />
+                <View style={styles.separator} />
                 {listItems}
             </View>
         </View>
@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
     cardContainer: {
         margin: 16,
         padding: 16,
-        backgroundColor: brandColors.lightPurple,
+        backgroundColor: Colors.purple["2"],
         borderRadius: 16,
     },
     badgesContainer: {
-        backgroundColor: brandColors.lightPurple,
+        backgroundColor: Colors.purple["2"],
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
         margin: 8,
     },
     moreInfoContainer: {
-        backgroundColor: brandColors.lightPurple,
+        backgroundColor: Colors.purple["2"],
     },
     separator: {
         marginVertical: 5,

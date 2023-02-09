@@ -1,9 +1,9 @@
 import { StyleSheet, FlatList, Text } from "react-native";
-import { brandColors } from "../constants/Colors";
 import PostCard from "./PostCard";
 import { fetchPosts } from "../firebase/fetchPosts";
 import { View } from "./Themed";
 import { useState, useEffect } from "react";
+import Colors from "../constants/Colors";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ export default function PostList() {
 const styles = StyleSheet.create({
     listContainer: {
         padding: 24,
-        backgroundColor: brandColors.darkPurple,
+        backgroundColor: Colors.purple.p,
     },
     bodyText: {
         color: "black",

@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
-import { brandColors } from "../constants/Colors";
 import { Text } from "./Themed";
 import { postObject } from "../constants/Types";
+import Colors from "../constants/Colors";
 
 export default function RiderBadge({ post }: { post: postObject }) {
     return (
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     },
     locationText: {
         fontSize: 16,
-        color: brandColors.darkPurple,
+        color: Colors.purple.p,
         flexWrap: "wrap",
     },
 });
