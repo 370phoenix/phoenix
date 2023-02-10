@@ -5,14 +5,12 @@
  */
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { ColorSchemeName, Pressable } from "react-native";
+import { Pressable } from "react-native";
 
-import Colors from "../constants/Colors";
 import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
-import useColorScheme from "../hooks/useColorScheme";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
@@ -23,12 +21,12 @@ import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../typ
 import LinkingConfiguration from "./LinkingConfiguration";
 import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
 import { Text } from "../components/Themed";
+import Colors from "../constants/Colors";
+import Type from "../constants/Type";
 
-export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+export default function Navigation() {
     return (
-        <NavigationContainer
-            linking={LinkingConfiguration}
-            theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <NavigationContainer linking={LinkingConfiguration}>
             <RootNavigator />
         </NavigationContainer>
     );
@@ -114,11 +112,25 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-    const colorScheme = useColorScheme();
     const auth = getAuth();
 
     return (
-        <BottomTab.Navigator initialRouteName="ViewPosts">
+        <BottomTab.Navigator
+            initialRouteName="ViewPosts"
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: Colors.purple.m,
+                },
+                headerTintColor: Colors.gray.w,
+                headerTitleStyle: Type.header.m,
+                tabBarActiveBackgroundColor: Colors.purple.m,
+                tabBarInactiveBackgroundColor: Colors.purple.m,
+                tabBarActiveTintColor: Colors.gray.w,
+                tabBarInactiveTintColor: Colors.gray["3"],
+                tabBarStyle: {
+                    backgroundColor: Colors.purple.m,
+                },
+            }}>
             <BottomTab.Screen
                 name="ViewPosts"
                 component={ViewPostsScreen}
@@ -131,7 +143,14 @@ function BottomTabNavigator() {
                             style={({ pressed }) => ({
                                 opacity: pressed ? 0.5 : 1,
                             })}>
-                            <Text style={{ paddingHorizontal: 10, color: "blue", fontSize: 16 }}>
+                            <Text
+                                textStyle="label"
+                                styleSize="s"
+                                style={{
+                                    paddingHorizontal: 10,
+                                    color: Colors.gray.w,
+                                    fontSize: 16,
+                                }}>
                                 Log out
                             </Text>
                         </Pressable>
@@ -142,7 +161,7 @@ function BottomTabNavigator() {
                 name="TabTwo"
                 component={TabTwoScreen}
                 options={{
-                    title: "Tab Two",
+                    title: "Tab 2",
                     tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
                 }}
             />

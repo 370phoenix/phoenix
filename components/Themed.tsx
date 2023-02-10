@@ -67,20 +67,20 @@ export function Button(props: ButtonProps) {
     const textStyles: Array<any> = [buttonComponentStyles.text];
     const baseColor = Colors[color];
 
-    if (!clear) {
+    if (clear) {
+        buttonStyles.push({ flexDirection: "row" });
+        if (light) {
+            textStyles.push({ color: baseColor["4"] });
+        } else {
+            textStyles.push({ color: baseColor["p"] });
+        }
+    } else {
         if (light) {
             buttonStyles.push({ backgroundColor: baseColor["4"] });
             textStyles.push({ color: baseColor["p"], marginHorizontal: 16 });
         } else {
             buttonStyles.push({ backgroundColor: baseColor["p"] });
             textStyles.push({ color: Colors.gray.w, marginHorzontal: 16 });
-        }
-    } else {
-        buttonStyles.push({ flexDirection: "row" });
-        if (light) {
-            textStyles.push({ color: baseColor["4"] });
-        } else {
-            textStyles.push({ color: baseColor["p"] });
         }
     }
 
@@ -101,7 +101,10 @@ export function Button(props: ButtonProps) {
     return (
         <Touchable onPress={props.onPress} style={Platform.OS == "ios" ? style : null}>
             <View style={buttonStyles}>
-                <Text textStyle="label" styleSize="l" style={textStyles}>
+                <Text
+                    textStyle={clear ? "lineTitle" : "label"}
+                    styleSize={!clear ? "l" : undefined}
+                    style={textStyles}>
                     {props.title}
                 </Text>
             </View>
