@@ -18,7 +18,6 @@ export default function SignInScreen({ navigation }: Props) {
             <Button
                 style={{ width: "80%" }}
                 onPress={() => {
-                    debugger;
                     navigation.navigate("SignIn");
                 }}
                 title="Create Account"
