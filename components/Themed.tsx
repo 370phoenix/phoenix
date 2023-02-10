@@ -61,11 +61,13 @@ export function View(props: ViewProps) {
 // light: No background, color text if true. reverse if false.
 // color: background or text color depending on light
 export function Button(props: ButtonProps) {
-    const { style, color, clear, light, icon, ..._ } = props;
+    const { style, color, clear, light, icon, title, onPress, ..._ } = props;
     const Touchable: any = Platform.OS === "android" ? TouchableNativeFeedback : TouchableOpacity;
     const buttonStyles: Array<any> = [buttonComponentStyles.button];
     const textStyles: Array<any> = [buttonComponentStyles.text];
     const baseColor = Colors[color];
+
+    let text = title;
 
     if (clear) {
         buttonStyles.push({ flexDirection: "row" });
@@ -74,6 +76,7 @@ export function Button(props: ButtonProps) {
         } else {
             textStyles.push({ color: baseColor["p"] });
         }
+        text = text.toUpperCase();
     } else {
         if (light) {
             buttonStyles.push({ backgroundColor: baseColor["4"] });
@@ -88,24 +91,24 @@ export function Button(props: ButtonProps) {
 
     if (icon)
         return (
-            <Touchable onPress={props.onPress} style={Platform.OS == "ios" ? style : null}>
+            <Touchable onPress={onPress} style={Platform.OS == "ios" ? style : null}>
                 <View style={buttonStyles}>
                     <Image style={buttonComponentStyles.icon} source={icon} />
                     <Text textStyle="label" styleSize="l" style={textStyles}>
-                        {props.title}
+                        {text}
                     </Text>
                 </View>
             </Touchable>
         );
 
     return (
-        <Touchable onPress={props.onPress} style={Platform.OS == "ios" ? style : null}>
+        <Touchable onPress={onPress} style={Platform.OS == "ios" ? style : null}>
             <View style={buttonStyles}>
                 <Text
                     textStyle={clear ? "lineTitle" : "label"}
                     styleSize={!clear ? "l" : undefined}
                     style={textStyles}>
-                    {props.title}
+                    {text}
                 </Text>
             </View>
         </Touchable>
