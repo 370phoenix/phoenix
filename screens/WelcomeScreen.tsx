@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Image } from "react-native";
 import { View, Button, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
@@ -9,13 +10,16 @@ type Props = NativeStackScreenProps<RootStackParamList, "Welcome">;
 export default function SignInScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
+            <StatusBar style="light" />
             <Image style={styles.logo} source={require("../assets/images/logo-horizontal.png")} />
             <Text textStyle="header" styleSize="s" style={styles.headline}>
                 Create account or sign in
             </Text>
             <Button
                 style={{ width: "80%" }}
-                onPress={() => navigation.navigate("SignIn")}
+                onPress={() => {
+                    navigation.navigate("SignIn");
+                }}
                 title="Create Account"
                 color="purple"
                 light

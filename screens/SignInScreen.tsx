@@ -1,15 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Constants from "expo-constants";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import { StatusBar } from "expo-status-bar";
 import { getApp } from "firebase/app";
 import React from "react";
-import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    TextInput,
-} from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, TextInput } from "react-native";
 import { View, Text, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { getVerificationId, Message, signIn } from "../firebase/auth";
@@ -60,7 +55,8 @@ export default function CreateScreen({ navigation }: Props) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
+            <StatusBar backgroundColor={Colors.purple.p} style="light" translucent={true} />
             <View style={styles.header}>
                 <Button
                     title="Go back"
@@ -105,7 +101,9 @@ export default function CreateScreen({ navigation }: Props) {
                         value={phone}
                         style={styles.input}
                     />
-                    <Text style={styles.label}>phone number</Text>
+                    <Text textStyle="label" styleSize="s" style={styles.label}>
+                        phone number
+                    </Text>
                 </View>
 
                 {vId !== null && (
@@ -131,7 +129,7 @@ export default function CreateScreen({ navigation }: Props) {
                     onPress={vId ? onSubmit : onNext}
                 />
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -140,14 +138,18 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        paddingTop: Platform.OS === "android" ? Constants.statusBarHeight : 0,
         backgroundColor: Colors.purple.m,
+        textColor: "white",
     },
     header: {
         alignItems: "flex-start",
         height: "auto",
         width: "100%",
         paddingHorizontal: 20,
+        paddingTop: Platform.OS == "ios" ? Constants.statusBarHeight : 0,
+        paddingBottom: 8,
+        backgroundColor: Colors.purple.p,
     },
     form: {
         flex: 1,

@@ -10,12 +10,19 @@ export default function PostList() {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        if (posts.length === 0 && isLoading) {
-            fetchPosts()
-                .then((response) => setPosts(response))
-                .catch((error) => alert(error))
-                .finally(() => setLoading(false));
-        }
+        const fetchData = async () => {
+            if (posts.length === 0 && isLoading) {
+                try {
+                    const res = await fetchPosts();
+                    setPosts(res);
+                    setLoading(false);
+                } catch (e: any) {
+                    alert(e);
+                }
+            }
+        };
+
+        fetchData();
     }, [posts, isLoading]);
 
     return (
@@ -23,6 +30,7 @@ export default function PostList() {
             {posts.length !== 0 && (
                 <FlatList
                     data={posts}
+                    showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => <PostCard key={Math.random()} post={item}></PostCard>}
                 />
             )}
