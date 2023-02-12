@@ -23,6 +23,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
 import { Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 import Type from "../constants/Type";
+import CreatePostScreen from "../screens/CreatePostScreen";
 
 export default function Navigation() {
     return (
@@ -162,6 +163,14 @@ function BottomTabNavigator() {
                 component={TabTwoScreen}
                 options={{
                     title: "Tab 2",
+                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                }}
+            />
+            <BottomTab.Screen
+                name="CreatePost"
+                component={CreatePostScreen}
+                options={{
+                    title: "Create Post",
                     tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
                 }}
             />
