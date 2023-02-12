@@ -1,12 +1,16 @@
 {
   "posts": [
     {
+      "postID": 1,
       "dropoffLocation": "Publix",
+      "date": "02/22/2023",
       "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "roundTrip": true,
       "latestTime": "3PM",
       "pickupLocation": "Eagle Hall",
+      "numFriends": 1,
       "remainingSpots": {
         "capacity": 4,
         "filled": 2
@@ -32,12 +36,16 @@
       ]
     },
     {
+      "postID": 2,
       "dropoffLocation": "Airport",
+      "date": "02/19/2023",
       "earliestTime": "2PM",
       "isMatched": false,
       "isRequested": false,
+      "roundTrip": true,
       "latestTime": "4PM",
       "pickupLocation": "Alabama Hall",
+      "numFriends": 0,
       "remainingSpots": {
         "capacity": 4,
         "filled": 1
@@ -56,12 +64,16 @@
       ]
     },
     {
+      "postID": 4,
       "dropoffLocation": "Publix",
+      "date": "02/20/2023",
       "earliestTime": "1PM",
-      "isMatched": false,
+      "isMatched": true,
       "isRequested": false,
+      "roundTrip": true,
       "latestTime": "3PM",
       "pickupLocation": "Eagle Hall",
+      "numFriends": 0,
       "remainingSpots": {
         "capacity": 2,
         "filled": 2
@@ -87,14 +99,18 @@
       ]
     },
     {
+      "postID": 5,
       "dropoffLocation": "Dick's",
+      "date": "02/28/2023",
       "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "roundTrip": true,
       "latestTime": "4:20PM",
       "pickupLocation": "Cox",
+      "numFriends": 0,
       "remainingSpots": {
-        "capacity": 1,
+        "capacity": 2,
         "filled": 1
       },
       "rideNotes": [
@@ -111,12 +127,16 @@
       ]
     },
     {
+      "postID": 3,
       "dropoffLocation": "Raoul",
+      "date": "02/18/2023",
       "earliestTime": "1PM",
       "isMatched": false,
       "isRequested": false,
+      "roundTrip": true,
       "latestTime": "3PM",
       "pickupLocation": "Publix",
+      "numFriends": 0,
       "remainingSpots": {
         "capacity": 4,
         "filled": 2
