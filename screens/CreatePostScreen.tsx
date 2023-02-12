@@ -4,6 +4,8 @@ import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
 import DateTimePicker from "../components/DateTimePicker";
 import Switch from "../components/Switch";
+import MLTextInput from "../components/MultilineInput";
+import NumberPicker from "../components/NumberPicker";
 
 import LocationPicker from "../components/LocationPicker";
 
@@ -15,6 +17,8 @@ export default function CreatePostScreen({ navigation }: RootTabScreenProps<"Cre
                 <LocationPicker name="dropoff" />
                 <Switch label="Round trip?" />
                 <DateTimePicker />
+                {/* <NumberPicker /> */}
+                <MLTextInput />
             </View>
         </ScrollView>
     );
