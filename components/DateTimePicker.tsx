@@ -4,10 +4,16 @@ import { Button } from "./Themed";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function App() {
+    // Function to convert date to string
     const dateToString = (tempDate: Date): string => {
         let fDate =
             tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
-        let fTime = tempDate.getHours() + ":" + tempDate.getMinutes();
+        let minutes : string | number = tempDate.getMinutes();
+        minutes = minutes < 10? '0' + minutes : minutes;
+        let hours : string | number = tempDate.getHours();
+        hours = hours > 12? hours - 12 : hours;
+        
+        let fTime = `${hours}:${minutes}`;
         return fDate + "\n" + fTime;
     };
 
@@ -49,25 +55,15 @@ const styles = StyleSheet.create({
     container: {
         height: 500,
         flex: 1,
-        padding: 6,
-        alignItems: "center",
-        backgroundColor: "white",
-    },
-
-    text: {
-        fontSize: 25,
-        color: "red",
-        padding: 3,
-        marginBottom: 10,
-        textAlign: "center",
-    },
-
-    // Style for iOS ONLY...
-    datePicker: {
-        justifyContent: "center",
+        padding: 8,
+        margin: 16,
         alignItems: "flex-start",
-        width: 320,
-        height: 260,
-        display: "flex",
+    },
+    input: {
+        height: 40,
+        margin: 16,
+        borderWidth: 1,
+        padding: 8,
+        flex: 8
     },
 });
