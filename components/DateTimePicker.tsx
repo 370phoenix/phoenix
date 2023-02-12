@@ -4,66 +4,70 @@ import { Button } from "./Themed";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function App() {
-    // Function to convert date to string
-    const dateToString = (tempDate: Date): string => {
-        let fDate =
-            tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
-        let minutes : string | number = tempDate.getMinutes();
-        minutes = minutes < 10? '0' + minutes : minutes;
-        let hours : string | number = tempDate.getHours();
-        hours = hours > 12? hours - 12 : hours;
-        
-        let fTime = `${hours}:${minutes}`;
-        return fDate + "\n" + fTime;
-    };
+    // Function to convert date to string (Not used in this file, will be useful for reading from database)
+    // const dateToString = (tempDate: Date): string => {
+    //     let fDate =
+    //         tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
+    //     let minutes: string | number = tempDate.getMinutes();
+    //     minutes = minutes < 10 ? "0" + minutes : minutes;
+    //     let hours: string | number = tempDate.getHours();
+    //     hours = hours > 12 ? hours - 12 : hours;
+
+    //     let fTime = `${hours}:${minutes}`;
+    //     return fDate + " " + fTime;
+    // };
 
     const [date, setDate] = useState(new Date());
-    const [text, setText] = useState(dateToString(new Date()));
+    // const [text, setText] = useState(dateToString(new Date()));
 
     const onChange = (event: any, selectedDate?: Date | undefined) => {
         const currentDate = selectedDate || date;
         setDate(currentDate);
 
         let tempDate = new Date(currentDate);
-        setText(dateToString(tempDate));
+        // setText(dateToString(tempDate));
     };
 
     return (
-        <View style={styles.container}>
-            <DateTimePicker
-                testID="dateTimePicker"
-                value={date}
-                mode={"date"}
-                is24Hour={false}
-                display={"default"}
-                onChange={onChange}
-            />
-            <DateTimePicker
-                testID="dateTimePicker"
-                value={date}
-                mode={"time"}
-                is24Hour={false}
-                display={"default"}
-                onChange={onChange}
-            />
-            <Text>{text}</Text>
+        <View>
+            <Text style={styles.label}>When do you want a ride?</Text>
+            <View style={styles.container}>
+                <DateTimePicker
+                    style={styles.dateTime}
+                    testID="dateTimePicker"
+                    value={date}
+                    mode={"date"}
+                    is24Hour={false}
+                    display={"default"}
+                    onChange={onChange}
+                    minimumDate={new Date()}
+                />
+                <DateTimePicker
+                    style={styles.dateTime}
+                    testID="dateTimePicker"
+                    value={date}
+                    mode={"time"}
+                    is24Hour={false}
+                    display={"default"}
+                    onChange={onChange}
+                />
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        height: 500,
-        flex: 1,
-        padding: 8,
-        margin: 16,
-        alignItems: "flex-start",
+        marginLeft: 16,
+        justifyContent:"flex-start",
+        display: "flex",
+        flexDirection: "row",
     },
-    input: {
-        height: 40,
-        margin: 16,
-        borderWidth: 1,
-        padding: 8,
-        flex: 8
+    dateTime: {
+        marginRight: 16,
+    },
+    label: {
+        marginBottom: 8,
+        marginLeft: 16,
     },
 });

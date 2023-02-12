@@ -3,15 +3,17 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
 import DateTimePicker from "../components/DateTimePicker";
+import Switch from "../components/Switch";
 
-import CurrentLocation from "../components/LocationPicker";
+import LocationPicker from "../components/LocationPicker";
 
 export default function CreatePostScreen({ navigation }: RootTabScreenProps<"CreatePost">) {
     return (
         <ScrollView style={styles.container}>
             <View>
-                <CurrentLocation name="pickup" />
-                <CurrentLocation name="dropoff" />
+                <LocationPicker name="pickup" />
+                <LocationPicker name="dropoff" />
+                <Switch label="Round trip?" />
                 <DateTimePicker />
             </View>
         </ScrollView>
@@ -20,6 +22,7 @@ export default function CreatePostScreen({ navigation }: RootTabScreenProps<"Cre
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.purple[4]
+        backgroundColor: Colors.purple[4],
+        color: Colors.gray[4],
     },
 });

@@ -5,7 +5,6 @@ import Colors from "../constants/Colors";
 import * as Location from "expo-location";
 import { Button, Text } from "./Themed";
 
-// Component returns current location as string for create post form
 export default function App({ name }: { name: string }) {
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -39,17 +38,15 @@ export default function App({ name }: { name: string }) {
     }
 
     return (
-        <View>
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>{name === 'pickup'? 'from' : 'to'}</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={onChangeText}
-                    value={inputText}
-                    placeholder={`${name} location`}
-                    placeholderTextColor={Colors.gray.b}
-                />
-            </View>
+        <View style={styles.container}>
+            <Text style={styles.label}>{name === "pickup" ? "From" : "To"}</Text>
+            <TextInput
+                style={styles.input}
+                onChangeText={onChangeText}
+                value={inputText}
+                placeholder={`${name} location`}
+                placeholderTextColor={Colors.gray.b}
+            />
             <Button
                 title="Use Current Location"
                 color="navy"
@@ -61,24 +58,16 @@ export default function App({ name }: { name: string }) {
 }
 
 const styles = StyleSheet.create({
-    paragraph: {
-        color: Colors.gray.b,
+    container: {
+        marginTop: 8,
+        marginLeft: 16,
+        marginRight: 16,
     },
     input: {
-        height: 40,
-        margin: 16,
         borderWidth: 1,
         padding: 8,
-        flex: 8
-    },
-    inputContainer : {
-        display: 'flex',
-        flexDirection: 'row'
     },
     label: {
-        height: 40,
-        margin: 16,
-        padding: 8,
-        flex: 1
-    }
+        marginBottom: 8,
+    },
 });
