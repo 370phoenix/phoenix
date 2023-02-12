@@ -1,51 +1,73 @@
-import React, { useState, useEffect } from "react";
-import { Text, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
+import { SafeAreaView, StyleSheet, Text, View, Platform } from "react-native";
+import React, { useState } from "react";
+import { Button } from "./Themed";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-import * as Location from "expo-location";
-
-// Component returns current location as string for create post form
 export default function App() {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [locationString, setLocationString] = useState<string | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-    const getLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-            setErrorMsg("Access to Location denied");
-        }
-
-        let location: Location.LocationObject | null = await Location.getLastKnownPositionAsync();
-        if (location == null) location = await Location.getCurrentPositionAsync();
-        setLocation(location);
-
-        const place = await Location.reverseGeocodeAsync({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-        });
-
-        place.find((p) => {
-            setLocationString(`Your current location: ${p.city} ${p.region}, ${p.postalCode}`);
-        });
+    const dateToString = (tempDate: Date): string => {
+        let fDate =
+            tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
+        let fTime = tempDate.getHours() + ":" + tempDate.getMinutes();
+        return fDate + "\n" + fTime;
     };
 
-    useEffect(() => {
-        getLocation();
-    }, []);
+    const [date, setDate] = useState(new Date());
+    const [text, setText] = useState(dateToString(new Date()));
 
-    let text: string | null = "Waiting..";
-    if (errorMsg) {
-        text = errorMsg;
-    } else if (location) {
-        text = locationString;
-    }
+    const onChange = (event: any, selectedDate?: Date | undefined) => {
+        const currentDate = selectedDate || date;
+        setDate(currentDate);
 
-    return <Text style={styles.paragraph}>{text}</Text>;
+        let tempDate = new Date(currentDate);
+        setText(dateToString(tempDate));
+    };
+
+    return (
+        <View style={styles.container}>
+            <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={"date"}
+                is24Hour={false}
+                display={"default"}
+                onChange={onChange}
+            />
+            <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={"time"}
+                is24Hour={false}
+                display={"default"}
+                onChange={onChange}
+            />
+            <Text>{text}</Text>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-    paragraph: {
-        color: Colors.gray.b,
+    container: {
+        height: 500,
+        flex: 1,
+        padding: 6,
+        alignItems: "center",
+        backgroundColor: "white",
+    },
+
+    text: {
+        fontSize: 25,
+        color: "red",
+        padding: 3,
+        marginBottom: 10,
+        textAlign: "center",
+    },
+
+    // Style for iOS ONLY...
+    datePicker: {
+        justifyContent: "center",
+        alignItems: "flex-start",
+        width: 320,
+        height: 260,
+        display: "flex",
     },
 });
