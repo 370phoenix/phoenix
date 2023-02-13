@@ -5,6 +5,7 @@ import Colors from "../constants/Colors";
 import * as Location from "expo-location";
 import { Button, Text } from "./Themed";
 
+export { Location };
 export default function App({ name }: { name: string }) {
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);

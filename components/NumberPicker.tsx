@@ -1,10 +1,10 @@
 import { Dropdown } from "react-native-element-dropdown";
-
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text } from "./Themed";
 
-export default function App({ label, input }: { label: string; input: any[]}) {
+// Component for number pickers
+export default function App({ label, input }: { label: string; input: any[] }) {
     const [select, setSelect] = useState<{ name: string; value: number } | null>(null);
 
     const onChange = (selectedItem: any) => {
@@ -18,7 +18,7 @@ export default function App({ label, input }: { label: string; input: any[]}) {
                 valueField="value"
                 data={input}
                 onChange={onChange}
-                value={input[0].value}
+                value={input[0].value} 
             />
         </View>
     );
