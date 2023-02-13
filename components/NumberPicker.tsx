@@ -18,13 +18,13 @@ export default function App({
         <View style={styles.dropdown}>
             <Text style={styles.label}>{label}</Text>
             <ScrollView>
-            <Dropdown
-                labelField="name"
-                valueField="value"
-                data={input}
-                onChange={onChange}
-                value={selected}
-            />
+                <Dropdown
+                    labelField="name"
+                    valueField="value"
+                    data={input}
+                    onChange={onChange}
+                    value={selected}
+                />
             </ScrollView>
         </View>
     );

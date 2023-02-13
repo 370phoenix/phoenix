@@ -3,9 +3,21 @@ import { Text, View } from "./Themed";
 import { postObject } from "../constants/DataTypes";
 import Colors from "../constants/Colors";
 
+// Function to convert date to string (will be useful for reading from database)
+// const dateToString = (tempDate: Date): string => {
+//     let fDate =
+//         tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
+//     let minutes: string | number = tempDate.getMinutes();
+//     minutes = minutes < 10 ? "0" + minutes : minutes;
+//     let hours: string | number = tempDate.getHours();
+//     hours = hours > 12 ? hours - 12 : hours;
+
+//     let fTime = `${hours}:${minutes}`;
+//     return fDate + " " + fTime;
+// };
+
 export default function LocationBadge({ post }: { post: postObject }) {
     return (
-        // TODO: Replace pickup, destination, time with proper icons
         <View style={styles.locationBadge}>
             <Text style={styles.locationText}>
                 Trip: {post.pickupLocation} to {post.dropoffLocation}

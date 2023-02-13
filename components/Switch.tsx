@@ -3,8 +3,17 @@ import { View, Switch, StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
 import { Text } from "./Themed";
 
-const App = ({ label, isEnabled, setIsEnabled, toggleSwitch }: { label: string, isEnabled:boolean, setIsEnabled:any,toggleSwitch:any }) => {
-
+const App = ({
+    label,
+    isEnabled,
+    setIsEnabled,
+    toggleSwitch,
+}: {
+    label: string;
+    isEnabled: boolean;
+    setIsEnabled: any;
+    toggleSwitch: any;
+}) => {
     return (
         <View style={styles.switchContainer}>
             <Text style={styles.label}>{label}</Text>

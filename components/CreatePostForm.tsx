@@ -7,7 +7,7 @@ import MLTextInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
 import { Button } from "./Themed";
 import LocationPicker, { Location } from "../components/LocationPicker";
-import uuid from 'react-native-uuid';
+import uuid from "react-native-uuid";
 
 type PostType = {
     pickup: Location.LocationObject | null | string;
@@ -66,7 +66,6 @@ const seats = [
     },
 ];
 
-// TODO: Fix text input interaction with keyboard, currently location inputs are blocked by keyboard
 export default function App() {
     // date input
     const [date, setDate] = useState(new Date());
@@ -114,14 +113,6 @@ export default function App() {
             dateTime: date,
             roundTrip: isRoundtrip,
         };
-        // console.log("Pickup: " + pickupText);
-        // console.log("Dropoff: " + dropoffText);
-        // console.log("postID: " + dropoffText);
-        // console.log("Number of Friends: " + numFriends);
-        // console.log("Number of Seats: " + numSeats);
-        // console.log("Notes: " + notes);
-        // console.log("Date: " + date);
-        // console.log("Roundtrip: " + isRoundtrip);
         console.log(Post);
     };
 
@@ -130,14 +121,12 @@ export default function App() {
             <View>
                 <LocationPicker
                     name="pickup"
-                    location={pickup}
                     setLocation={setPickup}
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
                 <LocationPicker
                     name="dropoff"
-                    location={dropoff}
                     setLocation={setDropoff}
                     inputText={dropoffText}
                     onChangeText={onChangeDropoff}

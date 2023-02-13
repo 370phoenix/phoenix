@@ -1,4 +1,4 @@
-import { StyleSheet, FlatList, Text } from "react-native";
+import { StyleSheet, FlatList } from "react-native";
 import PostCard from "./PostCard";
 import { fetchPosts } from "../firebase/fetchPosts";
 import { View } from "./Themed";

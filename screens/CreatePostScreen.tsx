@@ -1,9 +1,5 @@
-import React, { useState } from "react";
-import {
-    StyleSheet,
-    ScrollView,
-    KeyboardAvoidingView,
-} from "react-native";
+import React from "react";
+import { StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
 import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";

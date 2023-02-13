@@ -2,8 +2,7 @@ import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
 
-export default function App({value, onChangeText} : {value: string, onChangeText: any}) {
-
+export default function App({ value, onChangeText }: { value: string; onChangeText: any }) {
     return (
         <View>
             <Text style={styles.label}>Is there anything else your match needs to know?</Text>
@@ -32,6 +31,6 @@ const styles = StyleSheet.create({
     },
     label: {
         marginLeft: 16,
-        marginTop: 16
+        marginTop: 16,
     },
 });

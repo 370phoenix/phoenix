@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
-import { Button, Text, View } from "./Themed";
+import { Button } from "./Themed";
 
 export default function MatchButton() {
     // state variables for onClick event, change status of match and appearance of button

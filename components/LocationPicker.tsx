@@ -8,18 +8,15 @@ import { Button, Text } from "./Themed";
 export { Location };
 export default function App({
     name,
-    location,
     setLocation,
     inputText,
     onChangeText,
 }: {
     name: string;
-    location: Location.LocationObject | string | null;
     setLocation: any;
     inputText: string;
     onChangeText: any;
 }) {
-    
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
