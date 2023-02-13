@@ -1,7 +1,8 @@
 import { StyleSheet, View } from "react-native";
+
 import { Text } from "./Themed";
-import { postObject } from "../constants/DataTypes";
 import Colors from "../constants/Colors";
+import { postObject } from "../constants/DataTypes";
 
 export default function RiderBadge({ post }: { post: postObject }) {
     return (

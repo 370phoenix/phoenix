@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function App({ onChange, date }: { onChange: any; date: Date }) {
     return (
@@ -11,9 +11,9 @@ export default function App({ onChange, date }: { onChange: any; date: Date }) {
                     style={styles.dateTime}
                     testID="dateTimePicker"
                     value={date}
-                    mode={"date"}
+                    mode="date"
                     is24Hour={false}
-                    display={"default"}
+                    display="default"
                     onChange={onChange}
                     minimumDate={new Date()}
                 />
@@ -21,9 +21,9 @@ export default function App({ onChange, date }: { onChange: any; date: Date }) {
                     style={styles.dateTime}
                     testID="dateTimePicker"
                     value={date}
-                    mode={"time"}
+                    mode="time"
                     is24Hour={false}
-                    display={"default"}
+                    display="default"
                     minuteInterval={5}
                     onChange={onChange}
                 />

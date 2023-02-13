@@ -1,7 +1,8 @@
 import { StyleSheet } from "react-native";
+
 import { Text, View } from "./Themed";
-import { postObject } from "../constants/DataTypes";
 import Colors from "../constants/Colors";
+import { postObject } from "../constants/DataTypes";
 
 // Function to convert date to string (will be useful for reading from database)
 // const dateToString = (tempDate: Date): string => {

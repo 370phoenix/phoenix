@@ -1,5 +1,6 @@
-import { Dropdown } from "react-native-element-dropdown";
 import { View, StyleSheet, ScrollView } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
+
 import { Text } from "./Themed";
 
 // Component for number pickers

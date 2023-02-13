@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
-import { postObject } from "../constants/DataTypes";
+
 import { View, Text } from "./Themed";
+import { postObject } from "../constants/DataTypes";
 
 const App = ({ post }: { post: postObject }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -9,7 +10,7 @@ const App = ({ post }: { post: postObject }) => {
         <View style={styles.centeredView}>
             <Modal
                 animationType="slide"
-                transparent={true}
+                transparent
                 visible={modalVisible}
                 onRequestClose={() => {
                     Alert.alert("Modal has been closed.");

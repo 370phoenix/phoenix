@@ -1,9 +1,10 @@
-import { StyleSheet, FlatList } from "react-native";
-import PostCard from "./PostCard";
-import { fetchPosts } from "../firebase/fetchPosts";
-import { View } from "./Themed";
 import { useState, useEffect } from "react";
+import { StyleSheet, FlatList } from "react-native";
+
+import PostCard from "./PostCard";
+import { View } from "./Themed";
 import Colors from "../constants/Colors";
+import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function PostList() {
                 <FlatList
                     data={posts}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => <PostCard key={Math.random()} post={item}></PostCard>}
+                    renderItem={({ item }) => <PostCard key={Math.random()} post={item} />}
                 />
             )}
         </View>

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { TouchableWithoutFeedback, View, StyleSheet, Keyboard } from "react-native";
-import Colors from "../constants/Colors";
+import { TouchableWithoutFeedback, View, Keyboard } from "react-native";
+import uuid from "react-native-uuid";
+
 import DateTimePicker from "./DateTimePicker";
-import Switch from "./Switch";
 import MLTextInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
+import PostValidation, { PostType } from "./PostValidation";
+import Switch from "./Switch";
 import { Button } from "./Themed";
 import LocationPicker, { Location } from "../components/LocationPicker";
-import uuid from "react-native-uuid";
-import PostValidation, { PostType } from "./PostValidation";
 
 // stores options for number picker form inputs
 const friends = [
@@ -85,7 +85,7 @@ export default function App() {
         setDropoff(text);
     };
     const onChangeDate = (event: any, selectedDate?: Date | undefined) => {
-        setDate(selectedDate || date);
+        setDate(selectedDate ?? date);
     };
 
     // change handler for round trip switch
@@ -94,12 +94,12 @@ export default function App() {
     // create object from form inputs on submit event
     const onSubmit = () => {
         const Post: PostType = {
-            pickup: pickup,
-            dropoff: dropoff,
+            pickup,
+            dropoff,
             postID: uuid.v4(),
-            numFriends: numFriends,
+            numFriends,
             availableSpots: numSeats,
-            notes: notes,
+            notes,
             dateTime: date,
             roundTrip: isRoundtrip,
             isMatched: [],
@@ -144,15 +144,8 @@ export default function App() {
                     selected={numSeats}
                 />
                 <MLTextInput value={notes} onChangeText={onChangeNotes} />
-                <Button onPress={onSubmit} color="navy" title="Post"></Button>
+                <Button onPress={onSubmit} color="navy" title="Post" />
             </View>
         </TouchableWithoutFeedback>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: Colors.purple[4],
-        color: Colors.gray[4],
-    },
-});

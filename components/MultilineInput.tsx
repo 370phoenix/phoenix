@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
+
 import Colors from "../constants/Colors";
 
 export default function App({ value, onChangeText }: { value: string; onChangeText: any }) {
@@ -11,7 +12,7 @@ export default function App({ value, onChangeText }: { value: string; onChangeTe
                 editable
                 multiline
                 numberOfLines={4}
-                placeholder={"notes"}
+                placeholder="notes"
                 placeholderTextColor={Colors.gray[2]}
                 maxLength={40}
                 onChangeText={onChangeText}

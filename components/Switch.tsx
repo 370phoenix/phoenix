@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Switch, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
+
 import { Text } from "./Themed";
+import Colors from "../constants/Colors";
 
 const App = ({
     label,

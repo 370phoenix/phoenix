@@ -87,11 +87,11 @@ export function Button(props: ButtonProps) {
         }
     }
 
-    if (Platform.OS == "android") buttonStyles.push(style);
+    if (Platform.OS === "android") buttonStyles.push(style);
 
     if (icon)
         return (
-            <Touchable onPress={onPress} style={Platform.OS == "ios" ? style : null}>
+            <Touchable onPress={onPress} style={Platform.OS === "ios" ? style : null}>
                 <View style={buttonStyles}>
                     <Image style={buttonComponentStyles.icon} source={icon} />
                     <Text textStyle="label" styleSize="l" style={textStyles}>
@@ -102,7 +102,7 @@ export function Button(props: ButtonProps) {
         );
 
     return (
-        <Touchable onPress={onPress} style={Platform.OS == "ios" ? style : null}>
+        <Touchable onPress={onPress} style={Platform.OS === "ios" ? style : null}>
             <View style={buttonStyles}>
                 <Text
                     textStyle={clear ? "lineTitle" : "label"}

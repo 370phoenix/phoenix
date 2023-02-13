@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { StyleSheet, Pressable, Text } from "react-native";
-import LocationBadge from "./LocationBadge";
 
-import { View } from "./Themed";
-import { postObject } from "../constants/DataTypes";
+import LocationBadge from "./LocationBadge";
 import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
+import { View } from "./Themed";
 import Colors from "../constants/Colors";
+import { postObject } from "../constants/DataTypes";
 
 export default function PostCard({ post }: { post: postObject }) {
     // Toggle ride/location badge and MoreInfo component
@@ -16,11 +16,7 @@ export default function PostCard({ post }: { post: postObject }) {
         <View style={styles.cardContainer}>
             <View>
                 <Pressable onPress={() => setShowMore(!showMore)}>
-                    {!showMore ? (
-                        <BasicInfo post={post}></BasicInfo>
-                    ) : (
-                        <MoreInfo post={post}></MoreInfo>
-                    )}
+                    {!showMore ? <BasicInfo post={post} /> : <MoreInfo post={post} />}
                 </Pressable>
             </View>
             <MatchButton />
@@ -32,8 +28,8 @@ export default function PostCard({ post }: { post: postObject }) {
 function BasicInfo({ post }: { post: postObject }) {
     return (
         <View style={styles.badgesContainer}>
-            <LocationBadge post={post}></LocationBadge>
-            <RiderBadge post={post}></RiderBadge>
+            <LocationBadge post={post} />
+            <RiderBadge post={post} />
         </View>
     );
 }

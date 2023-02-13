@@ -1,9 +1,9 @@
+import * as Location from "expo-location";
 import { useState } from "react";
 import { View, StyleSheet, TextInput } from "react-native";
-import Colors from "../constants/Colors";
 
-import * as Location from "expo-location";
 import { Button, Text } from "./Themed";
+import Colors from "../constants/Colors";
 
 export { Location };
 export default function App({
@@ -19,7 +19,7 @@ export default function App({
 }) {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const getLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
             setErrorMsg("Access to Location denied");
             onChangeText(errorMsg);
@@ -52,7 +52,7 @@ export default function App({
             <Button
                 title="Use Current Location"
                 color="navy"
-                clear={true}
+                clear
                 onPress={() => getLocation()}
             />
         </View>
