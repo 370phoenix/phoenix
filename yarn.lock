@@ -8378,6 +8378,11 @@ react-native-dotenv@^3.4.7:
   dependencies:
     dotenv "^16.0.3"
 
+react-native-element-dropdown@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-native-element-dropdown/-/react-native-element-dropdown-2.6.0.tgz#558306e89a71fb9c56c53a271c37ff5d945bbbd9"
+  integrity sha512-6cOGAeME7CSqq8PgdNT68v+nt2vcowgXNu0uxcBmSB1iT5ArhQddb1Vsk0QIOkt8NjRpyD0LjSBo/HVTy5u+bQ==
+
 react-native-gradle-plugin@^0.70.3:
   version "0.70.3"
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.70.3.tgz#cbcf0619cbfbddaa9128701aa2d7b4145f9c4fc8"
@@ -8395,11 +8400,6 @@ react-native-screens@~3.18.0:
   dependencies:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
-
-react-native-select-dropdown@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/react-native-select-dropdown/-/react-native-select-dropdown-3.2.1.tgz#3e204834fa68549c62e0ef46c6f6270740fc8d18"
-  integrity sha512-4kLmjm3z9JUzIw98oKdQYvk8XsxhNg5NfKN112m1oIufu+6w2HcPw438rVpXzrWntvs9ZLf8Za6ZQO6GqZHdzA==
 
 react-native-web@~0.18.9:
   version "0.18.12"

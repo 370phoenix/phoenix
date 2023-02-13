@@ -1,34 +1,25 @@
-import SelectDropdown from "react-native-select-dropdown";
+import { Dropdown } from "react-native-element-dropdown";
 
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text } from "./Themed";
-import { Button } from "./Themed";
 
-const numSeats = [2, 3, 4, 5];
+export default function App({ label, input }: { label: string; input: any[]}) {
+    const [select, setSelect] = useState<{ name: string; value: number } | null>(null);
 
-export default function App({ label }: { label: string }) {
-    const [select, onSelect] = useState(1);
-
+    const onChange = (selectedItem: any) => {
+        setSelect(selectedItem.value);
+    };
     return (
         <View style={styles.dropdown}>
             <Text style={styles.label}>{label}</Text>
-            <Button onPress={() => {}} title="pickNumber" color="navy">
-            <SelectDropdown
-                data={numSeats}
-                onChangeSearchInputText={() => {}}
-                defaultValue={select}
-                onSelect={(selectedItem) => {
-                    onSelect(selectedItem);
-                }}
-                buttonTextAfterSelection={(selectedItem, index) => {
-                    return selectedItem;
-                }}
-                rowTextForSelection={(item, index) => {
-                    return item;
-                }}
+            <Dropdown
+                labelField="name"
+                valueField="value"
+                data={input}
+                onChange={onChange}
+                value={input[0].value}
             />
-            </Button>
         </View>
     );
 }
@@ -37,9 +28,10 @@ const styles = StyleSheet.create({
     dropdown: {
         margin: 8,
         marginTop: 16,
+        marginBottom: 0,
         padding: 8,
     },
     label: {
-        marginBottom: 16,
+        marginBottom: 8,
     },
 });
