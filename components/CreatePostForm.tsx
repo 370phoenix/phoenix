@@ -8,17 +8,7 @@ import NumberPicker from "./NumberPicker";
 import { Button } from "./Themed";
 import LocationPicker, { Location } from "../components/LocationPicker";
 import uuid from "react-native-uuid";
-
-type PostType = {
-    pickup: Location.LocationObject | null | string;
-    dropoff: Location.LocationObject | null | string;
-    postID: number[] | string;
-    numFriends: number;
-    availableSpots: number;
-    notes: string;
-    dateTime: Date;
-    roundTrip: boolean;
-};
+import PostValidation, { PostType } from "./PostValidation";
 
 // stores options for number picker form inputs
 const friends = [
@@ -112,8 +102,11 @@ export default function App() {
             notes: notes,
             dateTime: date,
             roundTrip: isRoundtrip,
+            isMatched: [],
+            isRequested: [],
         };
         console.log(Post);
+        // VALIDATE POST AND WRITE TO DATABASE
     };
 
     return (
