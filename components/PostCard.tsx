@@ -3,7 +3,7 @@ import { StyleSheet, Pressable, Text } from "react-native";
 import LocationBadge from "./LocationBadge";
 
 import { View } from "./Themed";
-import { postObject } from "../constants/Types";
+import { postObject } from "../constants/DataTypes";
 import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
 import Colors from "../constants/Colors";

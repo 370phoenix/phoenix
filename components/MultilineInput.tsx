@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         margin: 16,
         marginTop: 0,
-        padding: 8
+        padding: 8,
     },
     label: {
         marginLeft: 16,

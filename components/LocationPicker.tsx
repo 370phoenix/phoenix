@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { View, StyleSheet, TextInput } from "react-native";
 import Colors from "../constants/Colors";
 
@@ -8,7 +8,7 @@ import { Button, Text } from "./Themed";
 export default function App({ name }: { name: string }) {
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [inputText, onChangeText] = React.useState("");
+    const [inputText, onChangeText] = useState("");
 
     const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
         marginRight: 16,
     },
     input: {
-        borderWidth: 1,
+        borderBottomWidth: 1,
         padding: 8,
     },
     label: {

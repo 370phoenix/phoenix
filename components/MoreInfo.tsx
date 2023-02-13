@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
-import { postObject } from "../constants/Types";
+import { postObject } from "../constants/DataTypes";
 import { View, Text } from "./Themed";
 
 const App = ({ post }: { post: postObject }) => {

@@ -1,6 +1,5 @@
-import { SafeAreaView, StyleSheet, Text, View, Platform } from "react-native";
-import React, { useState } from "react";
-import { Button } from "./Themed";
+import { StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function App() {

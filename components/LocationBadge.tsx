@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { Text, View } from "./Themed";
-import { postObject } from "../constants/Types";
+import { postObject } from "../constants/DataTypes";
 import Colors from "../constants/Colors";
 
 export default function LocationBadge({ post }: { post: postObject }) {

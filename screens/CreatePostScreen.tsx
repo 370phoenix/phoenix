@@ -17,8 +17,8 @@ export default function CreatePostScreen({ navigation }: RootTabScreenProps<"Cre
                 <LocationPicker name="dropoff" />
                 <Switch label="Round trip?" />
                 <DateTimePicker />
-                {/* <NumberPicker /> */}
                 <MLTextInput />
+                <NumberPicker label="How many friends are you riding with?"/>
             </View>
         </ScrollView>
     );
