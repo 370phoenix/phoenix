@@ -5,10 +5,11 @@ import uuid from "react-native-uuid";
 import DateTimePicker from "./DateTimePicker";
 import MLTextInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
-import PostValidation, { PostType } from "./PostValidation";
+import PostValidation from "./PostValidation";
 import Switch from "./Switch";
 import { Button } from "./Themed";
 import LocationPicker, { Location } from "../components/LocationPicker";
+import { PostType } from "../constants/DataTypes";
 
 // stores options for number picker form inputs
 const friends = [
@@ -104,6 +105,8 @@ export default function App() {
             roundTrip: isRoundtrip,
             isMatched: [],
             isRequested: [],
+            // TODO: get poster's UserID and add to list
+            riders: []
         };
         console.log(Post);
         // VALIDATE POST AND WRITE TO DATABASE
