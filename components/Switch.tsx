@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Switch, StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
 import { Text } from "./Themed";
 
-const App = ({ label }: { label: string }) => {
-    const [isEnabled, setIsEnabled] = useState(true);
-    const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+const App = ({ label, isEnabled, setIsEnabled, toggleSwitch }: { label: string, isEnabled:boolean, setIsEnabled:any,toggleSwitch:any }) => {
 
     return (
         <View style={styles.switchContainer}>
@@ -23,10 +21,10 @@ const App = ({ label }: { label: string }) => {
 
 const styles = StyleSheet.create({
     label: {
-        marginBottom: 8
+        marginBottom: 8,
     },
-    switchContainer : {
-        margin: 16
+    switchContainer: {
+        margin: 16,
     },
 });
 

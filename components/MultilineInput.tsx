@@ -2,8 +2,7 @@ import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
 
-export default function App() {
-    const [value, onChangeText] = React.useState("");
+export default function App({value, onChangeText} : {value: string, onChangeText: any}) {
 
     return (
         <View>
@@ -16,7 +15,7 @@ export default function App() {
                 placeholder={"notes"}
                 placeholderTextColor={Colors.gray[2]}
                 maxLength={40}
-                onChangeText={(text) => onChangeText(text)}
+                onChangeText={onChangeText}
                 value={value}
             />
         </View>

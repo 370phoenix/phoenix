@@ -1,25 +1,31 @@
 import { Dropdown } from "react-native-element-dropdown";
-import { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { Text } from "./Themed";
 
 // Component for number pickers
-export default function App({ label, input }: { label: string; input: any[] }) {
-    const [select, setSelect] = useState<{ name: string; value: number } | null>(null);
-
-    const onChange = (selectedItem: any) => {
-        setSelect(selectedItem.value);
-    };
+export default function App({
+    label,
+    input,
+    onChange,
+    selected,
+}: {
+    label: string;
+    input: any[];
+    onChange: any;
+    selected: { label: string; value: number } | number;
+}) {
     return (
         <View style={styles.dropdown}>
             <Text style={styles.label}>{label}</Text>
+            <ScrollView>
             <Dropdown
                 labelField="name"
                 valueField="value"
                 data={input}
                 onChange={onChange}
-                value={input[0].value} 
+                value={selected}
             />
+            </ScrollView>
         </View>
     );
 }

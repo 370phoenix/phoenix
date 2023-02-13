@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-export default function App() {
+export default function App({onChange, date} : {onChange: any, date: Date}) {
     // Function to convert date to string (Not used in this file, will be useful for reading from database)
     // const dateToString = (tempDate: Date): string => {
     //     let fDate =
@@ -16,16 +16,12 @@ export default function App() {
     //     return fDate + " " + fTime;
     // };
 
-    const [date, setDate] = useState(new Date());
-    // const [text, setText] = useState(dateToString(new Date()));
+    // const [date, setDate] = useState(new Date());
 
-    const onChange = (event: any, selectedDate?: Date | undefined) => {
-        const currentDate = selectedDate || date;
-        setDate(currentDate);
-
-        let tempDate = new Date(currentDate);
-        // setText(dateToString(tempDate));
-    };
+    // const onChange = (event: any, selectedDate?: Date | undefined) => {
+    //     const currentDate = selectedDate || date;
+    //     setDate(currentDate);
+    // };
 
     return (
         <View>
@@ -40,7 +36,7 @@ export default function App() {
                     display={"default"}
                     onChange={onChange}
                     minimumDate={new Date()}
-                />
+                    />
                 <DateTimePicker
                     style={styles.dateTime}
                     testID="dateTimePicker"
@@ -48,6 +44,7 @@ export default function App() {
                     mode={"time"}
                     is24Hour={false}
                     display={"default"}
+                    minuteInterval={5}
                     onChange={onChange}
                 />
             </View>

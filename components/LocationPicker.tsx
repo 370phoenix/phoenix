@@ -6,15 +6,26 @@ import * as Location from "expo-location";
 import { Button, Text } from "./Themed";
 
 export { Location };
-export default function App({ name }: { name: string }) {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+export default function App({
+    name,
+    location,
+    setLocation,
+    inputText,
+    onChangeText,
+}: {
+    name: string;
+    location: Location.LocationObject | string | null;
+    setLocation: any;
+    inputText: string;
+    onChangeText: any;
+}) {
+    
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [inputText, onChangeText] = useState("");
-
     const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
             setErrorMsg("Access to Location denied");
+            onChangeText(errorMsg);
         }
 
         let location: Location.LocationObject | null = await Location.getLastKnownPositionAsync();
@@ -27,16 +38,9 @@ export default function App({ name }: { name: string }) {
         });
 
         place.find((p) => {
-            onChangeText(`${p.streetNumber} ${p.street}\n${p.city} ${p.region}, ${p.postalCode}`);
+            onChangeText(`${p.streetNumber} ${p.street}, ${p.city} ${p.region}, ${p.postalCode}`);
         });
     };
-
-    let text: string | null = "Waiting..";
-    if (errorMsg) {
-        text = errorMsg;
-    } else if (location) {
-        text = inputText;
-    }
 
     return (
         <View style={styles.container}>
