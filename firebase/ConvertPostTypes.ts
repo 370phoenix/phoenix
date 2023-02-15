@@ -8,7 +8,11 @@ function convertDate(date: number | Date) {
 function convertLocation(location: string | LocationObject) {
     // TODO: Convert coords to string, string to coords with geocoding
     if (typeof location === "string") {
-        
+        try {
+
+        } catch (e) {
+            console.log("error: " + e);
+        }
     }
 }
 

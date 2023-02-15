@@ -24,6 +24,7 @@ export default function PostList() {
         };
 
         fetchData();
+        console.log(posts);
     }, [posts, isLoading]);
 
     return (

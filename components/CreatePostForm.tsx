@@ -1,3 +1,4 @@
+import { getAuth } from "firebase/auth/react-native";
 import React, { useState } from "react";
 import { TouchableWithoutFeedback, View, Keyboard } from "react-native";
 import uuid from "react-native-uuid";
@@ -8,10 +9,10 @@ import NumberPicker from "./NumberPicker";
 import PostValidation from "./PostValidation";
 import Switch from "./Switch";
 import { Button } from "./Themed";
-import LocationPicker, { Location } from "../components/LocationPicker";
+import LocationPicker from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
-import writeUserData, { examplePost } from "../firebase/makePosts";
-
+import writeUserData from "../firebase/makePosts";
+import { fire } from "../firebaseConfig";
 
 // stores options for number picker form inputs
 const friends = [
@@ -63,9 +64,9 @@ export default function App() {
     // date input
     const [date, setDate] = useState(new Date());
     // location input
-    const [pickup, setPickup] = useState<Coords | string | null>(null);
+    const [pickup, setPickup] = useState<Coords | string>("");
     const [pickupText, setPickupText] = useState("");
-    const [dropoff, setDropoff] = useState<Location.LocationObject | string | null>(null);
+    const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
     const [isRoundtrip, setIsRoundtrip] = useState(true);
     const [numFriends, setNumFriends] = useState(0);
@@ -94,6 +95,10 @@ export default function App() {
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
+    // find current userID
+    const Auth = getAuth(fire);
+    const user = Auth.currentUser;
+    const userID = user ? user.uid : "No user found";
     // create object from form inputs on submit event
     const onSubmit = () => {
         const Post: PostType = {
@@ -107,13 +112,11 @@ export default function App() {
             roundTrip: isRoundtrip,
             isMatched: false,
             isRequested: false,
-            // TODO: get poster's UserID and add to list
-            riders: [],
+            riders: [userID],
         };
-        console.log(examplePost);
-        writeUserData(examplePost);
+        console.log(Post);
         // VALIDATE POST AND WRITE TO DATABASE
-        
+        writeUserData(Post);
     };
 
     return (

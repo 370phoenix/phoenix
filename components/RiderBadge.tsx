@@ -2,14 +2,14 @@ import { StyleSheet, View } from "react-native";
 
 import { Text } from "./Themed";
 import Colors from "../constants/Colors";
-import { postObject } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 
-export default function RiderBadge({ post }: { post: postObject }) {
+export default function RiderBadge({ post }: { post: PostType }) {
     return (
         // TODO: iconography
         <View style={styles.locationBadge}>
             <Text style={styles.locationText}>
-                {post.remainingSpots.filled} / {post.remainingSpots.capacity}
+                {post.availableSpots} / {post.numFriends + post.availableSpots}
             </Text>
         </View>
     );

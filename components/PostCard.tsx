@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, Pressable, Text } from "react-native";
 
-import LocationBadge from "./LocationBadge";
 import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
 import { View } from "./Themed";
@@ -28,9 +27,19 @@ export default function PostCard({ post }: { post: PostType }) {
 
 // Component containing rider and location badges
 function BasicInfo({ post }: { post: PostType }) {
+    const pickup = post.pickup;
+    const dropoff = post.dropoff;
+    const fDate = new Date(post.dateTime).toDateString();
+    const fTime = new Date(post.dateTime).toLocaleTimeString();
+
     return (
         <View style={styles.badgesContainer}>
-            <LocationBadge post={post} />
+            <Text>
+                {typeof pickup === "string" ? pickup : "Pickup not found"} to 
+                {typeof dropoff === "string" ? dropoff : "Dropoff not found"}
+            </Text>
+            <Text>{fDate}</Text>
+            <Text>{fTime}</Text>
             <RiderBadge post={post} />
         </View>
     );
@@ -67,6 +76,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        flex: 1
     },
     moreInfo: {
         backgroundColor: "white",
