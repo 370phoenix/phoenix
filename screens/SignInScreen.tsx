@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
-import { FirebaseRecaptchaBanner, FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { StatusBar } from "expo-status-bar";
 import { getApp } from "firebase/app";
 import React from "react";

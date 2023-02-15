@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Text as DefaultText,
     View as DefaultView,
@@ -7,7 +7,6 @@ import {
     Pressable,
     Platform,
     Switch,
-    ColorValue,
 } from "react-native";
 
 import Colors, { BaseColor, BaseColorIndicators } from "../constants/Colors";

@@ -3,7 +3,6 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import { Platform, StyleSheet, View } from "react-native";
 import LogoHorizontal from "../assets/icons/LogoHorizontal";
-import { Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 
 type HeaderOnly = {
