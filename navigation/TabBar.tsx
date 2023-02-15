@@ -1,6 +1,6 @@
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
 import CreateButton from "../assets/icons/CreateButton";
 import { View, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
@@ -38,6 +38,13 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
         });
     };
 
+    const screenWidth = Dimensions.get("window").width;
+    const createLayout = {
+        position: "absolute",
+        bottom: 10,
+        left: screenWidth / 2 - 40,
+    };
+
     return (
         <View style={styles.container}>
             <Pressable
@@ -56,9 +63,11 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                     PROFILE
                 </Text>
             </Pressable>
-            <View style={styles.button}>
+            <Pressable
+                style={[styles.button, createLayout]}
+                onPress={() => navigation.navigate("Modal")}>
                 <CreateButton />
-            </View>
+            </Pressable>
         </View>
     );
 }
@@ -69,12 +78,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.gray["5"],
         paddingTop: 8,
     },
-    button: {
-        position: "absolute",
-        bottom: 8,
-        alignItems: "center",
-        width: "100%",
-    },
     tabButton: {
         flex: 1,
         height: 67,
@@ -83,4 +86,5 @@ const styles = StyleSheet.create({
     },
     feed: { flex: 1 },
     profile: { flex: 1 },
+    button: {},
 });

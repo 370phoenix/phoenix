@@ -27,6 +27,7 @@ import Header from "./Header";
 import Matches from "../assets/icons/Matches";
 import MatchesScreen from "../screens/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
+import TabBar from "./TabBar";
 
 export default function Navigation() {
     return (
@@ -110,7 +111,7 @@ function RootNavigator() {
                                 ),
                             })}
                         />
-                        <Stack.Group screenOptions={{ presentation: "modal" }}>
+                        <Stack.Group screenOptions={{ presentation: "modal", headerShown: false }}>
                             <Stack.Screen name="Modal" component={ModalScreen} />
                         </Stack.Group>
                     </>
@@ -146,7 +147,7 @@ function BottomTabNavigator() {
         <BottomTab.Navigator
             initialRouteName="ViewPosts"
             // NOT WORKING due to bug
-            // tabBar={(props) => <TabBar {...props} />}
+            tabBar={(props) => <TabBar {...props} />}
             backBehavior="none"
             screenOptions={{
                 header: ({ navigation, route, options }) => {
