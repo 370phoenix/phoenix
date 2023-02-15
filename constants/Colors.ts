@@ -26,6 +26,8 @@ interface ColorInterface {
     navy: BaseColor<BaseColorIndicators>;
     gold: BaseColor<BaseColorIndicators>;
     gray: BaseColor<GrayColorIndicators>;
+    green: BaseColor<BaseColorIndicators>;
+    red: BaseColor<BaseColorIndicators>;
 }
 
 export default {
@@ -61,5 +63,21 @@ export default {
         4: "#DDD9E2",
         5: "#EEECF0",
         w: "#F9F9FA",
+    },
+    green: {
+        p: "#15803D",
+        m: "#14532D",
+        1: "#16A34A",
+        2: "#4ADE80",
+        3: "#BBF7D0",
+        4: "#F0FDF4",
+    },
+    red: {
+        p: "#B91C1C",
+        m: "#7F1D1D",
+        1: "#DC2626",
+        2: "#F87171",
+        3: "#FECACA",
+        4: "#FEF2F2",
     },
 } as ColorInterface;
