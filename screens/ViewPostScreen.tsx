@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 
 import PostList from "../components/PostList";
 import { View } from "../components/Themed";

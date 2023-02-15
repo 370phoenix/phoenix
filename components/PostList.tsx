@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, FlatList } from "react-native";
+import { StyleSheet, FlatList, Text } from "react-native";
 
 import PostCard from "./PostCard";
 import { View } from "./Themed";
@@ -29,25 +29,22 @@ export default function PostList() {
 
     return (
         <View style={styles.listContainer}>
-            {posts.length !== 0 && (
+            {/* {posts.length !== 0 && (
                 <FlatList
                     data={posts}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => <PostCard key={Math.random()} post={item} />}
+                    renderItem={({ item }) => <PostCard post={item}/>}
+                    
                 />
-            )}
+            )} */}
+            <Text>{JSON.stringify(posts)}</Text>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     listContainer: {
-        padding: 24,
-        backgroundColor: Colors.purple.p,
-    },
-    bodyText: {
-        color: "black",
-        backgroundColor: "white",
-        fontSize: 50,
+        // padding: 24,
+        // backgroundColor: Colors.purple.p,
     },
 });

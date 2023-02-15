@@ -15,12 +15,7 @@ export default function PostCard({ post }: { post: PostType }) {
 
     return (
         <View style={styles.cardContainer}>
-            <View>
-                <Pressable onPress={() => setShowMore(!showMore)}>
-                    {!showMore ? <BasicInfo post={post} /> : <MoreInfo post={post} />}
-                </Pressable>
-            </View>
-            <MatchButton />
+            <BasicInfo post={post} />
         </View>
     );
 }
@@ -33,14 +28,15 @@ function BasicInfo({ post }: { post: PostType }) {
     const fTime = new Date(post.dateTime).toLocaleTimeString();
 
     return (
-        <View style={styles.badgesContainer}>
-            <Text>
-                {typeof pickup === "string" ? pickup : "Pickup not found"} to 
-                {typeof dropoff === "string" ? dropoff : "Dropoff not found"}
-            </Text>
-            <Text>{fDate}</Text>
-            <Text>{fTime}</Text>
-            <RiderBadge post={post} />
+        <View>
+            <Text style={{color: Colors.gray.b, fontSize: 20}}>Hello</Text>
+            {/* <Text>
+                    {typeof pickup === "string" ? pickup : "Pickup not found"} to
+                    {typeof dropoff === "string" ? dropoff : "Dropoff not found"}
+                </Text>
+                <Text>{fDate}</Text>
+                <Text>{fTime}</Text>
+                <RiderBadge post={post} /> */}
         </View>
     );
 }
@@ -68,15 +64,16 @@ const styles = StyleSheet.create({
     cardContainer: {
         margin: 16,
         padding: 16,
-        backgroundColor: Colors.purple["2"],
-        borderRadius: 16,
+        backgroundColor: Colors.purple.p,
+        fontSize: 20,
+        flex: 1,
     },
     badgesContainer: {
         backgroundColor: Colors.purple["2"],
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: 1
+        // flexDirection: "row",
+        // alignItems: "center",
+        // justifyContent: "center",
+        // flex: 1,
     },
     moreInfo: {
         backgroundColor: "white",
