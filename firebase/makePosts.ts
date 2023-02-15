@@ -7,11 +7,6 @@ export default function writeUserData(post: PostType) {
     set(ref(db, "posts/" + post.postID), {
         ...post,
     })
-    .then(() => {
-      //data successfullly saved
-    })
-    .catch((error) => {
-        //write failed
-    });
+    // TODO: add confirmation of created post
 }
 

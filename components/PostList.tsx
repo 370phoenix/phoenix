@@ -21,6 +21,8 @@ export default function PostList() {
             }
         }
     };
+
+    // pull down to refresh, updates posts
     const onRefresh: any = async () => {
         setLoading(true);
         setRefreshing(true);
