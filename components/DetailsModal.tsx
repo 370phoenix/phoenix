@@ -35,15 +35,20 @@ export default function DetailsModal({
 }
 
 function MoreInfo({ post }: { post: PostType }) {
+    const pickup = Convert.convertLocation(post.pickup);
+    const dropoff = Convert.convertLocation(post.dropoff);
+    const date = Convert.convertDate(post.startTime);
+    const startTime = Convert.convertTime(post.startTime);
+    const endTime = Convert.convertTime(post.endTime);
     return (
         <View>
-            <Text>DETAILS</Text>
+            <Text>Ride Information</Text>
             <Text>
-                From {Convert.convertLocation(post.pickup)} to{" "}
-                {Convert.convertLocation(post.dropoff)}
+                From {pickup} to {dropoff}
             </Text>
+            <Text>{date}</Text>
             <Text>
-                Time: {Convert.convertTime(post.startTime)} - {Convert.convertTime(post.endTime)}
+                {startTime} - {endTime}
             </Text>
             <Text>{post.roundTrip ? "Round trip" : "One way"}</Text>
             <Text>Notes: {post.notes}</Text>

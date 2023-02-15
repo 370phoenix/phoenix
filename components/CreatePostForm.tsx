@@ -68,7 +68,7 @@ export default function CreatePostForm() {
     const user = Auth.currentUser;
     const userID = user ? user.uid : "No user found";
     // create object from form inputs on submit event
-    const onSubmit = () => {
+    const onSubmit = async () => {
         const Post: PostType = {
             pickup,
             dropoff,
@@ -85,7 +85,10 @@ export default function CreatePostForm() {
         };
         console.log(Post);
         // VALIDATE POST
-        writeUserData(Post);
+        const writeComplete = await writeUserData(Post) ?? false;
+        // if(writeComplete){
+        //     // alert("Write to database complete!")
+        // }
     };
 
     return (
