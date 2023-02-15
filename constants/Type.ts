@@ -1,3 +1,25 @@
+export interface TypeInfo {
+    fontFamily: string;
+    fontSize: number;
+    lineHeight: number;
+    letterSpacing?: number;
+}
+
+export type TypeFamily = {
+    l?: TypeInfo;
+    m?: TypeInfo;
+    s?: TypeInfo;
+};
+
+export interface TypeShape {
+    title: TypeFamily;
+    lineTitle: TypeFamily;
+    display: TypeFamily;
+    header: TypeFamily;
+    body: TypeFamily;
+    label: TypeFamily;
+}
+
 export default {
     display: {
         l: {
@@ -66,14 +88,18 @@ export default {
         },
     },
     lineTitle: {
-        fontFamily: "inter-extrabold",
-        fontSize: 16,
-        lineHeight: 20,
-        letterSpacing: 2,
+        l: {
+            fontFamily: "inter-extrabold",
+            fontSize: 16,
+            lineHeight: 20,
+            letterSpacing: 2,
+        },
     },
     title: {
-        fontFamily: "inter-medium",
-        fontSize: 34,
-        lineHeight: 40,
+        l: {
+            fontFamily: "inter-medium",
+            fontSize: 34,
+            lineHeight: 40,
+        },
     },
-};
+} as TypeShape;
