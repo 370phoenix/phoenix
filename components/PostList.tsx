@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, FlatList, Text } from "react-native";
+import { StyleSheet, FlatList, Text, ScrollView } from "react-native";
 
 import PostCard from "./PostCard";
 import { View } from "./Themed";
@@ -8,14 +8,14 @@ import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState<[string, any][]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
             if (posts.length === 0 && isLoading) {
                 try {
                     const res = await fetchPosts();
-                    setPosts(res);
+                    setPosts(Object.entries(res));
                     setLoading(false);
                 } catch (e: any) {
                     alert(e);
@@ -27,9 +27,14 @@ export default function PostList() {
         console.log(posts);
     }, [posts, isLoading]);
 
+    const PostCards = posts.map((post) => {
+        return <PostCard post={post[1]}/>;
+    });
+
     return (
-        <View style={styles.listContainer}>
-            {/* {posts.length !== 0 && (
+        <ScrollView>
+            <View style={styles.listContainer}>
+                {/* {posts.length !== 0 && (
                 <FlatList
                     data={posts}
                     showsVerticalScrollIndicator={false}
@@ -37,8 +42,10 @@ export default function PostList() {
                     
                 />
             )} */}
-            <Text>{JSON.stringify(posts)}</Text>
-        </View>
+                {/* <Text>{JSON.stringify(posts)}</Text> */}
+                {PostCards}
+            </View>
+        </ScrollView>
     );
 }
 

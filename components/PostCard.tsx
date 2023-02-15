@@ -29,14 +29,13 @@ function BasicInfo({ post }: { post: PostType }) {
 
     return (
         <View>
-            <Text style={{color: Colors.gray.b, fontSize: 20}}>Hello</Text>
-            {/* <Text>
+            <Text>
                     {typeof pickup === "string" ? pickup : "Pickup not found"} to
                     {typeof dropoff === "string" ? dropoff : "Dropoff not found"}
                 </Text>
                 <Text>{fDate}</Text>
                 <Text>{fTime}</Text>
-                <RiderBadge post={post} /> */}
+                <RiderBadge post={post} />
         </View>
     );
 }
@@ -64,7 +63,7 @@ const styles = StyleSheet.create({
     cardContainer: {
         margin: 16,
         padding: 16,
-        backgroundColor: Colors.purple.p,
+        backgroundColor: Colors.purple[2],
         fontSize: 20,
         flex: 1,
     },
