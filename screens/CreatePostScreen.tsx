@@ -1,9 +1,11 @@
+import { useHeaderHeight } from "@react-navigation/elements";
 import React from "react";
 import { StyleSheet, ScrollView, KeyboardAvoidingView } from "react-native";
+
+import CreatePostForm from "../components/CreatePostForm";
 import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
-import { useHeaderHeight } from "@react-navigation/elements";
-import CreatePostForm from "../components/CreatePostForm";
+
 
 // TODO: Fix text input interaction with keyboard, currently location inputs are blocked by keyboard
 export default function CreatePostScreen({ navigation }: RootTabScreenProps<"CreatePost">) {
@@ -11,7 +13,7 @@ export default function CreatePostScreen({ navigation }: RootTabScreenProps<"Cre
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
             <KeyboardAvoidingView
-                behavior={"position"}
+                behavior="position"
                 style={{ flex: 1 }}
                 keyboardVerticalOffset={height}>
                 <CreatePostForm />

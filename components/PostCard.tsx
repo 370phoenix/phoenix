@@ -6,9 +6,11 @@ import MatchButton from "./MatchButton";
 import RiderBadge from "./RiderBadge";
 import { View } from "./Themed";
 import Colors from "../constants/Colors";
-import { postObject } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 
-export default function PostCard({ post }: { post: postObject }) {
+// TODO: Redo PostCard component
+
+export default function PostCard({ post }: { post: PostType }) {
     // Toggle ride/location badge and MoreInfo component
     const [showMore, setShowMore] = useState(false);
 
@@ -25,7 +27,7 @@ export default function PostCard({ post }: { post: postObject }) {
 }
 
 // Component containing rider and location badges
-function BasicInfo({ post }: { post: postObject }) {
+function BasicInfo({ post }: { post: PostType }) {
     return (
         <View style={styles.badgesContainer}>
             <LocationBadge post={post} />
@@ -35,11 +37,11 @@ function BasicInfo({ post }: { post: postObject }) {
 }
 
 // Component containing other information for post
-function MoreInfo({ post }: { post: postObject }) {
+function MoreInfo({ post }: { post: PostType }) {
     const riders = post.riders;
     const listItems = riders.map((rider) => (
-        <Text key={rider.gradYear}>
-            Gender: {rider.gender}, Grad Year: {rider.gradYear}
+        <Text key={rider}>
+            Placeholder for moreinfo{/* Gender: {rider.gender}, Grad Year: {rider.gradYear} */}
         </Text>
     ));
     return (

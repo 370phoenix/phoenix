@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Alert, Modal, StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "./Themed";
-import { postObject } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 
-const App = ({ post }: { post: postObject }) => {
+const App = ({ post }: { post: PostType }) => {
     const [modalVisible, setModalVisible] = useState(false);
     return (
         <View style={styles.centeredView}>

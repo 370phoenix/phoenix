@@ -1,4 +1,4 @@
-import { getDatabase, ref, child, get, DataSnapshot } from "firebase/database";
+import { getDatabase, ref, child, get } from "firebase/database";
 
 const dbRef = ref(getDatabase());
 

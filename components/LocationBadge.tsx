@@ -2,30 +2,17 @@ import { StyleSheet } from "react-native";
 
 import { Text, View } from "./Themed";
 import Colors from "../constants/Colors";
-import { postObject } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 
-// Function to convert date to string (will be useful for reading from database)
-// const dateToString = (tempDate: Date): string => {
-//     let fDate =
-//         tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
-//     let minutes: string | number = tempDate.getMinutes();
-//     minutes = minutes < 10 ? "0" + minutes : minutes;
-//     let hours: string | number = tempDate.getHours();
-//     hours = hours > 12 ? hours - 12 : hours;
-
-//     let fTime = `${hours}:${minutes}`;
-//     return fDate + " " + fTime;
-// };
-
-export default function LocationBadge({ post }: { post: postObject }) {
+export default function LocationBadge({ post }: { post: PostType }) {
     return (
         <View style={styles.locationBadge}>
-            <Text style={styles.locationText}>
-                Trip: {post.pickupLocation} to {post.dropoffLocation}
+            {/* <Text style={styles.locationText}>
+                Trip: {post.pickup} to {post.dropoff}
             </Text>
             <Text style={styles.locationText}>
-                Between: {post.earliestTime} - {post.latestTime}
-            </Text>
+                Between: {post.dateTime}
+            </Text> */}
         </View>
     );
 }

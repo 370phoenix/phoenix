@@ -14,17 +14,22 @@ type UserID = string;
 
 type PostID = number[] | string;
 
+type Coords = {
+    lat: number;
+    lng: number;
+}
+
 type PostType = {
-    pickup: Location.LocationObject | null | string;
-    dropoff: Location.LocationObject | null | string;
+    pickup: Coords | string;
+    dropoff: Coords | string;
     postID: PostID;
     numFriends: number;
     availableSpots: number;
     notes: string;
-    dateTime: Date;
+    dateTime: number;
     roundTrip: boolean;
-    isMatched: PostID[];
-    isRequested: PostID[];
+    isMatched: boolean;
+    isRequested: boolean;
     riders: UserID[];
 };
 
@@ -40,4 +45,4 @@ type PostType = {
 //     riders: userProfile[];
 // };
 
-export { UserType, PostType };
+export { UserType, PostType, Coords };

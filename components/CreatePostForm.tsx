@@ -9,7 +9,9 @@ import PostValidation from "./PostValidation";
 import Switch from "./Switch";
 import { Button } from "./Themed";
 import LocationPicker, { Location } from "../components/LocationPicker";
-import { PostType } from "../constants/DataTypes";
+import { PostType, Coords } from "../constants/DataTypes";
+import writeUserData, { examplePost } from "../firebase/makePosts";
+
 
 // stores options for number picker form inputs
 const friends = [
@@ -61,7 +63,7 @@ export default function App() {
     // date input
     const [date, setDate] = useState(new Date());
     // location input
-    const [pickup, setPickup] = useState<Location.LocationObject | string | null>(null);
+    const [pickup, setPickup] = useState<Coords | string | null>(null);
     const [pickupText, setPickupText] = useState("");
     const [dropoff, setDropoff] = useState<Location.LocationObject | string | null>(null);
     const [dropoffText, setDropoffText] = useState("");
@@ -101,15 +103,17 @@ export default function App() {
             numFriends,
             availableSpots: numSeats,
             notes,
-            dateTime: date,
+            dateTime: date.getTime(),
             roundTrip: isRoundtrip,
-            isMatched: [],
-            isRequested: [],
+            isMatched: false,
+            isRequested: false,
             // TODO: get poster's UserID and add to list
-            riders: []
+            riders: [],
         };
-        console.log(Post);
+        console.log(examplePost);
+        writeUserData(examplePost);
         // VALIDATE POST AND WRITE TO DATABASE
+        
     };
 
     return (
