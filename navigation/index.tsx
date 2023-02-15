@@ -8,7 +8,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { Pressable } from "react-native";
 
 import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
 import WelcomeScreen from "../screens/WelcomeScreen";
@@ -20,12 +19,14 @@ import TabTwoScreen from "../screens/TabTwoScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
-import { Text } from "../components/Themed";
+import { Button, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 import Type from "../constants/Type";
 import { getHeaderTitle } from "@react-navigation/elements";
-import TabBar from "./TabBar";
 import Header from "./Header";
+import Matches from "../assets/icons/Matches";
+import MatchesScreen from "../screens/MatchesScreen";
+import { Left } from "../assets/icons/Chevron";
 
 export default function Navigation() {
     return (
@@ -72,7 +73,13 @@ function RootNavigator() {
 
     return (
         <AuthContext.Provider value={authState}>
-            <Stack.Navigator>
+            <Stack.Navigator
+                screenOptions={{
+                    header: ({ navigation, route, options }) => {
+                        const title = getHeaderTitle(options, route.name);
+                        return <Header title={title} options={options} />;
+                    },
+                }}>
                 {authState.signedIn ? (
                     <>
                         <Stack.Screen
@@ -84,6 +91,24 @@ function RootNavigator() {
                             name="NotFound"
                             component={NotFoundScreen}
                             options={{ title: "Oops!" }}
+                        />
+                        <Stack.Screen
+                            name="Matches"
+                            component={MatchesScreen}
+                            options={({ navigation }) => ({
+                                title: "Matches",
+                                headerLeft: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                ),
+                            })}
                         />
                         <Stack.Group screenOptions={{ presentation: "modal" }}>
                             <Stack.Screen name="Modal" component={ModalScreen} />
@@ -124,22 +149,16 @@ function BottomTabNavigator() {
             // tabBar={(props) => <TabBar {...props} />}
             backBehavior="none"
             screenOptions={{
-                headerStyle: {
-                    backgroundColor: Colors.purple.m,
-                },
-                headerTintColor: Colors.gray.w,
-                headerTitleStyle: Type.header.m,
                 header: ({ navigation, route, options }) => {
                     const title = getHeaderTitle(options, route.name);
-
-                    return <Header title={title} />;
+                    return <Header title={title} options={options} />;
                 },
                 tabBarStyle: {
                     backgroundColor: Colors.navy["3"],
                 },
                 tabBarLabelStyle: {
-                    fontSize: 16,
-                    lineHeight: 20,
+                    fontSize: 14,
+                    lineHeight: 16,
                     fontFamily: "inter-extrabold",
                     letterSpacing: 1.5,
                 },
@@ -153,22 +172,17 @@ function BottomTabNavigator() {
                     title: "VIEW POSTS",
                     tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
                     headerRight: () => (
-                        <Pressable
-                            onPress={() => auth.signOut()}
-                            style={({ pressed }) => ({
-                                opacity: pressed ? 0.5 : 1,
-                            })}>
-                            <Text
-                                textStyle="label"
-                                styleSize="s"
-                                style={{
-                                    paddingHorizontal: 10,
-                                    color: Colors.gray.w,
-                                    fontSize: 16,
-                                }}>
-                                Log out
-                            </Text>
-                        </Pressable>
+                        <Button
+                            title=""
+                            onPress={() => {
+                                navigation.navigate("Matches");
+                            }}
+                            leftIcon={Matches}
+                            color="purple"
+                            light
+                            short
+                            clear
+                        />
                     ),
                 })}
             />
@@ -178,6 +192,18 @@ function BottomTabNavigator() {
                 options={{
                     title: "PROFILE",
                     tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+                    headerRight: () => (
+                        <Button
+                            title="Sign out"
+                            onPress={() => {
+                                auth.signOut();
+                            }}
+                            color="purple"
+                            light
+                            short
+                            clear
+                        />
+                    ),
                 }}
             />
         </BottomTab.Navigator>
@@ -191,5 +217,5 @@ function TabBarIcon(props: {
     name: React.ComponentProps<typeof FontAwesome>["name"];
     color: string;
 }) {
-    return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+    return <FontAwesome size={20} style={{ marginBottom: -5 }} {...props} />;
 }

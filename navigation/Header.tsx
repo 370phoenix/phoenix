@@ -1,3 +1,5 @@
+import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
+import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import { Platform, StyleSheet, View } from "react-native";
 import LogoHorizontal from "../assets/icons/LogoHorizontal";
@@ -8,29 +10,23 @@ type HeaderOnly = {
     title: string;
     leftButton?: boolean;
     rightButton?: boolean;
+    options: BottomTabNavigationOptions | NativeStackNavigationOptions;
 };
 export type HeaderProps = View["props"] & HeaderOnly;
 
-export default function Header({
-    style,
-    title,
-    leftButton = false,
-    rightButton = false,
-}: HeaderProps) {
+export default function Header({ style, title, options }: HeaderProps) {
+    const { headerLeft, headerRight } = options;
+    const props = {
+        tintColor: options.headerTintColor,
+        canGoBack: true,
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.body}>
-                <View style={styles.leftBtn}>
-                    {leftButton && (
-                        <Button clear title="back" light color="navy" onPress={() => {}} short />
-                    )}
-                </View>
+                <View style={styles.leftBtn}>{headerLeft && headerLeft(props)}</View>
                 <LogoHorizontal color={Colors.gray.w} />
-                <View style={styles.rightBtn}>
-                    {rightButton && (
-                        <Button clear title="back" light color="navy" onPress={() => {}} short />
-                    )}
-                </View>
+                <View style={styles.rightBtn}>{headerRight && headerRight(props)}</View>
             </View>
         </View>
     );

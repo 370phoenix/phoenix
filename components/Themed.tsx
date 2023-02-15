@@ -159,6 +159,8 @@ export function Button({
         });
     };
 
+    const iconSize = short && text !== "" ? 10 : 20;
+
     return (
         <Pressable
             onPress={onPress}
@@ -171,8 +173,8 @@ export function Button({
                         {leftIcon({
                             color: textColor,
                             preserveAspectRatio: "xMidYMid meet",
-                            height: 20,
-                            width: 20,
+                            height: iconSize,
+                            width: iconSize,
                         })}
                         <Spacer direction="row" size={8} />
                     </>
@@ -189,8 +191,8 @@ export function Button({
                         {rightIcon({
                             color: textColor,
                             preserveAspectRatio: "xMidYMid meet",
-                            height: 20,
-                            width: 20,
+                            height: iconSize,
+                            width: iconSize,
                         })}
                     </>
                 )}
@@ -299,6 +301,7 @@ export function TextArea({
     label,
     style,
     inputState,
+    numberOfLines = 4,
     validationState = ValidationState.default,
     ...otherProps
 }: TextAreaProps) {
@@ -324,6 +327,7 @@ export function TextArea({
                 onChangeText={setText}
                 allowFontScaling={false}
                 multiline={true}
+                numberOfLines={numberOfLines}
                 style={[fontStyles, inputStyle, { borderColor: color, color: color }]}
                 {...otherProps}
             />

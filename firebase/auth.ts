@@ -72,7 +72,7 @@ export async function getVerificationId({
     try {
         const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
 
-        if (phoneNumber.length !== 10 || phoneNumber.match(/\d/g) === null)
+        if (fullNumber.length !== 12 || fullNumber.match(/\+\d*/g) === null)
             throw new Error("Phone number incorrect format");
 
         const phoneProvider = new PhoneAuthProvider(auth);
