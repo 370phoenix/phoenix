@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, FlatList, Text, ScrollView } from "react-native";
+import { StyleSheet, FlatList, ScrollView } from "react-native";
 
 import PostCard from "./PostCard";
 import { View } from "./Themed";
-import Colors from "../constants/Colors";
 import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
@@ -27,23 +26,16 @@ export default function PostList() {
         console.log(posts);
     }, [posts, isLoading]);
 
-    const PostCards = posts.map((post) => {
-        return <PostCard post={post[1]}/>;
-    });
-
     return (
         <ScrollView>
             <View style={styles.listContainer}>
-                {/* {posts.length !== 0 && (
-                <FlatList
-                    data={posts}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => <PostCard post={item}/>}
-                    
-                />
-            )} */}
-                {/* <Text>{JSON.stringify(posts)}</Text> */}
-                {PostCards}
+                {posts.length !== 0 && (
+                    <FlatList
+                        data={posts}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => <PostCard post={item[1]} />}
+                    />
+                )}
             </View>
         </ScrollView>
     );
@@ -51,7 +43,6 @@ export default function PostList() {
 
 const styles = StyleSheet.create({
     listContainer: {
-        // padding: 24,
-        // backgroundColor: Colors.purple.p,
+        padding: 16,
     },
 });

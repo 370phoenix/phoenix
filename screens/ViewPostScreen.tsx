@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet } from "react-native";
 
 import PostList from "../components/PostList";
 import { View } from "../components/Themed";
@@ -17,7 +17,5 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<"ViewPos
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
     },
 });

@@ -1,46 +1,58 @@
-import React, { useState } from "react";
-import { Alert, Modal, StyleSheet, Pressable } from "react-native";
+import React from "react";
+import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
+import MatchButton from "./MatchButton";
 import { View, Text } from "./Themed";
 import { PostType } from "../constants/DataTypes";
 
-const App = ({ post }: { post: PostType }) => {
-    const [modalVisible, setModalVisible] = useState(false);
+export default function DetailsModal({
+    post,
+    onPress,
+    onRequestClose,
+    isVisible,
+}: {
+    post: PostType;
+    onPress: any;
+    onRequestClose: any;
+    isVisible: boolean;
+}) {
     return (
         <View style={styles.centeredView}>
             <Modal
                 animationType="slide"
                 transparent
-                visible={modalVisible}
-                onRequestClose={() => {
-                    Alert.alert("Modal has been closed.");
-                    setModalVisible(!modalVisible);
-                }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>Hello World!</Text>
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => setModalVisible(!modalVisible)}>
-                            <Text style={styles.textStyle}>Hide Modal</Text>
-                        </Pressable>
-                    </View>
-                </View>
+                visible={isVisible}
+                onRequestClose={onRequestClose}>
+                <TouchableOpacity activeOpacity={1} onPressOut={onPress} style={styles.background}>
+                    <ScrollView directionalLockEnabled>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                <MoreInfo post={post} />
+                            </View>
+                        </View>
+                    </ScrollView>
+                </TouchableOpacity>
             </Modal>
-            <Pressable
-                style={[styles.button, styles.buttonOpen]}
-                onPress={() => setModalVisible(true)}>
-                <Text style={styles.textStyle}>Show Modal</Text>
-            </Pressable>
         </View>
     );
-};
+}
+
+function MoreInfo({ post }: { post: PostType }) {
+    return (
+        <View>
+            <Text>Notes: {post.notes}</Text>
+            <Text>Time: {post.dateTime}</Text>
+            <Text>{post.roundTrip ? "Round trip" : "One way"}</Text>
+            <MatchButton />
+        </View>
+    );
+}
 
 const styles = StyleSheet.create({
     centeredView: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
+        // alignItems: "center",
         marginTop: 22,
     },
     modalView: {
@@ -58,26 +70,8 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-    },
-    buttonOpen: {
-        backgroundColor: "#F194FF",
-    },
-    buttonClose: {
-        backgroundColor: "#2196F3",
-    },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center",
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: "center",
+    background: {
+        width: "100%",
+        height: "100%",
     },
 });
-
-export default App;
