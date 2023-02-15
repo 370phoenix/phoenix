@@ -1,3 +1,4 @@
+import { FontAwesome } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useState } from "react";
 import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
@@ -6,37 +7,12 @@ import { View, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 
 export default function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
-    const [profileColor, setProfileColor] = useState(Colors.navy["2"]);
-    const [feedColor, setFeedColor] = useState(Colors.navy["1"]);
-    const [profileText, setProfileText] = useState(Colors.navy["p"]);
-    const [feedText, setFeedText] = useState(Colors.gray["w"]);
-
-    const onFeed = () => {
-        const isFocused = state.key === "ViewPosts";
-        const event = navigation.emit({
-            type: "tabPress",
-            target: "ViewPosts",
-            canPreventDefault: true,
-        });
-
-        if (!isFocused) navigation.navigate("ViewPosts");
-    };
-    const onProfile = () => {
-        const isFocused = state.key === "Profile";
-        const event = navigation.emit({
-            type: "tabPress",
-            target: "Profile",
-            canPreventDefault: true,
-        });
-
-        if (!isFocused) navigation.navigate("Profile");
-    };
-    const longPress = (from: string) => {
-        navigation.emit({
-            type: "tabLongPress",
-            target: from,
-        });
-    };
+    const activeColor = Colors.navy["1"];
+    const passiveColor = Colors.navy["2"];
+    const activePressedColor = Colors.navy["m"];
+    const textActive = Colors.gray.w;
+    const textPassive = Colors.navy.p;
+    const [createColor, setCreateColor] = useState(Colors.gray.w);
 
     const screenWidth = Dimensions.get("window").width;
     const createLayout = {
@@ -47,26 +23,66 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
 
     return (
         <View style={styles.container}>
-            <Pressable
-                style={[styles.tabButton, { backgroundColor: feedColor }]}
-                onPress={onFeed}
-                onLongPress={() => longPress("Feed")}>
-                <Text textStyle="lineTitle" styleSize="l" style={{ color: feedText }}>
-                    FEED
-                </Text>
-            </Pressable>
-            <Pressable
-                style={[styles.tabButton, { backgroundColor: profileColor }]}
-                onPress={onProfile}
-                onLongPress={() => longPress("Profile")}>
-                <Text textStyle="lineTitle" styleSize="l" style={{ color: profileText }}>
-                    PROFILE
-                </Text>
-            </Pressable>
+            {state.routes.map((route, index) => {
+                const { options } = descriptors[route.key];
+                const isFocused = state.index == index;
+                const label = route.name.toUpperCase();
+
+                const onPress = () => {
+                    const event = navigation.emit({
+                        type: "tabPress",
+                        target: route.key,
+                        canPreventDefault: true,
+                    });
+
+                    if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
+                };
+                const longPress = () => {
+                    navigation.emit({
+                        type: "tabLongPress",
+                        target: route.key,
+                    });
+                };
+
+                return (
+                    <Pressable
+                        style={({ pressed }) => {
+                            return [
+                                styles.tabButton,
+                                {
+                                    backgroundColor: isFocused
+                                        ? pressed
+                                            ? activePressedColor
+                                            : activeColor
+                                        : pressed
+                                        ? activeColor
+                                        : passiveColor,
+                                },
+                            ];
+                        }}
+                        onPress={onPress}
+                        onLongPress={longPress}
+                        key={route.key}>
+                        <FontAwesome
+                            color={isFocused ? textActive : textPassive}
+                            size={20}
+                            name={route.name == "Feed" ? "rss" : "user"}
+                        />
+                        <Text
+                            textStyle="lineTitle"
+                            styleSize="l"
+                            style={{ color: isFocused ? textActive : textPassive, marginLeft: 8 }}>
+                            {label}
+                        </Text>
+                    </Pressable>
+                );
+            })}
             <Pressable
                 style={[styles.button, createLayout]}
-                onPress={() => navigation.navigate("Modal")}>
-                <CreateButton />
+                onPress={() => navigation.navigate("Modal")}
+                onPressIn={() => setCreateColor(Colors.purple["3"])}
+                onPressOut={() => setCreateColor(Colors.gray.w)}>
+                <CreateButton color={createColor} />
             </Pressable>
         </View>
     );
@@ -83,8 +99,7 @@ const styles = StyleSheet.create({
         height: 67,
         alignItems: "center",
         justifyContent: "center",
+        flexDirection: "row",
     },
-    feed: { flex: 1 },
-    profile: { flex: 1 },
     button: {},
 });

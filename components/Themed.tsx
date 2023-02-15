@@ -67,6 +67,7 @@ type ButtonOnly = {
     light?: boolean;
     clear?: boolean;
     short?: boolean;
+    fontSize?: number;
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
     color: "purple" | "navy" | "gold" | "gray";
@@ -85,6 +86,7 @@ export function Button({
     light,
     leftIcon,
     rightIcon,
+    fontSize,
     title,
     onPress,
     ..._
@@ -131,6 +133,7 @@ export function Button({
         : baseColor["m"];
 
     textStyles.color = textColor;
+    textStyles.fontSize = fontSize ? fontSize : undefined;
     containerStyles.backgroundColor = bgColor;
     containerStyles.gap = 8;
 

@@ -145,7 +145,7 @@ function BottomTabNavigator() {
 
     return (
         <BottomTab.Navigator
-            initialRouteName="ViewPosts"
+            initialRouteName="Feed"
             // NOT WORKING due to bug
             tabBar={(props) => <TabBar {...props} />}
             backBehavior="none"
@@ -167,10 +167,9 @@ function BottomTabNavigator() {
                 tabBarInactiveTintColor: Colors.gray["2"],
             }}>
             <BottomTab.Screen
-                name="ViewPosts"
+                name="Feed"
                 component={ViewPostsScreen}
-                options={({ navigation }: RootTabScreenProps<"ViewPosts">) => ({
-                    title: "VIEW POSTS",
+                options={({ navigation }: RootTabScreenProps<"Feed">) => ({
                     tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
                     headerRight: () => (
                         <Button
@@ -191,7 +190,6 @@ function BottomTabNavigator() {
                 name="Profile"
                 component={TabTwoScreen}
                 options={{
-                    title: "PROFILE",
                     tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
                     headerRight: () => (
                         <Button
@@ -200,6 +198,7 @@ function BottomTabNavigator() {
                                 auth.signOut();
                             }}
                             color="purple"
+                            fontSize={16}
                             light
                             short
                             clear

@@ -28,7 +28,7 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 >;
 
 export type RootTabParamList = {
-    ViewPosts: undefined;
+    Feed: undefined;
     Profile: undefined;
 };
 

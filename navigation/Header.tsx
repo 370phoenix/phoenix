@@ -56,11 +56,11 @@ const styles = StyleSheet.create({
     leftBtn: {
         flex: 1,
         alignItems: "flex-start",
-        paddingHorizontal: 16,
+        paddingLeft: 8,
     },
     rightBtn: {
         flex: 1,
         alignItems: "flex-end",
-        paddingHorizontal: 16,
+        paddingRight: 8,
     },
 });
