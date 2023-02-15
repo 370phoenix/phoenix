@@ -12,12 +12,12 @@ export default function CreatePostScreen({ navigation }: RootTabScreenProps<"Cre
     const height = useHeaderHeight();
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-            <KeyboardAvoidingView
+            {/* <KeyboardAvoidingView
                 behavior="position"
                 style={{ flex: 1 }}
-                keyboardVerticalOffset={height}>
+                keyboardVerticalOffset={height}> */}
                 <CreatePostForm />
-            </KeyboardAvoidingView>
+            {/* </KeyboardAvoidingView> */}
         </ScrollView>
     );
 }

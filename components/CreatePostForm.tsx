@@ -1,68 +1,25 @@
 import { getAuth } from "firebase/auth/react-native";
 import React, { useState } from "react";
-import { TouchableWithoutFeedback, View, Keyboard } from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet } from "react-native";
 import uuid from "react-native-uuid";
 
 import DateTimePicker from "./CustomDateTimePicker";
-import MLTextInput from "./MultilineInput";
+import CustomSwitch from "./CustomSwitch";
+import MultilineInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
 import PostValidation from "./PostValidation";
-import Switch from "./Switch";
-import { Button } from "./Themed";
-import LocationPicker from "../components/LocationPicker";
+import { Button, Text } from "./Themed";
+import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
 import { fire } from "../firebaseConfig";
 
 // stores options for number picker form inputs
-const friends = [
-    {
-        name: "0",
-        value: 0,
-    },
-    {
-        name: "1",
-        value: 1,
-    },
-    {
-        name: "2",
-        value: 2,
-    },
-    {
-        name: "3",
-        value: 3,
-    },
-    {
-        name: "4",
-        value: 4,
-    },
-];
-const seats = [
-    {
-        name: "1",
-        value: 1,
-    },
-    {
-        name: "2",
-        value: 2,
-    },
-    {
-        name: "3",
-        value: 3,
-    },
-    {
-        name: "4",
-        value: 4,
-    },
-    {
-        name: "5",
-        value: 5,
-    },
-];
 
-export default function App() {
+export default function CreatePostForm() {
     // date input
-    const [date, setDate] = useState(new Date());
+    const [startTime, setStartTime] = useState(new Date());
+    const [endTime, setEndTime] = useState(new Date());
     // location input
     const [pickup, setPickup] = useState<Coords | string>("");
     const [pickupText, setPickupText] = useState("");
@@ -74,12 +31,20 @@ export default function App() {
     const [notes, setNotes] = React.useState("");
 
     const onChangeNotes = (text: string) => setNotes(text);
-    const onChangeFriends = (selectedItem: any) => {
-        setNumFriends(selectedItem.value);
+
+    const addNumFriends = () => {
+        if (numFriends < 6) setNumFriends(numFriends + 1);
     };
-    const onChangeSeats = (selectedItem: any) => {
-        setNumSeats(selectedItem.value);
+    const deleteNumFriends = () => {
+        if (numFriends > 0) setNumFriends(numFriends - 1);
     };
+    const addNumSeats = () => {
+        if (numSeats < 6) setNumSeats(numSeats + 1);
+    };
+    const deleteNumSeats = () => {
+        if (numSeats > 1) setNumSeats(numSeats - 1);
+    };
+
     const onChangePickup = (text: string) => {
         setPickupText(text);
         setPickup(text);
@@ -88,8 +53,11 @@ export default function App() {
         setDropoffText(text);
         setDropoff(text);
     };
-    const onChangeDate = (event: any, selectedDate?: Date | undefined) => {
-        setDate(selectedDate ?? date);
+    const onChangeStartTime = (event: any, selectedDate?: Date | undefined) => {
+        setStartTime(selectedDate ?? startTime);
+    };
+    const onChangeEndTime = (event: any, selectedDate?: Date | undefined) => {
+        setEndTime(selectedDate ?? endTime);
     };
 
     // change handler for round trip switch
@@ -108,54 +76,75 @@ export default function App() {
             numFriends,
             availableSpots: numSeats,
             notes,
-            dateTime: date.getTime(),
+            startTime: startTime.getTime(),
+            endTime: endTime.getTime(),
             roundTrip: isRoundtrip,
             isMatched: false,
             isRequested: false,
             riders: [userID],
         };
         console.log(Post);
-        // VALIDATE POST AND WRITE TO DATABASE
+        // VALIDATE POST
         writeUserData(Post);
     };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View>
+            <View style={styles.body}>
+                <Text style={styles.label}>From</Text>
                 <LocationPicker
                     name="pickup"
                     setLocation={setPickup}
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
+                <LocationButton
+                    setLocation={setPickup}
+                    inputText={pickupText}
+                    onChangeText={onChangePickup}
+                />
+                <Text style={styles.label}>To</Text>
                 <LocationPicker
                     name="dropoff"
                     setLocation={setDropoff}
                     inputText={dropoffText}
                     onChangeText={onChangeDropoff}
                 />
-                <Switch
-                    label="Round trip"
+                <Text style={styles.label}>Round trip</Text>
+                <CustomSwitch
                     isEnabled={isRoundtrip}
                     setIsEnabled={setIsRoundtrip}
                     toggleSwitch={roundtripSwitch}
                 />
-                <DateTimePicker date={date} onChange={onChangeDate} />
+                <Text style={styles.label}>When do you want a ride?</Text>
+                <DateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
+                <Text style={styles.label}>"How many friends are you riding with?"</Text>
                 <NumberPicker
-                    input={friends}
-                    label="How many friends are you riding with?"
-                    onChange={onChangeFriends}
-                    selected={numFriends}
+                    count={numFriends}
+                    handlePlus={addNumFriends}
+                    handleMinus={deleteNumFriends}
                 />
+                <Text style={styles.label}>"How many spots are available?"</Text>
                 <NumberPicker
-                    input={seats}
-                    label="How many spots are available?"
-                    onChange={onChangeSeats}
-                    selected={numSeats}
+                    count={numSeats}
+                    handlePlus={addNumSeats}
+                    handleMinus={deleteNumSeats}
                 />
-                <MLTextInput value={notes} onChangeText={onChangeNotes} />
+                <Text style={styles.label}>Is there anything else your match needs to know?</Text>
+                <MultilineInput value={notes} onChangeText={onChangeNotes} />
                 <Button onPress={onSubmit} color="navy" title="Post" />
             </View>
         </TouchableWithoutFeedback>
     );
 }
+
+const styles = StyleSheet.create({
+    body: {
+        margin: 16,
+        marginTop: 0,
+    },
+    label: {
+        marginBottom: 8,
+        marginTop: 16,
+    },
+});

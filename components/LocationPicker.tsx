@@ -2,17 +2,39 @@ import * as Location from "expo-location";
 import { useState } from "react";
 import { View, StyleSheet, TextInput } from "react-native";
 
-import { Button, Text } from "./Themed";
+import { Button } from "./Themed";
 import Colors from "../constants/Colors";
 
 export { Location };
-export default function App({
+export default function LocationPicker({
     name,
     setLocation,
     inputText,
     onChangeText,
 }: {
     name: string;
+    setLocation: any;
+    inputText: string;
+    onChangeText: any;
+}) {
+    return (
+        <View>
+            <TextInput
+                style={styles.input}
+                onChangeText={onChangeText}
+                value={inputText}
+                placeholder={`${name} location`}
+                placeholderTextColor={Colors.gray.b}
+            />
+        </View>
+    );
+}
+
+export function LocationButton({
+    setLocation,
+    inputText,
+    onChangeText,
+}: {
     setLocation: any;
     inputText: string;
     onChangeText: any;
@@ -38,38 +60,12 @@ export default function App({
             onChangeText(`${p.streetNumber} ${p.street}, ${p.city} ${p.region}, ${p.postalCode}`);
         });
     };
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.label}>{name === "pickup" ? "From" : "To"}</Text>
-            <TextInput
-                style={styles.input}
-                onChangeText={onChangeText}
-                value={inputText}
-                placeholder={`${name} location`}
-                placeholderTextColor={Colors.gray.b}
-            />
-            <Button
-                title="Use Current Location"
-                color="navy"
-                clear
-                onPress={() => getLocation()}
-            />
-        </View>
-    );
+    return <Button title="Use Current Location" color="navy" clear onPress={() => getLocation()} />;
 }
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 8,
-        marginLeft: 16,
-        marginRight: 16,
-    },
     input: {
         borderBottomWidth: 1,
         padding: 8,
-    },
-    label: {
-        marginBottom: 8,
     },
 });

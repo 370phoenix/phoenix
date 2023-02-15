@@ -12,7 +12,6 @@ export default function MatchButton() {
             title={status === "default" ? "Match!" : "Cancel Match"}
             onPress={() => setStatus(status === "default" ? "requested" : "default")}
             color="purple"
-            light
         />
     );
 }

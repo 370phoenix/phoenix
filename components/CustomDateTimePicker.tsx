@@ -1,31 +1,50 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-export default function CustomDateTimePicker({ onChange, date }: { onChange: any; date: Date }) {
+import { Text } from "./Themed";
+
+export default function CustomDateTimePicker({
+    onChangeStart,
+    start,
+    onChangeEnd,
+    end,
+}: {
+    onChangeStart: any;
+    start: Date;
+    onChangeEnd: any;
+    end: Date;
+}) {
     return (
         <View>
-            <Text style={styles.label}>When do you want a ride?</Text>
             <View style={styles.container}>
                 <DateTimePicker
-                    style={styles.dateTime}
                     testID="dateTimePicker"
-                    value={date}
+                    value={start}
                     mode="date"
                     is24Hour={false}
                     display="default"
-                    onChange={onChange}
+                    onChange={onChangeStart}
                     minimumDate={new Date()}
                 />
                 <DateTimePicker
-                    style={styles.dateTime}
                     testID="dateTimePicker"
-                    value={date}
+                    value={start}
                     mode="time"
                     is24Hour={false}
                     display="default"
                     minuteInterval={5}
-                    onChange={onChange}
+                    onChange={onChangeStart}
+                />
+                <Text> to </Text>
+                <DateTimePicker
+                    testID="dateTimePicker"
+                    value={end}
+                    mode="time"
+                    is24Hour={false}
+                    display="default"
+                    minuteInterval={5}
+                    onChange={onChangeEnd}
                 />
             </View>
         </View>
@@ -34,16 +53,9 @@ export default function CustomDateTimePicker({ onChange, date }: { onChange: any
 
 const styles = StyleSheet.create({
     container: {
-        marginLeft: 16,
-        justifyContent: "flex-start",
         display: "flex",
         flexDirection: "row",
-    },
-    dateTime: {
-        marginRight: 16,
-    },
-    label: {
-        marginBottom: 8,
-        marginLeft: 16,
+        alignItems: "center",
+        justifyContent: "space-between",
     },
 });

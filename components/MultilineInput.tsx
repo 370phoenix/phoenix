@@ -3,10 +3,9 @@ import { View, Text, TextInput, StyleSheet } from "react-native";
 
 import Colors from "../constants/Colors";
 
-export default function App({ value, onChangeText }: { value: string; onChangeText: any }) {
+export default function MultilineInput({ value, onChangeText }: { value: string; onChangeText: any }) {
     return (
         <View>
-            <Text style={styles.label}>Is there anything else your match needs to know?</Text>
             <TextInput
                 style={styles.multiline}
                 editable
@@ -26,12 +25,7 @@ const styles = StyleSheet.create({
     multiline: {
         borderBottomColor: Colors.gray.b,
         borderBottomWidth: 1,
-        margin: 16,
-        marginTop: 0,
         padding: 8,
-    },
-    label: {
-        marginLeft: 16,
-        marginTop: 16,
+        marginBottom: 16
     },
 });

@@ -1,31 +1,33 @@
-import { LocationObject } from "expo-location";
+import { Coords } from "../constants/DataTypes";
 
 function convertDate(date: number | Date) {
-    if (typeof date === "number") return new Date(date);
-    else return date.getTime();
+    let tempDate;
+    if (typeof date === "number") tempDate = new Date(date);
+    else tempDate = date;
+    const dayOfWeek = tempDate.toLocaleString('en-us', {  weekday: 'long' });
+    const month = tempDate.toLocaleString('en-us', {  month: 'long' });
+
+    const fDate = `${dayOfWeek}, ${month} ${tempDate.getDate()}`;
+    return fDate;
 }
 
-function convertLocation(location: string | LocationObject) {
-    // TODO: Convert coords to string, string to coords with geocoding
-    if (typeof location === "string") {
-        try {
-
-        } catch (e) {
-            console.log("error: " + e);
-        }
-    }
-}
-
-// Function to convert date to string (will be useful for reading from database)
-const formatDateString = (tempDate: Date): string => {
-    const fDate = tempDate.getMonth() + 1 + "/" + tempDate.getDate() + "/" + tempDate.getFullYear();
+function convertTime(date: number | Date) {
+    let tempDate;
+    if (typeof date === "number") tempDate = new Date(date);
+    else tempDate = date;
     let minutes: string | number = tempDate.getMinutes();
     minutes = minutes < 10 ? "0" + minutes : minutes;
     let hours: string | number = tempDate.getHours();
     hours = hours > 12 ? hours - 12 : hours;
+    const ampm = hours >= 12 ? 'pm' : 'am';
 
-    const fTime = `${hours}:${minutes}`;
-    return fDate + " " + fTime;
-};
+    const fTime = `${hours}:${minutes}${ampm}`;
+    return fTime;
+}
 
-export default { convertLocation, convertDate, formatDateString };
+function convertLocation(location: string | Coords) {
+    // TODO: Convert coords to string, string to coords with geocoding
+    return typeof location === "string" ? location : "Could not parse date from location"
+}
+
+export default { convertLocation, convertDate, convertTime };

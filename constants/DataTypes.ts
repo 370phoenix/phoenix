@@ -24,7 +24,8 @@ type PostType = {
     numFriends: number;
     availableSpots: number;
     notes: string;
-    dateTime: number;
+    startTime: number;
+    endTime: number;
     roundTrip: boolean;
     isMatched: boolean;
     isRequested: boolean;

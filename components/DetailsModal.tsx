@@ -3,7 +3,9 @@ import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
 import MatchButton from "./MatchButton";
 import { View, Text } from "./Themed";
+import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
+import Convert from "../firebase/ConvertPostTypes";
 
 export default function DetailsModal({
     post,
@@ -17,23 +19,18 @@ export default function DetailsModal({
     isVisible: boolean;
 }) {
     return (
-        <View style={styles.centeredView}>
-            <Modal
-                animationType="slide"
-                transparent
-                visible={isVisible}
-                onRequestClose={onRequestClose}>
-                <TouchableOpacity activeOpacity={1} onPressOut={onPress} style={styles.background}>
-                    <ScrollView directionalLockEnabled>
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <MoreInfo post={post} />
-                            </View>
-                        </View>
-                    </ScrollView>
-                </TouchableOpacity>
-            </Modal>
-        </View>
+        <Modal
+            animationType="slide"
+            transparent
+            visible={isVisible}
+            onRequestClose={onRequestClose}>
+            <TouchableOpacity activeOpacity={1} onPressOut={onPress} style={styles.background} />
+            <ScrollView directionalLockEnabled>
+                <View style={styles.modalView}>
+                    <MoreInfo post={post} />
+                </View>
+            </ScrollView>
+        </Modal>
     );
 }
 
@@ -41,7 +38,13 @@ function MoreInfo({ post }: { post: PostType }) {
     return (
         <View>
             <Text>DETAILS</Text>
-            <Text>Time: {post.dateTime}</Text>
+            <Text>
+                From {Convert.convertLocation(post.pickup)} to{" "}
+                {Convert.convertLocation(post.dropoff)}
+            </Text>
+            <Text>
+                Time: {Convert.convertTime(post.startTime)} - {Convert.convertTime(post.endTime)}
+            </Text>
             <Text>{post.roundTrip ? "Round trip" : "One way"}</Text>
             <Text>Notes: {post.notes}</Text>
             <Text>RIDER PROFILES</Text>
@@ -51,18 +54,11 @@ function MoreInfo({ post }: { post: PostType }) {
 }
 
 const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        // alignItems: "center",
-        marginTop: 22,
-    },
     modalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        backgroundColor: Colors.gray.w,
+        padding: 32,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -74,6 +70,6 @@ const styles = StyleSheet.create({
     },
     background: {
         width: "100%",
-        height: "100%",
+        height: 96,
     },
 });
