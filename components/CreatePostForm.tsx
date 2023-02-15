@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { TouchableWithoutFeedback, View, Keyboard } from "react-native";
 import uuid from "react-native-uuid";
 
-import DateTimePicker from "./DateTimePicker";
+import DateTimePicker from "./CustomDateTimePicker";
 import MLTextInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
 import PostValidation from "./PostValidation";

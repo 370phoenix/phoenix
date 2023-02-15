@@ -2,7 +2,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export default function App({ onChange, date }: { onChange: any; date: Date }) {
+export default function CustomDateTimePicker({ onChange, date }: { onChange: any; date: Date }) {
     return (
         <View>
             <Text style={styles.label}>When do you want a ride?</Text>

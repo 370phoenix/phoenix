@@ -40,9 +40,11 @@ export default function DetailsModal({
 function MoreInfo({ post }: { post: PostType }) {
     return (
         <View>
-            <Text>Notes: {post.notes}</Text>
+            <Text>DETAILS</Text>
             <Text>Time: {post.dateTime}</Text>
             <Text>{post.roundTrip ? "Round trip" : "One way"}</Text>
+            <Text>Notes: {post.notes}</Text>
+            <Text>RIDER PROFILES</Text>
             <MatchButton />
         </View>
     );
