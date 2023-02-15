@@ -92,7 +92,7 @@ export default {
             fontFamily: "inter-extrabold",
             fontSize: 16,
             lineHeight: 20,
-            letterSpacing: 2,
+            letterSpacing: 1.5,
         },
     },
     title: {

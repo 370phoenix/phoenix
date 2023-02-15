@@ -23,6 +23,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
 import { Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 import Type from "../constants/Type";
+import { getHeaderTitle } from "@react-navigation/elements";
+import TabBar from "./TabBar";
+import Header from "./Header";
 
 export default function Navigation() {
     return (
@@ -117,26 +120,38 @@ function BottomTabNavigator() {
     return (
         <BottomTab.Navigator
             initialRouteName="ViewPosts"
+            // NOT WORKING due to bug
+            // tabBar={(props) => <TabBar {...props} />}
+            backBehavior="none"
             screenOptions={{
                 headerStyle: {
                     backgroundColor: Colors.purple.m,
                 },
                 headerTintColor: Colors.gray.w,
                 headerTitleStyle: Type.header.m,
-                tabBarActiveBackgroundColor: Colors.purple.m,
-                tabBarInactiveBackgroundColor: Colors.purple.m,
-                tabBarActiveTintColor: Colors.gray.w,
-                tabBarInactiveTintColor: Colors.gray["3"],
-                tabBarStyle: {
-                    backgroundColor: Colors.purple.m,
+                header: ({ navigation, route, options }) => {
+                    const title = getHeaderTitle(options, route.name);
+
+                    return <Header title={title} />;
                 },
+                tabBarStyle: {
+                    backgroundColor: Colors.navy["3"],
+                },
+                tabBarLabelStyle: {
+                    fontSize: 16,
+                    lineHeight: 20,
+                    fontFamily: "inter-extrabold",
+                    letterSpacing: 1.5,
+                },
+                tabBarActiveTintColor: Colors.navy["p"],
+                tabBarInactiveTintColor: Colors.gray["2"],
             }}>
             <BottomTab.Screen
                 name="ViewPosts"
                 component={ViewPostsScreen}
                 options={({ navigation }: RootTabScreenProps<"ViewPosts">) => ({
-                    title: "View Posts",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    title: "VIEW POSTS",
+                    tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
                     headerRight: () => (
                         <Pressable
                             onPress={() => auth.signOut()}
@@ -158,11 +173,11 @@ function BottomTabNavigator() {
                 })}
             />
             <BottomTab.Screen
-                name="TabTwo"
+                name="Profile"
                 component={TabTwoScreen}
                 options={{
-                    title: "Tab 2",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    title: "PROFILE",
+                    tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
                 }}
             />
         </BottomTab.Navigator>

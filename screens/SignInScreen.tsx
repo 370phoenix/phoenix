@@ -4,7 +4,7 @@ import { FirebaseRecaptchaBanner, FirebaseRecaptchaVerifierModal } from "expo-fi
 import { StatusBar } from "expo-status-bar";
 import { getApp } from "firebase/app";
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Left } from "../assets/icons/Chevron";
 import { View, Text, Button, ValidationState, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";

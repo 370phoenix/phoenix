@@ -67,6 +67,7 @@ type ButtonOnly = {
     title: string;
     light?: boolean;
     clear?: boolean;
+    short?: boolean;
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
     color: "purple" | "navy" | "gold" | "gray";
@@ -81,6 +82,7 @@ export function Button({
     style,
     color,
     clear,
+    short = false,
     light,
     leftIcon,
     rightIcon,
@@ -133,6 +135,8 @@ export function Button({
     containerStyles.backgroundColor = bgColor;
     containerStyles.gap = 8;
 
+    if (!short) containerStyles.paddingVertical = 8;
+
     if (clear) {
         containerStyles.flexDirection = "row";
         containerStyles.paddingHorizontal = 8;
@@ -143,13 +147,15 @@ export function Button({
 
     const onPressIn = () => {
         setTempStyles({
-            backgroundColor: highlight,
+            backgroundColor: clear ? bgColor : highlight,
+            opacity: clear ? 0.8 : 1,
         });
     };
 
     const onPressOut = () => {
         setTempStyles({
             backgroundColor: bgColor,
+            opacity: 1,
         });
     };
 
@@ -199,7 +205,6 @@ const buttonStyles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "row",
-        paddingVertical: 8,
     },
     text: { textAlign: "center" },
 });
