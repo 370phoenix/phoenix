@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, Alert } from "react-native";
 import uuid from "react-native-uuid";
 
-import DateTimePicker from "./CustomDateTimePicker";
+import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import MultilineInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
@@ -80,11 +80,8 @@ export default function CreatePostForm() {
     const onSubmit = async () => {
         //validate;
         let isValid = true;
-        //let isValidPickup = true;
-        ///let isValidDropoff = true;
 
         if(startTime.getTime() == endTime.getTime()){
-            //Alert.alert('Error', 'Enter Valid Time Window');
             isValid = false;
             console.log("not valid date, no submit");
             setMessage1({
@@ -93,7 +90,6 @@ export default function CreatePostForm() {
             })
         }
         if(pickupText == ""){
-            //Alert.alert('Error', 'Enter Valid Pickup Location');
             isValid = false;
             console.log("not valid pickup, no submit");
             setMessage2({
@@ -102,7 +98,6 @@ export default function CreatePostForm() {
             })
         }
         if(dropoffText == ""){
-            //Alert.alert('Error', 'Enter Valid Dropoff Location');
             isValid = false;
             console.log("not valid drop, no submit");
             setMessage3({
@@ -118,6 +113,7 @@ export default function CreatePostForm() {
         }
         }
        
+        // Push to database
         if(isValid){
         const Post: PostType = {
             pickup,
@@ -134,10 +130,13 @@ export default function CreatePostForm() {
             riders: [userID],
         };
         console.log(Post);
-        // VALIDATE POST
-        const writeComplete = await writeUserData(Post) ?? false;
+        
+        //Verify completion
+        //const writeComplete = await writeUserData(Post) ?? false;
 
         Alert.alert("Post Completed", "You may close this window")
+
+        //const writeComplete = (await writeUserData(Post)) ?? false;
         // if(writeComplete){
         //     // alert("Write to database complete!")
         // }
@@ -147,8 +146,12 @@ export default function CreatePostForm() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.body}>
-                <Text textStyle="header" style={styles.label}>Create Post</Text>
-                <Text textStyle="label" style={styles.label}>From</Text>
+                <Text textStyle="header" style={styles.label}>
+                    Create Post
+                </Text>
+                <Text textStyle="label" style={styles.label}>
+                    From
+                </Text>
                 <LocationPicker
                     name="pickup"
                     setLocation={setPickup}
@@ -171,7 +174,9 @@ export default function CreatePostForm() {
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
-                <Text textStyle="label" style={styles.label}>To</Text>
+                <Text textStyle="label" style={styles.label}>
+                    To
+                </Text>
                 <LocationPicker
                     name="dropoff"
                     setLocation={setDropoff}
@@ -196,7 +201,7 @@ export default function CreatePostForm() {
                     toggleSwitch={roundtripSwitch}
                 />
                 <Text textStyle="label"  style={styles.label}>When do you want a ride?</Text>
-                <DateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
+                <CustomDateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
                 {message1 ? (
                     <Text
                         style={[
@@ -214,7 +219,9 @@ export default function CreatePostForm() {
                     handlePlus={addNumFriends}
                     handleMinus={deleteNumFriends}
                 />
-                <Text textStyle="label"  style={styles.label}>"How many spots are available?"</Text>
+                <Text textStyle="label" style={styles.label}>
+                    "How many spots are available?"
+                </Text>
                 <NumberPicker
                     count={numSeats}
                     handlePlus={addNumSeats}
