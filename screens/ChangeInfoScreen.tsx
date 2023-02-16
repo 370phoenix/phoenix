@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { RootStackParamList } from "../types";
 import { Button, Spacer, Text, TextField, View } from "../components/Themed";
-import { UserInfo } from "../firebase/auth";
+import { MessageType, UserInfo, writeUser } from "../firebase/auth";
 import { getAuth } from "firebase/auth/react-native";
 import Colors from "../constants/Colors";
 import { FontAwesome } from "@expo/vector-icons";
@@ -24,7 +24,41 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const gradState = useState(userInfo ? String(userInfo.gradYear) : "");
     const genderState = useState(userInfo ? userInfo.gender : "");
 
-    const onConfirm = () => {};
+    const [message, setMessage] = useState("");
+
+    const onConfirm = async () => {
+        if (!user || !userInfo) {
+            setMessage("Error getting user id or information.");
+            return;
+        }
+
+        const gradString = gradState[0].trim();
+
+        if (gradString.match(/\D/g) !== null) {
+            setMessage("Please make sure grad year is all digits.");
+            return;
+        }
+
+        const gradYear = Number(gradString);
+        const res = await writeUser({
+            user: user,
+            userInfo: {
+                username: nameState[0].trim(),
+                major: majorState[0].trim(),
+                gradYear: gradYear,
+                gender: genderState[0].trim(),
+                chillIndex: userInfo.chillIndex,
+                ridesCompleted: userInfo.ridesCompleted,
+                phone: userInfo.phone,
+            },
+        });
+
+        if (res.type === MessageType.error) {
+            setMessage(res.message);
+        } else {
+            navigation.goBack();
+        }
+    };
     const onDelete = () => {};
 
     return (
@@ -53,6 +87,12 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 <TextField style={styles.input} label={"major"} inputState={majorState} />
                 <TextField style={styles.input} label={"grad year"} inputState={gradState} />
                 <TextField style={styles.input} label={"gender"} inputState={genderState} />
+
+                {message && (
+                    <Text textStyle="label" styleSize="m" style={styles.message}>
+                        {message}
+                    </Text>
+                )}
 
                 <Spacer direction="column" size={50} />
 
@@ -97,7 +137,10 @@ const styles = StyleSheet.create({
         width: "80%",
     },
     button: {
-        width: "80%",
+        width: "100%",
         marginBottom: 16,
+    },
+    message: {
+        color: Colors.red.p,
     },
 });

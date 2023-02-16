@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { StyleSheet } from "react-native";
 import ProfileView from "../components/ProfileView";
 
-import { Text, View } from "../components/Themed";
+import { View } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { AuthContext } from "../firebase/auth";
 import { RootTabParamList } from "../types";

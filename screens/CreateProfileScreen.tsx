@@ -43,6 +43,8 @@ export default function CreateProfileScreen({ route }: props) {
                 gradYear: gradYear,
                 gender: genderState[0].trim(),
                 phone: user.phoneNumber,
+                chillIndex: null,
+                ridesCompleted: 0,
             };
             const res = await writeUser({ user, userInfo });
             if (res.type === MessageType.success && authDispatch)

@@ -20,7 +20,7 @@ export default function WelcomeScreen({ navigation }: Props) {
                 onPress={() => {
                     navigation.navigate("SignIn");
                 }}
-                title="Create Account"
+                title="Continue"
                 color="purple"
                 light
             />

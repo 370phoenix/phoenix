@@ -140,7 +140,7 @@ export type UserInfo = {
     major: string;
     gradYear: number;
     gender: string;
-    chillIndex: number;
+    chillIndex: number | null;
     ridesCompleted: number;
 };
 
