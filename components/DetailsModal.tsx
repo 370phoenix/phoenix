@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
 import MatchButton from "./MatchButton";
@@ -35,6 +35,9 @@ export default function DetailsModal({
 }
 
 function MoreInfo({ post }: { post: PostType }) {
+    const [matched, setMatched] = useState(false);
+    const onChangeMatched = () => setMatched(!matched);
+
     const pickup = Convert.convertLocation(post.pickup);
     const dropoff = Convert.convertLocation(post.dropoff);
     const date = Convert.convertDate(post.startTime);
@@ -43,26 +46,26 @@ function MoreInfo({ post }: { post: PostType }) {
     return (
         <View>
             <Text textStyle="header">Ride Information</Text>
-            <Spacer direction="column" size={16}/>
+            <Spacer direction="column" size={16} />
             <Text textStyle="label">
-                {pickup} {'->'} {dropoff}
+                {pickup} {"->"} {dropoff}
             </Text>
             <Text>{date}</Text>
             <Text>
                 {startTime} - {endTime}
             </Text>
-            <Spacer direction="column" size={16}/>
+            <Spacer direction="column" size={16} />
             <Text textStyle="label">{post.roundTrip ? "Round trip" : "One way"}</Text>
-            <Spacer direction="column" size={16}/>
+            <Spacer direction="column" size={16} />
             <Text>Notes: {post.notes}</Text>
-            <Spacer direction="column" size={40}/>
+            <Spacer direction="column" size={40} />
             <Text textStyle="header">Rider Profiles</Text>
-            <Spacer direction="column" size={16}/>
+            <Spacer direction="column" size={16} />
             <Text textStyle="label">Profile 1</Text>
             <Text textStyle="label">Profile 2</Text>
-            <Spacer direction="column" size={40}/>
-            <MatchButton />
-            <Spacer direction="column" size={800}/>
+            <Spacer direction="column" size={40} />
+            <MatchButton matched={matched} onChangeMatched={onChangeMatched} />
+            <Spacer direction="column" size={800} />
         </View>
     );
 }

@@ -1,10 +1,10 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
-
 import React, { useState } from "react";
 import { StyleSheet, Platform, TouchableOpacity } from "react-native";
-import ConvertPostTypes from "../firebase/ConvertPostTypes";
 
 import { Text, View } from "./Themed";
+import ConvertPostTypes from "../firebase/ConvertPostTypes";
+
 
 export default function CustomDateTimePicker({
     onChangeStart,

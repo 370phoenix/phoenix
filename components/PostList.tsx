@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
-import { View } from "./Themed";
+import { View, Text } from "./Themed";
 import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
@@ -12,13 +12,10 @@ export default function PostList() {
 
     const fetchData = async () => {
         if ((posts.length === 0 && isLoading) || refreshing) {
-            try {
-                const res = await fetchPosts();
-                setPosts(Object.entries(res));
-                setLoading(false);
-            } catch (e: any) {
-                alert(e);
-            }
+            const res = await fetchPosts();
+            if(typeof res !== "string")
+            setPosts(Object.entries(res));
+            setLoading(false);
         }
     };
 
@@ -50,4 +47,3 @@ export default function PostList() {
         </View>
     );
 }
-

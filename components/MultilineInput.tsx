@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
+import { TextArea } from "./Themed";
 
 import Colors from "../constants/Colors";
 
