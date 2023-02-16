@@ -23,7 +23,7 @@ export default function CreatePostScreen() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.purple[4],
+        backgroundColor: Colors.gray.w,
         color: Colors.gray[4],
     },
 });

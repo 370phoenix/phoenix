@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { StyleSheet, Pressable, Text } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 
 import DetailsModal from "./DetailsModal";
-import { View } from "./Themed";
+import { View, Text, Spacer } from "./Themed";
 import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
 import Convert from "../firebase/ConvertPostTypes";
@@ -29,18 +29,18 @@ export default function PostCard({ post }: { post: PostType }) {
 }
 
 function BasicInfo({ post }: { post: PostType }) {
-    const pickup = post.pickup;
-    const dropoff = post.dropoff;
+    const pickup = Convert.convertLocation(post.pickup);
+    const dropoff = Convert.convertLocation(post.dropoff);
     const fDate = Convert.convertDate(post.startTime);
     const fStartTime = Convert.convertTime(post.startTime);
     const fEndTime = Convert.convertTime(post.endTime);
 
     return (
         <View style={styles.cardContainer}>
-            <Text style={styles.bodyText}>
-                {typeof pickup === "string" ? pickup : "Pickup not found"}
+            <Text textStyle="label">
+                {pickup}
                 {" ->\n"}
-                {typeof dropoff === "string" ? dropoff : "Dropoff not found"}
+                {dropoff}
             </Text>
             <Text>{fDate}</Text>
             <Text>{fStartTime} - {fEndTime}</Text>

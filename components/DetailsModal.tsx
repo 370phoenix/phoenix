@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
 import MatchButton from "./MatchButton";
-import { View, Text } from "./Themed";
+import { View, Text, Spacer } from "./Themed";
 import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
 import Convert from "../firebase/ConvertPostTypes";
@@ -42,18 +42,27 @@ function MoreInfo({ post }: { post: PostType }) {
     const endTime = Convert.convertTime(post.endTime);
     return (
         <View>
-            <Text>Ride Information</Text>
-            <Text>
-                From {pickup} to {dropoff}
+            <Text textStyle="header">Ride Information</Text>
+            <Spacer direction="column" size={16}/>
+            <Text textStyle="label">
+                {pickup} {'->'} {dropoff}
             </Text>
             <Text>{date}</Text>
             <Text>
                 {startTime} - {endTime}
             </Text>
-            <Text>{post.roundTrip ? "Round trip" : "One way"}</Text>
+            <Spacer direction="column" size={16}/>
+            <Text textStyle="label">{post.roundTrip ? "Round trip" : "One way"}</Text>
+            <Spacer direction="column" size={16}/>
             <Text>Notes: {post.notes}</Text>
-            <Text>RIDER PROFILES</Text>
+            <Spacer direction="column" size={40}/>
+            <Text textStyle="header">Rider Profiles</Text>
+            <Spacer direction="column" size={16}/>
+            <Text textStyle="label">Profile 1</Text>
+            <Text textStyle="label">Profile 2</Text>
+            <Spacer direction="column" size={40}/>
             <MatchButton />
+            <Spacer direction="column" size={800}/>
         </View>
     );
 }

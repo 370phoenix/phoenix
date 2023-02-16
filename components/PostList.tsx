@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, FlatList, RefreshControl } from "react-native";
+import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
 import { View } from "./Themed";
@@ -36,7 +36,7 @@ export default function PostList() {
     }, [posts, isLoading]);
 
     return (
-        <View style={styles.listContainer}>
+        <View>
             {posts.length !== 0 && (
                 <FlatList
                     data={posts}
@@ -51,9 +51,3 @@ export default function PostList() {
     );
 }
 
-const styles = StyleSheet.create({
-    listContainer: {
-        padding: 8,
-        paddingBottom: 0,
-    },
-});

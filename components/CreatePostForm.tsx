@@ -8,7 +8,7 @@ import CustomSwitch from "./CustomSwitch";
 import MultilineInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
 import PostValidation from "./PostValidation";
-import { Button, Text } from "./Themed";
+import { Button, Text, Spacer } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
@@ -94,7 +94,8 @@ export default function CreatePostForm() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.body}>
-                <Text style={styles.label}>From</Text>
+                <Text textStyle="header" style={styles.label}>Create Post</Text>
+                <Text textStyle="label" style={styles.label}>From</Text>
                 <LocationPicker
                     name="pickup"
                     setLocation={setPickup}
@@ -106,34 +107,34 @@ export default function CreatePostForm() {
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
-                <Text style={styles.label}>To</Text>
+                <Text textStyle="label" style={styles.label}>To</Text>
                 <LocationPicker
                     name="dropoff"
                     setLocation={setDropoff}
                     inputText={dropoffText}
                     onChangeText={onChangeDropoff}
                 />
-                <Text style={styles.label}>Round trip</Text>
+                <Text textStyle="label" style={styles.label}>Round trip</Text>
                 <CustomSwitch
                     isEnabled={isRoundtrip}
                     setIsEnabled={setIsRoundtrip}
                     toggleSwitch={roundtripSwitch}
                 />
-                <Text style={styles.label}>When do you want a ride?</Text>
+                <Text textStyle="label"  style={styles.label}>When do you want a ride?</Text>
                 <DateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
-                <Text style={styles.label}>"How many friends are you riding with?"</Text>
+                <Text textStyle="label" style={styles.label}>"How many friends are you riding with?"</Text>
                 <NumberPicker
                     count={numFriends}
                     handlePlus={addNumFriends}
                     handleMinus={deleteNumFriends}
                 />
-                <Text style={styles.label}>"How many spots are available?"</Text>
+                <Text textStyle="label"  style={styles.label}>"How many spots are available?"</Text>
                 <NumberPicker
                     count={numSeats}
                     handlePlus={addNumSeats}
                     handleMinus={deleteNumSeats}
                 />
-                <Text style={styles.label}>Is there anything else your match needs to know?</Text>
+                <Text textStyle="label"  style={styles.label}>Is there anything else your match needs to know?</Text>
                 <MultilineInput value={notes} onChangeText={onChangeNotes} />
                 <Button onPress={onSubmit} color="navy" title="Post" />
             </View>
