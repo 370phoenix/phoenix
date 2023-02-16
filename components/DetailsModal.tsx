@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 
-import MatchButton from "./MatchButton";
-import { View, Text, Spacer } from "./Themed";
+import { View, Text, Spacer, Button } from "./Themed";
 import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
 import Convert from "../firebase/ConvertPostTypes";
@@ -64,7 +63,11 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="label">Profile 1</Text>
             <Text textStyle="label">Profile 2</Text>
             <Spacer direction="column" size={40} />
-            <MatchButton matched={matched} onChangeMatched={onChangeMatched} />
+            <Button
+            title={matched ? "Cancel Match" : "Match!"}
+            onPress={onChangeMatched}
+            color="purple"
+        />
             <Spacer direction="column" size={800} />
         </View>
     );

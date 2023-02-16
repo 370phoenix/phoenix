@@ -4,6 +4,7 @@ import { FlatList, RefreshControl } from "react-native";
 import PostCard from "./PostCard";
 import { View, Text } from "./Themed";
 import { fetchPosts } from "../firebase/fetchPosts";
+import Colors from "../constants/Colors";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
@@ -13,8 +14,7 @@ export default function PostList() {
     const fetchData = async () => {
         if ((posts.length === 0 && isLoading) || refreshing) {
             const res = await fetchPosts();
-            if(typeof res !== "string")
-            setPosts(Object.entries(res));
+            if (typeof res !== "string") setPosts(Object.entries(res));
             setLoading(false);
         }
     };
@@ -34,7 +34,12 @@ export default function PostList() {
 
     return (
         <View>
-            {posts.length !== 0 && (
+            {typeof posts === "string" && (
+                <Text style={{color: Colors.red.p}} textStyle="label" styleSize="l">
+                    Failed to retrieve posts
+                </Text>
+            )}
+            {typeof posts !== "string" && posts.length !== 0 && (
                 <FlatList
                     data={posts}
                     refreshControl={

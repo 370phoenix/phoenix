@@ -15,7 +15,6 @@ import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
-import MultilineInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
 import PostValidation from "./PostValidation";
 import { Button, Text, Spacer, TextArea } from "./Themed";
@@ -141,7 +140,7 @@ export default function CreatePostForm() {
             console.log(Post);
 
             //Verify completion
-            //const writeComplete = await writeUserData(Post) ?? false;
+            const writeComplete = await writeUserData(Post) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
 
