@@ -7,7 +7,7 @@ import { RootStackParamList } from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Welcome">;
 
-export default function SignInScreen({ navigation }: Props) {
+export default function WelcomeScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
             <StatusBar style="light" />

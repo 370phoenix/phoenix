@@ -8,7 +8,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Left } from "../assets/icons/Chevron";
 import { View, Text, Button, ValidationState, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";
-import { getVerificationId, Message, signIn } from "../firebase/auth";
+import { getVerificationId, MessageType, signIn } from "../firebase/auth";
 import { RootStackParamList } from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "SignIn">;
@@ -17,7 +17,7 @@ export default function CreateScreen({ navigation }: Props) {
     const [phone, setPhone] = React.useState("");
     const [otp, setOtp] = React.useState("");
     const [vId, setVId] = React.useState<string | null>(null);
-    const [message, setMessage] = React.useState<Message | null>(null);
+    const [message, setMessage] = React.useState<string | null>(null);
     const captchaRef = React.useRef<FirebaseRecaptchaVerifierModal>(null);
 
     const app = getApp();
@@ -36,22 +36,18 @@ export default function CreateScreen({ navigation }: Props) {
             captchaRef: captchaRef,
         });
 
-        if (res.type === "result" && res.data) {
+        if (res.type === MessageType.success && res.data) {
             setVId(res.data);
         }
-
-        setMessage(res);
+        if (res.message) setMessage(res.message);
     };
 
     const onSubmit = async () => {
         if (vId && otp) {
             const res = await signIn({ verificationId: vId, verificationCode: otp });
-            setMessage(res);
+            setMessage(res.message);
         } else {
-            setMessage({
-                message: "Error: missing code",
-                type: "error",
-            });
+            setMessage("Error: missing code");
         }
     };
 
@@ -80,17 +76,7 @@ export default function CreateScreen({ navigation }: Props) {
                     Enter Phone Number
                 </Text>
 
-                {message ? (
-                    <Text
-                        style={[
-                            styles.message,
-                            { color: message.type === "error" ? "red" : "blue" },
-                        ]}>
-                        {message.message}
-                    </Text>
-                ) : (
-                    ""
-                )}
+                {message ? <Text style={[styles.message]}>{message}</Text> : ""}
 
                 <TextField
                     editable={vId === null}
@@ -172,5 +158,8 @@ const styles = StyleSheet.create({
     },
     message: {
         paddingVertical: 10,
+        color: Colors.gray.w,
+        textAlign: "center",
+        paddingBottom: 16,
     },
 });

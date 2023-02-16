@@ -6,6 +6,7 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthAction, AuthState } from "./firebase/auth";
 
 declare global {
     namespace ReactNavigation {
@@ -20,6 +21,12 @@ export type RootStackParamList = {
     NotFound: undefined;
     Welcome: undefined;
     SignIn: undefined;
+    CreateProfile: CreateProfileParamList | undefined;
+};
+
+export type CreateProfileParamList = {
+    authState: AuthState;
+    authDispatch: React.Dispatch<AuthAction>;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

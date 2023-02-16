@@ -9,7 +9,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
+import {
+    AuthAction,
+    AuthContext,
+    authReducer,
+    AuthState,
+    getUserOnce,
+    MessageType,
+} from "../firebase/auth";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
@@ -28,6 +35,7 @@ import Matches from "../assets/icons/Matches";
 import MatchesScreen from "../screens/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
 import TabBar from "./TabBar";
+import CreateProfileScreen from "../screens/CreateProfileScreen";
 
 export default function Navigation() {
     return (
@@ -48,6 +56,7 @@ function RootNavigator() {
     const currentUser = auth.currentUser;
     const initialAuth = {
         signedIn: currentUser ? true : false,
+        needsInfo: false,
         user: currentUser ? currentUser : null,
     };
 
@@ -58,10 +67,17 @@ function RootNavigator() {
     );
 
     React.useEffect(() => {
-        const subscriber = onAuthStateChanged(auth, (user) => {
+        const subscriber = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in
-                authDispatch({ type: "SIGN_IN", user: user });
+                try {
+                    const userInfo = await getUserOnce(user);
+                    if ((userInfo.type = MessageType.info))
+                        authDispatch({ type: "COLLECT_INFO", user: user });
+                    else authDispatch({ type: "SIGN_IN", user: user });
+                } catch (e: any) {
+                    console.log(e.message);
+                }
             } else {
                 // User is signed out
                 authDispatch({ type: "SIGN_OUT" });
@@ -82,39 +98,48 @@ function RootNavigator() {
                     },
                 }}>
                 {authState.signedIn ? (
-                    <>
+                    authState.needsInfo ? (
                         <Stack.Screen
-                            name="Root"
-                            component={BottomTabNavigator}
-                            options={{ headerShown: false }}
+                            name="CreateProfile"
+                            component={CreateProfileScreen}
+                            initialParams={{ authState: authState, authDispatch: authDispatch }}
                         />
-                        <Stack.Screen
-                            name="NotFound"
-                            component={NotFoundScreen}
-                            options={{ title: "Oops!" }}
-                        />
-                        <Stack.Screen
-                            name="Matches"
-                            component={MatchesScreen}
-                            options={({ navigation }) => ({
-                                title: "Matches",
-                                headerLeft: () => (
-                                    <Button
-                                        title="Go back"
-                                        onPress={() => navigation.goBack()}
-                                        leftIcon={Left}
-                                        color="purple"
-                                        light
-                                        short
-                                        clear
-                                    />
-                                ),
-                            })}
-                        />
-                        <Stack.Group screenOptions={{ presentation: "modal", headerShown: false }}>
-                            <Stack.Screen name="Modal" component={ModalScreen} />
-                        </Stack.Group>
-                    </>
+                    ) : (
+                        <>
+                            <Stack.Screen
+                                name="Root"
+                                component={BottomTabNavigator}
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="NotFound"
+                                component={NotFoundScreen}
+                                options={{ title: "Oops!" }}
+                            />
+                            <Stack.Screen
+                                name="Matches"
+                                component={MatchesScreen}
+                                options={({ navigation }) => ({
+                                    title: "Matches",
+                                    headerLeft: () => (
+                                        <Button
+                                            title="Go back"
+                                            onPress={() => navigation.goBack()}
+                                            leftIcon={Left}
+                                            color="purple"
+                                            light
+                                            short
+                                            clear
+                                        />
+                                    ),
+                                })}
+                            />
+                            <Stack.Group
+                                screenOptions={{ presentation: "modal", headerShown: false }}>
+                                <Stack.Screen name="Modal" component={ModalScreen} />
+                            </Stack.Group>
+                        </>
+                    )
                 ) : (
                     <>
                         <Stack.Screen
