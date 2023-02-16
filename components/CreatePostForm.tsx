@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { TouchableWithoutFeedback, View, Keyboard, StyleSheet } from "react-native";
 import uuid from "react-native-uuid";
 
-import DateTimePicker from "./CustomDateTimePicker";
+import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import MultilineInput from "./MultilineInput";
 import NumberPicker from "./NumberPicker";
@@ -85,7 +85,7 @@ export default function CreatePostForm() {
         };
         console.log(Post);
         // VALIDATE POST
-        const writeComplete = await writeUserData(Post) ?? false;
+        const writeComplete = (await writeUserData(Post)) ?? false;
         // if(writeComplete){
         //     // alert("Write to database complete!")
         // }
@@ -94,8 +94,12 @@ export default function CreatePostForm() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.body}>
-                <Text textStyle="header" style={styles.label}>Create Post</Text>
-                <Text textStyle="label" style={styles.label}>From</Text>
+                <Text textStyle="header" style={styles.label}>
+                    Create Post
+                </Text>
+                <Text textStyle="label" style={styles.label}>
+                    From
+                </Text>
                 <LocationPicker
                     name="pickup"
                     setLocation={setPickup}
@@ -107,34 +111,51 @@ export default function CreatePostForm() {
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
-                <Text textStyle="label" style={styles.label}>To</Text>
+                <Text textStyle="label" style={styles.label}>
+                    To
+                </Text>
                 <LocationPicker
                     name="dropoff"
                     setLocation={setDropoff}
                     inputText={dropoffText}
                     onChangeText={onChangeDropoff}
                 />
-                <Text textStyle="label" style={styles.label}>Round trip</Text>
+                <Text textStyle="label" style={styles.label}>
+                    Round trip
+                </Text>
                 <CustomSwitch
                     isEnabled={isRoundtrip}
                     setIsEnabled={setIsRoundtrip}
                     toggleSwitch={roundtripSwitch}
                 />
-                <Text textStyle="label"  style={styles.label}>When do you want a ride?</Text>
-                <DateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
-                <Text textStyle="label" style={styles.label}>"How many friends are you riding with?"</Text>
+                <Text textStyle="label" style={styles.label}>
+                    When do you want a ride?
+                </Text>
+                <CustomDateTimePicker
+                    start={startTime}
+                    end={endTime}
+                    onChangeStart={onChangeStartTime}
+                    onChangeEnd={onChangeEndTime}
+                />
+                <Text textStyle="label" style={styles.label}>
+                    "How many friends are you riding with?"
+                </Text>
                 <NumberPicker
                     count={numFriends}
                     handlePlus={addNumFriends}
                     handleMinus={deleteNumFriends}
                 />
-                <Text textStyle="label"  style={styles.label}>"How many spots are available?"</Text>
+                <Text textStyle="label" style={styles.label}>
+                    "How many spots are available?"
+                </Text>
                 <NumberPicker
                     count={numSeats}
                     handlePlus={addNumSeats}
                     handleMinus={deleteNumSeats}
                 />
-                <Text textStyle="label"  style={styles.label}>Is there anything else your match needs to know?</Text>
+                <Text textStyle="label" style={styles.label}>
+                    Is there anything else your match needs to know?
+                </Text>
                 <MultilineInput value={notes} onChangeText={onChangeNotes} />
                 <Button onPress={onSubmit} color="navy" title="Post" />
             </View>
