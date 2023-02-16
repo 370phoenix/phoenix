@@ -22,12 +22,12 @@ const linking: LinkingOptions<RootStackParamList> = {
           },
           Profile: {
             screens: {
-              CreatePost: 'two',
+              TabTwoScreen: 'two',
             },
           },
         },
       },
-      Modal: 'modal',
+      Modal: 'CreatePost',
       NotFound: '*',
     },
   },

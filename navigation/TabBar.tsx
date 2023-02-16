@@ -79,7 +79,7 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
             })}
             <Pressable
                 style={[styles.button, createLayout]}
-                onPress={() => navigation.navigate("Modal")}
+                onPress={() => navigation.navigate("CreatePost")}
                 onPressIn={() => setCreateColor(Colors.purple["3"])}
                 onPressOut={() => setCreateColor(Colors.gray.w)}>
                 <CreateButton color={createColor} />
