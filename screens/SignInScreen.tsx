@@ -4,8 +4,9 @@ import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { StatusBar } from "expo-status-bar";
 import { getApp } from "firebase/app";
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput } from "react-native";
-import { View, Text, Button } from "../components/Themed";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { Left } from "../assets/icons/Chevron";
+import { View, Text, Button, ValidationState, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { getVerificationId, Message, signIn } from "../firebase/auth";
 import { RootStackParamList } from "../types";
@@ -64,7 +65,7 @@ export default function CreateScreen({ navigation }: Props) {
                     color="navy"
                     light
                     clear
-                    icon={require("../assets/images/chevron.png")}
+                    leftIcon={Left}
                 />
             </View>
             <KeyboardAvoidingView
@@ -73,13 +74,13 @@ export default function CreateScreen({ navigation }: Props) {
                 <FirebaseRecaptchaVerifierModal
                     ref={captchaRef}
                     firebaseConfig={app ? app.options : undefined}
-                    attemptInvisibleVerification={true}
+                    attemptInvisibleVerification={Platform.OS === "ios" ? true : false}
                 />
                 <Text style={styles.title} textStyle="header" styleSize="l">
                     Enter Phone Number
                 </Text>
 
-                {message && (
+                {message ? (
                     <Text
                         style={[
                             styles.message,
@@ -87,38 +88,38 @@ export default function CreateScreen({ navigation }: Props) {
                         ]}>
                         {message.message}
                     </Text>
+                ) : (
+                    ""
                 )}
 
-                <View style={styles.labeledInput}>
-                    <TextInput
-                        editable={vId === null}
-                        autoFocus
-                        autoComplete="tel"
-                        textContentType="telephoneNumber"
-                        clearTextOnFocus
-                        keyboardType="phone-pad"
-                        onChangeText={setPhone}
-                        value={phone}
-                        style={styles.input}
-                    />
-                    <Text textStyle="label" styleSize="s" style={styles.label}>
-                        phone number
-                    </Text>
-                </View>
+                <TextField
+                    editable={vId === null}
+                    autoFocus
+                    autoComplete="tel"
+                    textContentType={Platform.OS === "ios" ? "telephoneNumber" : undefined}
+                    keyboardType="phone-pad"
+                    clearTextOnFocus
+                    validationState={ValidationState.default}
+                    inputState={[phone, setPhone]}
+                    label="phone number"
+                    style={styles.inputs}
+                    light
+                />
 
-                {vId !== null && (
-                    <View style={styles.labeledInput}>
-                        <TextInput
-                            autoFocus
-                            autoComplete="sms-otp"
-                            textContentType="oneTimeCode"
-                            clearTextOnFocus
-                            onChangeText={setOtp}
-                            value={otp}
-                            style={styles.input}
-                        />
-                        <Text style={styles.label}>Enter verification code</Text>
-                    </View>
+                {vId !== null ? (
+                    <TextField
+                        autoFocus
+                        autoComplete="sms-otp"
+                        textContentType="oneTimeCode"
+                        clearTextOnFocus
+                        inputState={[otp, setOtp]}
+                        validationState={ValidationState.default}
+                        label="verification code"
+                        style={styles.inputs}
+                        light
+                    />
+                ) : (
+                    ""
                 )}
 
                 <Button
@@ -162,18 +163,8 @@ const styles = StyleSheet.create({
         color: Colors.gray.w,
         marginBottom: 80,
     },
-    labeledInput: {
+    inputs: {
         width: "100%",
-        alignItems: "flex-start",
-    },
-    label: { fontSize: 14, paddingVertical: 10, color: Colors.gray.w },
-    input: {
-        fontSize: 18,
-        padding: 10,
-        width: "100%",
-        borderBottomWidth: 1,
-        borderColor: Colors.gray.w,
-        color: Colors.gray.w,
     },
     button: {
         width: "100%",

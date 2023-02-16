@@ -69,10 +69,10 @@ export async function getVerificationId({
     phoneNumber,
     captchaRef,
 }: GetVerificationParams): Promise<Message> {
-    const fullNumber = "+1" + phoneNumber;
-
     try {
-        if (phoneNumber.length !== 10 || phoneNumber.match(/\d/g) === null)
+        const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
+
+        if (fullNumber.length !== 12 || fullNumber.match(/\+\d*/g) === null)
             throw new Error("Phone number incorrect format");
 
         const phoneProvider = new PhoneAuthProvider(auth);

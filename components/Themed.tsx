@@ -1,30 +1,37 @@
-/**
- * Learn more about Light and Dark modes:
- * https://docs.expo.io/guides/color-schemes/
- */
-
+import { useState } from "react";
 import {
     Text as DefaultText,
     View as DefaultView,
-    Platform,
-    TouchableNativeFeedback,
-    TouchableOpacity,
+    TextInput,
     StyleSheet,
-    Image,
-    ImageSourcePropType,
+    Pressable,
+    Platform,
+    Switch,
 } from "react-native";
 
-import Colors, { BaseColorIndicators, GrayColorIndicators } from "../constants/Colors";
-import Type from "../constants/Type";
+import Colors, { BaseColor, BaseColorIndicators } from "../constants/Colors";
+import { SvgProps } from "react-native-svg";
+import Type, { TypeFamily, TypeShape } from "../constants/Type";
 
-type ButtonOnly = {
-    title: string;
-    light?: boolean;
-    clear?: boolean;
-    icon?: ImageSourcePropType;
-    color: "purple" | "navy" | "gold";
-    onPress: (event?: any) => any;
+type SpacerOnly = {
+    direction: "column" | "row";
+    size: number;
 };
+export type SpacerProps = DefaultView["props"] & SpacerOnly;
+
+export function Spacer({ style, direction, size, ...otherProps }: SpacerProps) {
+    const defaultValue = "auto";
+    const horizontal = direction === "row";
+    return (
+        <View
+            style={{
+                width: horizontal ? size : defaultValue,
+                height: !horizontal ? size : defaultValue,
+            }}
+            {...otherProps}
+        />
+    );
+}
 
 type TextOnly = {
     textStyle?: "header" | "display" | "title" | "lineTitle" | "label" | "body";
@@ -32,91 +39,361 @@ type TextOnly = {
 };
 
 export type TextProps = DefaultText["props"] & TextOnly;
-export type ViewProps = DefaultView["props"];
-export type ButtonProps = DefaultView["props"] & ButtonOnly;
-
 // Still worth keeping custom text, but with our own props
-export function Text(props: TextProps) {
-    const { style, textStyle, styleSize, ...otherProps } = props;
+export function Text({ style, textStyle, styleSize, ...otherProps }: TextProps) {
     let textStyleSheet: any = {};
 
     if (textStyle) {
         textStyleSheet = Type[textStyle];
         if (styleSize) {
             textStyleSheet = textStyleSheet[styleSize];
+        } else {
+            textStyleSheet = textStyleSheet["l"];
         }
     }
 
     return <DefaultText style={[textStyleSheet, style]} {...otherProps} />;
 }
 
-// Same here
-export function View(props: ViewProps) {
-    const { style, ...otherProps } = props;
+export type ViewProps = DefaultView["props"];
 
+// Same here
+export function View({ style, ...otherProps }: ViewProps) {
     return <DefaultView style={style} {...otherProps} />;
 }
+
+type ButtonOnly = {
+    title: string;
+    light?: boolean;
+    clear?: boolean;
+    short?: boolean;
+    fontSize?: number;
+    leftIcon?: (props: SvgProps) => React.ReactElement;
+    rightIcon?: (props: SvgProps) => React.ReactElement;
+    color: "purple" | "navy" | "gold" | "gray";
+    onPress: (event?: any) => any;
+};
+export type ButtonProps = DefaultView["props"] & ButtonOnly;
 
 // title: text displayed in button
 // light: No background, color text if true. reverse if false.
 // color: background or text color depending on light
-export function Button(props: ButtonProps) {
-    const { style, color, clear, light, icon, title, onPress, ..._ } = props;
-    const Touchable: any = Platform.OS === "android" ? TouchableNativeFeedback : TouchableOpacity;
-    const buttonStyles: Array<any> = [buttonComponentStyles.button];
-    const textStyles: Array<any> = [buttonComponentStyles.text];
-    const baseColor = Colors[color];
+export function Button({
+    style,
+    color,
+    clear,
+    short = false,
+    light,
+    leftIcon,
+    rightIcon,
+    fontSize,
+    title,
+    onPress,
+    ..._
+}: ButtonProps) {
+    const [tempStyles, setTempStyles] = useState({});
+    const containerStyles: any = {};
+    const textStyles: any = {};
+    let baseColor = Colors["purple"];
+    const gray = color === "gray";
+    if (!gray) baseColor = Colors[color];
 
     let text = title;
 
+    const textColor = clear
+        ? light
+            ? gray
+                ? Colors.gray.w
+                : baseColor["4"]
+            : gray
+            ? Colors.gray.b
+            : baseColor["p"]
+        : light
+        ? gray
+            ? Colors.gray.b
+            : baseColor["p"]
+        : Colors.gray.w;
+    const bgColor = clear
+        ? "transparent"
+        : light
+        ? gray
+            ? Colors.gray["5"]
+            : baseColor["4"]
+        : gray
+        ? Colors.gray["1"]
+        : baseColor["p"];
+    const highlight = clear
+        ? Colors.gray["5"]
+        : light
+        ? gray
+            ? Colors.gray["4"]
+            : baseColor["3"]
+        : gray
+        ? Colors.gray["2"]
+        : baseColor["m"];
+
+    textStyles.color = textColor;
+    textStyles.fontSize = fontSize ? fontSize : undefined;
+    containerStyles.backgroundColor = bgColor;
+    containerStyles.gap = 8;
+
+    if (!short) containerStyles.paddingVertical = 8;
+
     if (clear) {
-        buttonStyles.push({ flexDirection: "row" });
-        if (light) {
-            textStyles.push({ color: baseColor["4"] });
-        } else {
-            textStyles.push({ color: baseColor["p"] });
-        }
+        containerStyles.flexDirection = "row";
+        containerStyles.paddingHorizontal = 8;
         text = text.toUpperCase();
     } else {
-        if (light) {
-            buttonStyles.push({ backgroundColor: baseColor["4"] });
-            textStyles.push({ color: baseColor["p"], marginHorizontal: 16 });
-        } else {
-            buttonStyles.push({ backgroundColor: baseColor["p"] });
-            textStyles.push({ color: Colors.gray.w, marginHorzontal: 16 });
-        }
+        containerStyles.paddingHorizontal = 12;
     }
 
-    if (Platform.OS === "android") buttonStyles.push(style);
+    const onPressIn = () => {
+        setTempStyles({
+            backgroundColor: clear ? bgColor : highlight,
+            opacity: clear ? 0.8 : 1,
+        });
+    };
 
-    if (icon)
-        return (
-            <Touchable onPress={onPress} style={Platform.OS === "ios" ? style : null}>
-                <View style={buttonStyles}>
-                    <Image style={buttonComponentStyles.icon} source={icon} />
-                    <Text textStyle="label" styleSize="l" style={textStyles}>
-                        {text}
-                    </Text>
-                </View>
-            </Touchable>
-        );
+    const onPressOut = () => {
+        setTempStyles({
+            backgroundColor: bgColor,
+            opacity: 1,
+        });
+    };
+
+    const iconSize = short && text !== "" ? 10 : 20;
 
     return (
-        <Touchable onPress={onPress} style={Platform.OS === "ios" ? style : null}>
-            <View style={buttonStyles}>
+        <Pressable
+            onPress={onPress}
+            style={Platform.OS == "ios" ? style : null}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}>
+            <View style={[buttonStyles.button, containerStyles, tempStyles]}>
+                {leftIcon && (
+                    <>
+                        {leftIcon({
+                            color: textColor,
+                            preserveAspectRatio: "xMidYMid meet",
+                            height: iconSize,
+                            width: iconSize,
+                        })}
+                        <Spacer direction="row" size={8} />
+                    </>
+                )}
                 <Text
                     textStyle={clear ? "lineTitle" : "label"}
-                    styleSize={!clear ? "l" : undefined}
-                    style={textStyles}>
+                    styleSize={clear ? undefined : "l"}
+                    style={[buttonStyles.text, textStyles, tempStyles]}>
                     {text}
                 </Text>
+                {rightIcon && (
+                    <>
+                        <Spacer direction="row" size={8} />
+                        {rightIcon({
+                            color: textColor,
+                            preserveAspectRatio: "xMidYMid meet",
+                            height: iconSize,
+                            width: iconSize,
+                        })}
+                    </>
+                )}
             </View>
-        </Touchable>
+        </Pressable>
     );
 }
 
-const buttonComponentStyles = StyleSheet.create({
-    button: { borderRadius: 4, alignItems: "center" },
-    text: { textAlign: "center", marginVertical: 8 },
-    icon: {},
+const buttonStyles = StyleSheet.create({
+    button: {
+        borderRadius: 4,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "row",
+    },
+    text: { textAlign: "center" },
+});
+
+export enum ValidationState {
+    error,
+    valid,
+    default,
+    disabled,
+}
+
+type TextFieldOnly = {
+    textStyle?: [keyof TypeShape, keyof TypeFamily];
+    label: string;
+    light?: boolean;
+    inputState: [string, React.Dispatch<React.SetStateAction<string>>];
+    validationState?: ValidationState;
+};
+export type TextFieldProps = TextInput["props"] & TextFieldOnly;
+
+export function TextField({
+    textStyle = ["body", "m"],
+    light = false,
+    label,
+    style,
+    inputState,
+    validationState = ValidationState.default,
+    ...otherProps
+}: TextFieldProps) {
+    const [family, size] = textStyle;
+    const fontStyles = Type[family][size];
+    const [text, setText] = inputState;
+
+    const { container: contianerStyle, input: inputStyle, label: labelStyle } = textFieldStyles;
+    let color;
+
+    if (validationState == ValidationState.error)
+        color = !light ? Colors.red["m"] : Colors.red["2"];
+    else if (validationState == ValidationState.valid)
+        color = !light ? Colors.green["m"] : Colors.green["2"];
+    else if (validationState == ValidationState.disabled)
+        color = !light ? Colors.gray["3"] : Colors.gray["2"];
+    else color = !light ? Colors.gray["1"] : Colors.gray["5"];
+
+    return (
+        <View style={[style, contianerStyle]}>
+            <TextInput
+                value={text}
+                onChangeText={setText}
+                allowFontScaling={false}
+                style={[fontStyles, inputStyle, { borderColor: color, color: color }]}
+                {...otherProps}
+            />
+            <Spacer direction="column" size={4} />
+            <Text
+                textStyle="label"
+                styleSize="s"
+                style={[labelStyle, { color: color }]}
+                allowFontScaling={false}>
+                {label}
+            </Text>
+        </View>
+    );
+}
+
+const textFieldStyles = StyleSheet.create({
+    container: {
+        flexDirection: "column",
+        justifyContent: "flex-end",
+    },
+    label: {
+        color: "undefined",
+    },
+    input: {
+        borderBottomWidth: 2,
+        paddingVertical: 5,
+    },
+});
+
+type TextAreaOnly = {
+    textStyle?: [keyof TypeShape, keyof TypeFamily];
+    label: string;
+    light?: boolean;
+    inputState: [string, React.Dispatch<React.SetStateAction<string>>];
+    validationState?: ValidationState;
+};
+export type TextAreaProps = TextInput["props"] & TextAreaOnly;
+
+export function TextArea({
+    textStyle = ["body", "m"],
+    light = false,
+    label,
+    style,
+    inputState,
+    numberOfLines = 4,
+    validationState = ValidationState.default,
+    ...otherProps
+}: TextAreaProps) {
+    const [family, size] = textStyle;
+    const fontStyles = Type[family][size];
+    const [text, setText] = inputState;
+
+    const { container: contianerStyle, input: inputStyle, label: labelStyle } = textAreaStyles;
+    let color;
+
+    if (validationState == ValidationState.error)
+        color = !light ? Colors.red["m"] : Colors.red["2"];
+    else if (validationState == ValidationState.valid)
+        color = !light ? Colors.green["m"] : Colors.green["2"];
+    else if (validationState == ValidationState.disabled)
+        color = !light ? Colors.gray["3"] : Colors.gray["2"];
+    else color = !light ? Colors.gray["1"] : Colors.gray["5"];
+
+    return (
+        <View style={[style, contianerStyle]}>
+            <TextInput
+                value={text}
+                onChangeText={setText}
+                allowFontScaling={false}
+                multiline={true}
+                numberOfLines={numberOfLines}
+                style={[fontStyles, inputStyle, { borderColor: color, color: color }]}
+                {...otherProps}
+            />
+            <Spacer direction="column" size={4} />
+            <Text
+                textStyle="label"
+                styleSize="s"
+                style={[labelStyle, { color: color }]}
+                allowFontScaling={false}>
+                {label}
+            </Text>
+        </View>
+    );
+}
+
+const textAreaStyles = StyleSheet.create({
+    container: {
+        flexDirection: "column",
+        justifyContent: "flex-end",
+    },
+    label: {
+        color: "undefined",
+    },
+    input: {
+        borderWidth: 2,
+        borderRadius: 8,
+        textAlignVertical: "top",
+        padding: 8,
+    },
+});
+
+type LabeledSwitchOnly = {
+    label: string;
+    color?: "purple" | "gold" | "navy";
+};
+export type LabeledSwitchProps = Switch["props"] & LabeledSwitchOnly;
+
+export function LabeledSwitch({
+    style,
+    label,
+    color = "purple",
+    ...otherProps
+}: LabeledSwitchProps) {
+    const baseColor: BaseColor<BaseColorIndicators> = Colors[color];
+    return (
+        <View style={[style, labeledSwitchStyles.container]}>
+            <Switch
+                style={labeledSwitchStyles.switch}
+                trackColor={{ true: baseColor["p"], false: baseColor["m"] }}
+                thumbColor={Colors.gray.w}
+                {...otherProps}
+            />
+            <Text textStyle="label" styleSize="s" style={labeledSwitchStyles.label}>
+                {label}
+            </Text>
+        </View>
+    );
+}
+
+const labeledSwitchStyles = StyleSheet.create({
+    container: {
+        flexDirection: "column",
+        alignItems: "flex-start",
+    },
+    label: { fontSize: 11 },
+    switch: { marginBottom: Platform.OS === "ios" ? 4 : 0 },
 });

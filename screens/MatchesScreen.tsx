@@ -1,24 +1,12 @@
-import { useState } from "react";
 import { StyleSheet } from "react-native";
 
-import {
-    Button,
-    LabeledSwitch,
-    Spacer,
-    Text,
-    TextArea,
-    TextField,
-    ValidationState,
-    View,
-} from "../components/Themed";
+import { Text, View } from "../components/Themed";
+import Colors from "../constants/Colors";
 
-export default function TabTwoScreen() {
-    const [on, setOn] = useState(false);
-    const [valid, setValid] = useState(ValidationState.error);
-
+export default function MatchesScreen() {
     return (
         <View style={styles.container}>
-            <Text>Tab 2</Text>
+            <Text>Matches</Text>
         </View>
     );
 }
@@ -28,6 +16,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: Colors.purple.m,
+        marginTop: -20,
     },
     title: {
         fontSize: 20,
