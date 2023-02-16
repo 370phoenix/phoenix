@@ -8,7 +8,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
-import { Pressable } from "react-native";
 
 import { AuthAction, AuthContext, authReducer, AuthState } from "../firebase/auth";
 import WelcomeScreen from "../screens/WelcomeScreen";
@@ -20,10 +19,15 @@ import TabTwoScreen from "../screens/TabTwoScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
-import { Text } from "../components/Themed";
+import { Button, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 import Type from "../constants/Type";
-import CreatePostScreen from "../screens/CreatePostScreen";
+import { getHeaderTitle } from "@react-navigation/elements";
+import Header from "./Header";
+import Matches from "../assets/icons/Matches";
+import MatchesScreen from "../screens/MatchesScreen";
+import { Left } from "../assets/icons/Chevron";
+import TabBar from "./TabBar";
 
 export default function Navigation() {
     return (
@@ -70,7 +74,13 @@ function RootNavigator() {
 
     return (
         <AuthContext.Provider value={authState}>
-            <Stack.Navigator>
+            <Stack.Navigator
+                screenOptions={{
+                    header: ({ navigation, route, options }) => {
+                        const title = getHeaderTitle(options, route.name);
+                        return <Header title={title} options={options} />;
+                    },
+                }}>
                 {authState.signedIn ? (
                     <>
                         <Stack.Screen
@@ -83,7 +93,25 @@ function RootNavigator() {
                             component={NotFoundScreen}
                             options={{ title: "Oops!" }}
                         />
-                        <Stack.Group screenOptions={{ presentation: "modal" }}>
+                        <Stack.Screen
+                            name="Matches"
+                            component={MatchesScreen}
+                            options={({ navigation }) => ({
+                                title: "Matches",
+                                headerLeft: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                ),
+                            })}
+                        />
+                        <Stack.Group screenOptions={{ presentation: "modal", headerShown: false }}>
                             <Stack.Screen name="Modal" component={ModalScreen} />
                         </Stack.Group>
                     </>
@@ -117,61 +145,65 @@ function BottomTabNavigator() {
 
     return (
         <BottomTab.Navigator
-            initialRouteName="ViewPosts"
+            initialRouteName="Feed"
+            // NOT WORKING due to bug
+            tabBar={(props) => <TabBar {...props} />}
+            backBehavior="none"
             screenOptions={{
-                headerStyle: {
-                    backgroundColor: Colors.purple.m,
+                header: ({ navigation, route, options }) => {
+                    const title = getHeaderTitle(options, route.name);
+                    return <Header title={title} options={options} />;
                 },
-                headerTintColor: Colors.gray.w,
-                headerTitleStyle: Type.header.m,
-                tabBarActiveBackgroundColor: Colors.purple.m,
-                tabBarInactiveBackgroundColor: Colors.purple.m,
-                tabBarActiveTintColor: Colors.gray.w,
-                tabBarInactiveTintColor: Colors.gray["3"],
                 tabBarStyle: {
-                    backgroundColor: Colors.purple.m,
+                    backgroundColor: Colors.navy["3"],
                 },
+                tabBarLabelStyle: {
+                    fontSize: 14,
+                    lineHeight: 16,
+                    fontFamily: "inter-extrabold",
+                    letterSpacing: 1.5,
+                },
+                tabBarActiveTintColor: Colors.navy["p"],
+                tabBarInactiveTintColor: Colors.gray["2"],
             }}>
             <BottomTab.Screen
-                name="ViewPosts"
+                name="Feed"
                 component={ViewPostsScreen}
-                options={({ navigation }: RootTabScreenProps<"ViewPosts">) => ({
-                    title: "View Posts",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                options={({ navigation }: RootTabScreenProps<"Feed">) => ({
+                    tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
                     headerRight: () => (
-                        <Pressable
-                            onPress={() => auth.signOut()}
-                            style={({ pressed }) => ({
-                                opacity: pressed ? 0.5 : 1,
-                            })}>
-                            <Text
-                                textStyle="label"
-                                styleSize="s"
-                                style={{
-                                    paddingHorizontal: 10,
-                                    color: Colors.gray.w,
-                                    fontSize: 16,
-                                }}>
-                                Log out
-                            </Text>
-                        </Pressable>
+                        <Button
+                            title=""
+                            onPress={() => {
+                                navigation.navigate("Matches");
+                            }}
+                            leftIcon={Matches}
+                            color="purple"
+                            light
+                            short
+                            clear
+                        />
                     ),
                 })}
             />
             <BottomTab.Screen
-                name="TabTwo"
+                name="Profile"
                 component={TabTwoScreen}
                 options={{
-                    title: "Tab 2",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-                }}
-            />
-            <BottomTab.Screen
-                name="CreatePost"
-                component={CreatePostScreen}
-                options={{
-                    title: "Create Post",
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+                    headerRight: () => (
+                        <Button
+                            title="Sign out"
+                            onPress={() => {
+                                auth.signOut();
+                            }}
+                            color="purple"
+                            fontSize={16}
+                            light
+                            short
+                            clear
+                        />
+                    ),
                 }}
             />
         </BottomTab.Navigator>
@@ -185,5 +217,5 @@ function TabBarIcon(props: {
     name: React.ComponentProps<typeof FontAwesome>["name"];
     color: string;
 }) {
-    return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+    return <FontAwesome size={20} style={{ marginBottom: -5 }} {...props} />;
 }
