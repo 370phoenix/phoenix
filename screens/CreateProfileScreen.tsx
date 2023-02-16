@@ -1,12 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { Dispatch, useContext, useEffect, useRef, useState } from "react";
+import { Dispatch, useState } from "react";
 import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";
-import { CreateProfileParamList, RootStackParamList } from "../types";
+import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthAction, AuthContext, AuthState, MessageType, writeUser } from "../firebase/auth";
+import { AuthAction, AuthState, MessageType, writeUser } from "../firebase/auth";
 
 type props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 export default function CreateProfileScreen({ route }: props) {

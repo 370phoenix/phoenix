@@ -70,7 +70,7 @@ type ButtonOnly = {
     fontSize?: number;
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
-    color: "purple" | "navy" | "gold" | "gray";
+    color: "purple" | "navy" | "gold" | "gray" | "red" | "green";
     onPress: (event?: any) => any;
 };
 export type ButtonProps = DefaultView["props"] & ButtonOnly;

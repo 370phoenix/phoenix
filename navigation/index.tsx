@@ -22,13 +22,12 @@ import SignInScreen from "../screens/SignInScreen";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import ViewPostsScreen from "../screens/ViewPostScreen";
-import TabTwoScreen from "../screens/TabTwoScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
-import { Button, Text } from "../components/Themed";
+import { Button } from "../components/Themed";
 import Colors from "../constants/Colors";
-import Type from "../constants/Type";
 import { getHeaderTitle } from "@react-navigation/elements";
 import Header from "./Header";
 import Matches from "../assets/icons/Matches";
@@ -36,6 +35,7 @@ import MatchesScreen from "../screens/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
 import TabBar from "./TabBar";
 import CreateProfileScreen from "../screens/CreateProfileScreen";
+import ChangeInfoScreen from "../screens/ChangeInfoScreen";
 
 export default function Navigation() {
     return (
@@ -72,7 +72,7 @@ function RootNavigator() {
                 // User is signed in
                 try {
                     const userInfo = await getUserOnce(user);
-                    if ((userInfo.type = MessageType.info))
+                    if (userInfo.type === MessageType.info)
                         authDispatch({ type: "COLLECT_INFO", user: user });
                     else authDispatch({ type: "SIGN_IN", user: user });
                 } catch (e: any) {
@@ -136,7 +136,7 @@ function RootNavigator() {
                             />
                             <Stack.Group
                                 screenOptions={{ presentation: "modal", headerShown: false }}>
-                                <Stack.Screen name="Modal" component={ModalScreen} />
+                                <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
                             </Stack.Group>
                         </>
                     )
@@ -150,7 +150,10 @@ function RootNavigator() {
                         <Stack.Screen
                             name="SignIn"
                             component={SignInScreen}
-                            options={{ headerShown: false }}
+                            options={{
+                                headerShown: false,
+                                animationTypeForReplace: authState.signedIn ? "push" : "pop",
+                            }}
                         />
                     </>
                 )}
@@ -213,7 +216,7 @@ function BottomTabNavigator() {
             />
             <BottomTab.Screen
                 name="Profile"
-                component={TabTwoScreen}
+                component={ProfileScreen}
                 options={{
                     tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
                     headerRight: () => (

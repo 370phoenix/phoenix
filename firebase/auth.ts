@@ -140,6 +140,8 @@ export type UserInfo = {
     major: string;
     gradYear: number;
     gender: string;
+    chillIndex: number;
+    ridesCompleted: number;
 };
 
 interface WriteUserParams {
