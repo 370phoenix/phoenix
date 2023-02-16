@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth/react-native";
 import React, { useState } from "react";
-import { TouchableWithoutFeedback, View, Keyboard, StyleSheet } from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, Alert } from "react-native";
 import uuid from "react-native-uuid";
 
 import DateTimePicker from "./CustomDateTimePicker";
@@ -13,6 +13,8 @@ import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
 import { fire } from "../firebaseConfig";
+import ErrorText from "./ErrorMessage";
+import { Message } from "../firebase/auth";
 
 // stores options for number picker form inputs
 
@@ -67,8 +69,56 @@ export default function CreatePostForm() {
     const Auth = getAuth(fire);
     const user = Auth.currentUser;
     const userID = user ? user.uid : "No user found";
+
+    //error message
+    const [message1, setMessage1] = React.useState<Message | null>(null);
+    const [message2, setMessage2] = React.useState<Message | null>(null);
+    const [message3, setMessage3] = React.useState<Message | null>(null);
+    const [message4, setMessage4] = React.useState<Message | null>(null);
+
     // create object from form inputs on submit event
     const onSubmit = async () => {
+        //validate;
+        let isValid = true;
+        //let isValidPickup = true;
+        ///let isValidDropoff = true;
+
+        if(startTime.getTime() == endTime.getTime()){
+            //Alert.alert('Error', 'Enter Valid Time Window');
+            isValid = false;
+            console.log("not valid date, no submit");
+            setMessage1({
+                message: "Error: Invalid time window",
+                type: "error",
+            })
+        }
+        if(pickupText == ""){
+            //Alert.alert('Error', 'Enter Valid Pickup Location');
+            isValid = false;
+            console.log("not valid pickup, no submit");
+            setMessage2({
+                message: "Error: Invalid pickup location",
+                type: "error",
+            })
+        }
+        if(dropoffText == ""){
+            //Alert.alert('Error', 'Enter Valid Dropoff Location');
+            isValid = false;
+            console.log("not valid drop, no submit");
+            setMessage3({
+                message: "Error: Invalid dropoff location",
+                type: "error",
+            })
+        if(numFriends >= numSeats){
+            isValid = false;
+            setMessage4({
+                message: "Error: Number of friends must be less than number of seats",
+                type: "error",
+            })
+        }
+        }
+       
+        if(isValid){
         const Post: PostType = {
             pickup,
             dropoff,
@@ -86,9 +136,12 @@ export default function CreatePostForm() {
         console.log(Post);
         // VALIDATE POST
         const writeComplete = await writeUserData(Post) ?? false;
+
+        Alert.alert("Post Completed", "You may close this window")
         // if(writeComplete){
         //     // alert("Write to database complete!")
         // }
+    }
     };
 
     return (
@@ -102,6 +155,17 @@ export default function CreatePostForm() {
                     inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
+                {message2 ? (
+                    <Text
+                        style={[
+                            styles.message,
+                            { color: message2.type === "error" ? "red" : "blue" },
+                        ]}>
+                        {message2.message}
+                    </Text>
+                ) : (
+                    ""
+                )}
                 <LocationButton
                     setLocation={setPickup}
                     inputText={pickupText}
@@ -114,6 +178,17 @@ export default function CreatePostForm() {
                     inputText={dropoffText}
                     onChangeText={onChangeDropoff}
                 />
+                {message3 ? (
+                    <Text
+                        style={[
+                            styles.message,
+                            { color: message3.type === "error" ? "red" : "blue" },
+                        ]}>
+                        {message3.message}
+                    </Text>
+                ) : (
+                    ""
+                )}
                 <Text textStyle="label" style={styles.label}>Round trip</Text>
                 <CustomSwitch
                     isEnabled={isRoundtrip}
@@ -122,6 +197,17 @@ export default function CreatePostForm() {
                 />
                 <Text textStyle="label"  style={styles.label}>When do you want a ride?</Text>
                 <DateTimePicker start={startTime} end={endTime} onChangeStart={onChangeStartTime} onChangeEnd={onChangeEndTime}/>
+                {message1 ? (
+                    <Text
+                        style={[
+                            styles.message,
+                            { color: message1.type === "error" ? "red" : "blue" },
+                        ]}>
+                        {message1.message}
+                    </Text>
+                ) : (
+                    ""
+                )}
                 <Text textStyle="label" style={styles.label}>"How many friends are you riding with?"</Text>
                 <NumberPicker
                     count={numFriends}
@@ -134,6 +220,17 @@ export default function CreatePostForm() {
                     handlePlus={addNumSeats}
                     handleMinus={deleteNumSeats}
                 />
+                {message4 ? (
+                    <Text
+                        style={[
+                            styles.message,
+                            { color: message4.type === "error" ? "red" : "blue" },
+                        ]}>
+                        {message4.message}
+                    </Text>
+                ) : (
+                    ""
+                )}
                 <Text textStyle="label"  style={styles.label}>Is there anything else your match needs to know?</Text>
                 <MultilineInput value={notes} onChangeText={onChangeNotes} />
                 <Button onPress={onSubmit} color="navy" title="Post" />
@@ -151,4 +248,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         marginTop: 16,
     },
+    message: {
+        paddingVertical: 10,
+    }
 });
