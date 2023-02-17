@@ -8,12 +8,15 @@ import Colors from "../constants/Colors";
 // TODO: Fix text input interaction with keyboard, currently location inputs are blocked by keyboard
 export default function CreatePostScreen() {
     const height = useHeaderHeight();
-    return <CreatePostForm />;
+    return (
+        <View style={styles.container}>
+            <CreatePostForm />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.gray.w,
-        color: Colors.gray[4],
+        backgroundColor: Colors.gray[4],
     },
 });

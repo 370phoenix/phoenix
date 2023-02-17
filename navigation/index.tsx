@@ -38,6 +38,7 @@ import CreateProfileScreen from "../screens/CreateProfileScreen";
 import ChangeInfoScreen from "../screens/ChangeInfoScreen";
 import CreatePostScreen from "../screens/CreatePostScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
+import ModalHeader from "../components/ModalHeader";
 
 export default function Navigation() {
     return (
@@ -137,7 +138,12 @@ function RootNavigator() {
                                 })}
                             />
                             <Stack.Group
-                                screenOptions={{ presentation: "modal", headerShown: false }}>
+                                screenOptions={{
+                                    presentation: "modal",
+                                    header: ({ navigation }) => (
+                                        <ModalHeader navigation={navigation} />
+                                    ),
+                                }}>
                                 <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
                                 <Stack.Screen name="CreatePost" component={CreatePostScreen} />
                                 <Stack.Screen name="PostDetails" component={PostDetailsScreen} />

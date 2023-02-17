@@ -8,6 +8,7 @@ import Colors from "../constants/Colors";
 import { FontAwesome } from "@expo/vector-icons";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useState } from "react";
+import ModalHeader from "../components/ModalHeader";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
@@ -63,18 +64,6 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Button
-                    title=""
-                    onPress={() => navigation.goBack()}
-                    clear
-                    short
-                    color="gray"
-                    leftIcon={() => (
-                        <FontAwesome size={30} name="times-circle" color={Colors.red.p} />
-                    )}
-                />
-            </View>
             <KeyboardAvoidingView
                 style={styles.body}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -124,20 +113,12 @@ const styles = StyleSheet.create({
         paddingTop: 32,
         paddingHorizontal: 16,
     },
-    header: {
-        backgroundColor: "#F9F9F9",
-        width: "100%",
-        paddingVertical: 16,
-        flexDirection: "row",
-        paddingHorizontal: 16,
-        zIndex: 100,
-    },
     input: {
         marginBottom: 16,
         width: "80%",
     },
     button: {
-        width: "100%",
+        width: "80%",
         marginBottom: 16,
     },
     message: {
