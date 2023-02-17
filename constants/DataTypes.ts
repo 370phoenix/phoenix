@@ -15,7 +15,7 @@ type PostID = number[] | string;
 type Coords = {
     lat: number;
     lng: number;
-}
+};
 
 type PostType = {
     pickup: Coords | string;
@@ -32,4 +32,4 @@ type PostType = {
     riders: UserID[];
 };
 
-export { UserType, PostType, Coords };
+export { PostID, UserType, PostType, Coords };

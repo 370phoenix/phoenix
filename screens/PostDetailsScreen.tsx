@@ -1,35 +1,45 @@
-import React, { useState } from "react";
-import { Modal, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
 
-import { View, Text, Spacer, Button } from "./Themed";
+import { View, Text, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
-import { PostType } from "../constants/DataTypes";
+import { PostID, PostType } from "../constants/DataTypes";
+import { MessageType } from "../firebase/auth";
 import Convert from "../firebase/ConvertPostTypes";
+import { fetchPost } from "../firebase/fetchPosts";
+import { RootStackParamList } from "../types";
 
-export default function DetailsModal({
-    post,
-    onPress,
-    onRequestClose,
-    isVisible,
-}: {
-    post: PostType;
-    onPress: any;
-    onRequestClose: any;
-    isVisible: boolean;
-}) {
+type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
+export default function DetailsModal({ route }: Props) {
+    const [post, setPost] = useState<PostType | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getPostInfo = async (postID: PostID) => {
+            const res = await fetchPost(postID);
+            if (res.type === MessageType.error) setMessage(res.message);
+            else setPost(res.data);
+        };
+
+        if (!route.params) return;
+        const paramPost = route.params.post;
+        if (paramPost instanceof Object && "postID" in paramPost) {
+            setPost(paramPost);
+        } else {
+            getPostInfo(paramPost);
+        }
+    }, [route.params]);
+
     return (
-        <Modal
-            animationType="slide"
-            transparent
-            visible={isVisible}
-            onRequestClose={onRequestClose}>
-            <TouchableOpacity activeOpacity={1} onPressOut={onPress} style={styles.background} />
-            <ScrollView directionalLockEnabled>
-                <View style={styles.modalView}>
-                    <MoreInfo post={post} />
-                </View>
-            </ScrollView>
-        </Modal>
+        <ScrollView directionalLockEnabled>
+            {message && (
+                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
+                    {message}
+                </Text>
+            )}
+            <View style={styles.modalView}>{post && <MoreInfo post={post} />}</View>
+        </ScrollView>
     );
 }
 
@@ -64,10 +74,10 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="label">Profile 2</Text>
             <Spacer direction="column" size={40} />
             <Button
-            title={matched ? "Cancel Match" : "Match!"}
-            onPress={onChangeMatched}
-            color="purple"
-        />
+                title={matched ? "Cancel Match" : "Match!"}
+                onPress={onChangeMatched}
+                color="purple"
+            />
             <Spacer direction="column" size={800} />
         </View>
     );

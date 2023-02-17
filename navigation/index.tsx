@@ -37,6 +37,7 @@ import TabBar from "./TabBar";
 import CreateProfileScreen from "../screens/CreateProfileScreen";
 import ChangeInfoScreen from "../screens/ChangeInfoScreen";
 import CreatePostScreen from "../screens/CreatePostScreen";
+import PostDetailsScreen from "../screens/PostDetailsScreen";
 
 export default function Navigation() {
     return (
@@ -139,6 +140,7 @@ function RootNavigator() {
                                 screenOptions={{ presentation: "modal", headerShown: false }}>
                                 <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
                                 <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+                                <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
                             </Stack.Group>
                         </>
                     )

@@ -6,8 +6,8 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { User } from "firebase/auth/react-native";
 import { AuthAction, AuthState, UserInfo } from "./firebase/auth";
+import { PostID, PostType } from "./constants/DataTypes";
 
 declare global {
     namespace ReactNavigation {
@@ -23,7 +23,12 @@ export type RootStackParamList = {
     Welcome: undefined;
     SignIn: undefined;
     CreateProfile: CreateProfileParamList | undefined;
+    PostDetails: PostDetailsParamList | undefined;
     CreatePost: undefined;
+};
+
+export type PostDetailsParamList = {
+    post: PostID | PostType;
 };
 
 export type ChangeInfoParamList = {
