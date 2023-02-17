@@ -6,7 +6,7 @@ import { View, Button, Text, Spacer, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthAction, AuthState, MessageType, writeUser } from "../firebase/auth";
+import { AuthAction, AuthState, MessageType, validateProfile, writeUser } from "../firebase/auth";
 
 type props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 export default function CreateProfileScreen({ route }: props) {
@@ -27,26 +27,23 @@ export default function CreateProfileScreen({ route }: props) {
 
     const onSubmit = async () => {
         const user = authState?.user;
-        const gradString = gradState[0].trim();
-
-        if (gradString.match(/\D/g) !== null) {
-            setMessage("Please make sure grad year is all digits.");
-            return;
-        }
-
-        const gradYear = Number(gradString);
 
         if (user && user.phoneNumber) {
-            const userInfo = {
+            const valid = validateProfile({
                 username: nameState[0].trim(),
                 major: majorState[0].trim(),
-                gradYear: gradYear,
+                gradString: gradState[0].trim(),
                 gender: genderState[0].trim(),
                 phone: user.phoneNumber,
-                chillIndex: null,
-                ridesCompleted: 0,
-            };
-            const res = await writeUser({ user, userInfo });
+            });
+
+            if (valid.type === MessageType.error) {
+                setMessage(valid.message);
+                return;
+            }
+            if (!valid.data) return;
+
+            const res = await writeUser({ user: user, userInfo: valid.data });
             if (res.type === MessageType.success && authDispatch)
                 authDispatch({ type: "COLLECTED" });
         }

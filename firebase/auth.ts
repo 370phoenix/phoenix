@@ -13,6 +13,8 @@ import { createContext } from "react";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
+import Filter from "bad-words";
+import Genders from "../constants/Genders.json";
 
 const auth = initializeAuth(fire, { persistence: getReactNativePersistence(AsyncStorage) });
 auth.useDeviceLanguage();
@@ -200,4 +202,73 @@ export async function deleteAccount(user: User): Promise<SuccessMessage | ErrorM
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
+}
+
+type ValidateProfileParams = {
+    username: string;
+    major: string;
+    gradString: string;
+    gender: string;
+    phone?: string | null;
+    userInfo?: UserInfo | null;
+};
+export function validateProfile({
+    username,
+    major,
+    gender,
+    gradString,
+    phone = null,
+    userInfo = null,
+}: ValidateProfileParams): SuccessMessage<UserInfo> | ErrorMessage {
+    const noUserError: ErrorMessage = {
+        type: MessageType.error,
+        message: "Must supply either phone or previous user info.",
+    };
+    if (!(phone || userInfo)) return noUserError;
+
+    const filter = new Filter();
+
+    if (filter.isProfane(username))
+        return { type: MessageType.error, message: "Display name cannot be profane." };
+
+    if (filter.isProfane(major))
+        return { type: MessageType.error, message: "Major cannot be profane." };
+
+    if (!Genders.includes(gender.toLowerCase()))
+        return {
+            type: MessageType.error,
+            message: "Gender not accepted. Please email us if we've made a mistake.",
+        };
+
+    if (gradString.match(/\D/g) !== null)
+        return { type: MessageType.error, message: "Please make sure grad year is all digits." };
+
+    const gradYear = Number(gradString);
+    if (userInfo)
+        return {
+            type: MessageType.success,
+            data: {
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: userInfo.phone,
+                chillIndex: userInfo.chillIndex,
+                ridesCompleted: userInfo.ridesCompleted,
+            },
+        };
+    else if (phone) {
+        return {
+            type: MessageType.success,
+            data: {
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: phone,
+                chillIndex: null,
+                ridesCompleted: 0,
+            },
+        };
+    } else return noUserError;
 }

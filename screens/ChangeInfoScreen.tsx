@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { RootStackParamList } from "../types";
 import { Button, Spacer, Text, TextField, View } from "../components/Themed";
-import { MessageType, UserInfo, writeUser } from "../firebase/auth";
+import { MessageType, UserInfo, validateProfile, writeUser } from "../firebase/auth";
 import { getAuth } from "firebase/auth/react-native";
 import Colors from "../constants/Colors";
 import { FontAwesome } from "@expo/vector-icons";
@@ -33,25 +33,23 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             return;
         }
 
-        const gradString = gradState[0].trim();
+        const valid = validateProfile({
+            username: nameState[0].trim(),
+            major: majorState[0].trim(),
+            gradString: gradState[0].trim(),
+            gender: genderState[0].trim(),
+            userInfo: userInfo,
+        });
 
-        if (gradString.match(/\D/g) !== null) {
-            setMessage("Please make sure grad year is all digits.");
+        if (valid.type === MessageType.error) {
+            setMessage(valid.message);
             return;
         }
+        if (!valid.data) return;
 
-        const gradYear = Number(gradString);
         const res = await writeUser({
             user: user,
-            userInfo: {
-                username: nameState[0].trim(),
-                major: majorState[0].trim(),
-                gradYear: gradYear,
-                gender: genderState[0].trim(),
-                chillIndex: userInfo.chillIndex,
-                ridesCompleted: userInfo.ridesCompleted,
-                phone: userInfo.phone,
-            },
+            userInfo: valid.data,
         });
 
         if (res.type === MessageType.error) {
@@ -60,6 +58,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             navigation.goBack();
         }
     };
+
     const onDelete = () => {};
 
     return (
