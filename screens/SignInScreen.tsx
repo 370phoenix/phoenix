@@ -87,7 +87,7 @@ export default function CreateScreen({ navigation }: Props) {
                     clearTextOnFocus
                     validationState={ValidationState.default}
                     inputState={[phone, setPhone]}
-                    label="phone number"
+                    label="phone number (US)"
                     style={styles.inputs}
                     light
                 />

@@ -112,6 +112,6 @@ const styles = StyleSheet.create({
     },
     button: {
         position: "absolute",
-        bottom: 10,
+        bottom: 14,
     },
 });

@@ -32,13 +32,13 @@ export default function DetailsModal({ route }: Props) {
     }, [route.params]);
 
     return (
-        <ScrollView directionalLockEnabled>
+        <ScrollView directionalLockEnabled style={styles.container}>
             {message && (
                 <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
                     {message}
                 </Text>
             )}
-            <View style={styles.modalView}>{post && <MoreInfo post={post} />}</View>
+            {post && <MoreInfo post={post} />}
         </ScrollView>
     );
 }
@@ -53,7 +53,7 @@ function MoreInfo({ post }: { post: PostType }) {
     const startTime = Convert.convertTime(post.startTime);
     const endTime = Convert.convertTime(post.endTime);
     return (
-        <View>
+        <View style={styles.infoContainer}>
             <Text textStyle="header">Ride Information</Text>
             <Spacer direction="column" size={16} />
             <Text textStyle="label">
@@ -101,5 +101,12 @@ const styles = StyleSheet.create({
     background: {
         width: "100%",
         height: 96,
+    },
+    container: {
+        backgroundColor: Colors.gray[4],
+    },
+    infoContainer: {
+        paddingTop: 32,
+        paddingHorizontal: 16,
     },
 });

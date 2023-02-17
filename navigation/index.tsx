@@ -19,7 +19,6 @@ import {
 } from "../firebase/auth";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
-import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import ViewPostsScreen from "../screens/ViewPostScreen";
 import ProfileScreen from "../screens/ProfileScreen";
