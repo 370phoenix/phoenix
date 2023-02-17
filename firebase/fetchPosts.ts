@@ -1,11 +1,17 @@
-import { getDatabase, ref, child, get, DataSnapshot } from "firebase/database";
+import { getDatabase, ref, child, get } from "firebase/database";
 
 const dbRef = ref(getDatabase());
 
-const fetchPosts = async () => {
-    let response = await get(child(dbRef, "posts"));
-    let data = response.val();
-    return data;
+const fetchPosts = async () : Promise<any>=> {
+    try {
+
+        const response = await get(child(dbRef, "posts"));
+        const data = response.val();
+        return data;
+    }
+    catch(e: any) {
+        return e.message;
+    }
 };
 
 export { fetchPosts };

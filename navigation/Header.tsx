@@ -1,7 +1,6 @@
 import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { StatusBar } from "react-native";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View, StatusBar} from "react-native";
 import LogoHorizontal from "../assets/icons/LogoHorizontal";
 import Colors from "../constants/Colors";
 
