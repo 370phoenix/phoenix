@@ -15,19 +15,19 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Root: {
         screens: {
-          ViewPosts: {
+          Feed: {
             screens: {
               TabOneScreen: 'one',
             },
           },
-          TabTwo: {
+          Profile: {
             screens: {
               TabTwoScreen: 'two',
             },
           },
         },
       },
-      Modal: 'modal',
+      Modal: 'CreatePost',
       NotFound: '*',
     },
   },

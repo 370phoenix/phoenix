@@ -23,6 +23,7 @@ export type RootStackParamList = {
     Welcome: undefined;
     SignIn: undefined;
     CreateProfile: CreateProfileParamList | undefined;
+    CreatePost: undefined;
 };
 
 export type ChangeInfoParamList = {
