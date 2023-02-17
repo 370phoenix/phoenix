@@ -21,7 +21,6 @@ import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
-import { fire } from "../firebaseConfig";
 import { Message } from "../firebase/auth";
 import Colors from "../constants/Colors";
 
@@ -75,8 +74,8 @@ export default function CreatePostForm() {
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
     // find current userID
-    const Auth = getAuth(fire);
-    const user = Auth.currentUser;
+    const auth = getAuth();
+    const user = auth.currentUser;
     const userID = user ? user.uid : "No user found";
 
     //error message

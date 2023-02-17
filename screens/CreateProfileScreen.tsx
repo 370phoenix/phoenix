@@ -1,19 +1,17 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { Dispatch, useState } from "react";
+import { Dispatch, useContext, useState } from "react";
 import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthAction, AuthState, MessageType, validateProfile, writeUser } from "../firebase/auth";
+import { AuthAction, AuthContext, MessageType, validateProfile, writeUser } from "../firebase/auth";
 
 type props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 export default function CreateProfileScreen({ route }: props) {
-    let authState: AuthState | null = null;
     let authDispatch: Dispatch<AuthAction> | null = null;
     if (route.params) {
-        authState = route.params.authState;
         authDispatch = route.params.authDispatch;
     }
     const headerHeight = useHeaderHeight();
@@ -22,6 +20,7 @@ export default function CreateProfileScreen({ route }: props) {
     const majorState = useState("");
     const gradState = useState("");
     const genderState = useState("");
+    const authState = useContext(AuthContext);
 
     const [message, setMessage] = useState("");
 

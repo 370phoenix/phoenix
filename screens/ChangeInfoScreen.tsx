@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { RootStackParamList } from "../types";
 import { Button, Spacer, Text, TextField, View } from "../components/Themed";
-import { MessageType, UserInfo, validateProfile, writeUser } from "../firebase/auth";
+import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../firebase/auth";
 import { getAuth } from "firebase/auth/react-native";
 import Colors from "../constants/Colors";
 import { FontAwesome } from "@expo/vector-icons";
@@ -59,7 +59,14 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         }
     };
 
-    const onDelete = () => {};
+    const onDelete = async () => {
+        if (!user) {
+            setMessage("Error: no user found.");
+            return;
+        }
+        const res = await deleteAccount(user);
+        if (res.type === MessageType.error) setMessage(res.message);
+    };
 
     return (
         <View style={styles.container}>
@@ -86,7 +93,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
 
                 <Button onPress={onConfirm} title="Confirm?" color="navy" style={styles.button} />
                 <Button
-                    onPress={onConfirm}
+                    onPress={onDelete}
                     title="DELETE ACCOUNT"
                     color="red"
                     style={styles.button}

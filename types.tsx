@@ -36,7 +36,6 @@ export type ChangeInfoParamList = {
 };
 
 export type CreateProfileParamList = {
-    authState: AuthState;
     authDispatch: React.Dispatch<AuthAction>;
 };
 

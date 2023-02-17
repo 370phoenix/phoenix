@@ -104,7 +104,7 @@ function RootNavigator() {
                         <Stack.Screen
                             name="CreateProfile"
                             component={CreateProfileScreen}
-                            initialParams={{ authState: authState, authDispatch: authDispatch }}
+                            initialParams={{ authDispatch: authDispatch }}
                         />
                     ) : (
                         <>

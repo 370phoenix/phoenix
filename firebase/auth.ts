@@ -1,22 +1,20 @@
-import { fire } from "../firebaseConfig";
 import {
     ApplicationVerifier,
-    initializeAuth,
-    getReactNativePersistence,
     PhoneAuthProvider,
     signInWithCredential,
     User,
     deleteUser,
+    getAuth,
 } from "firebase/auth/react-native";
 
 import { createContext } from "react";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
+import { fire } from "../firebaseConfig";
 
-const auth = initializeAuth(fire, { persistence: getReactNativePersistence(AsyncStorage) });
+const auth = getAuth(fire);
 auth.useDeviceLanguage();
 
 export type AuthState = {
@@ -172,8 +170,10 @@ export async function getUserUpdates(
         const db = getDatabase();
         const userRef = ref(db, "users/" + user.uid);
         onValue(userRef, (snapshot) => {
-            const data = snapshot.val();
-            onUpdate(data);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                onUpdate(data);
+            }
         });
         return { message: "Listener attached.", type: MessageType.success };
     } catch (e: any) {
