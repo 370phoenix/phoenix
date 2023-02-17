@@ -7,17 +7,13 @@ import { View, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 
 export default function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
-    const activeColor = Colors.navy["1"];
-    const passiveColor = Colors.navy["2"];
+    const activeColor = Colors.navy["p"];
+    const passiveColor = Colors.navy["1"];
     const activePressedColor = Colors.navy["m"];
-    const textActive = Colors.gray.w;
-    const textPassive = Colors.navy.p;
     const [createColor, setCreateColor] = useState(Colors.gray.w);
 
     const screenWidth = Dimensions.get("window").width;
     const createLayout = {
-        position: "absolute",
-        bottom: 10,
         left: screenWidth / 2 - 40,
     };
 
@@ -47,8 +43,10 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                 return (
                     <Pressable
                         style={({ pressed }) => {
+                            const localStyle = route.name === "Feed" ? styles.feed : styles.profile;
                             return [
                                 styles.tabButton,
+                                localStyle,
                                 {
                                     backgroundColor: isFocused
                                         ? pressed
@@ -64,14 +62,14 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                         onLongPress={longPress}
                         key={route.key}>
                         <FontAwesome
-                            color={isFocused ? textActive : textPassive}
-                            size={20}
+                            color={Colors.gray.w}
+                            size={30}
                             name={route.name == "Feed" ? "rss" : "user"}
                         />
                         <Text
                             textStyle="lineTitle"
                             styleSize="l"
-                            style={{ color: isFocused ? textActive : textPassive, marginLeft: 8 }}>
+                            style={{ color: Colors.gray.w, marginLeft: 8 }}>
                             {label}
                         </Text>
                     </Pressable>
@@ -101,5 +99,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "row",
     },
-    button: {},
+    feed: {
+        paddingRight: 20,
+    },
+    profile: {
+        paddingLeft: 20,
+    },
+    button: {
+        position: "absolute",
+        bottom: 10,
+    },
 });
