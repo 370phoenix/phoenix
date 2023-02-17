@@ -164,11 +164,7 @@ export function Button({
     const iconSize = short && text !== "" ? 10 : 20;
 
     return (
-        <Pressable
-            onPress={onPress}
-            style={Platform.OS == "ios" ? style : null}
-            onPressIn={onPressIn}
-            onPressOut={onPressOut}>
+        <Pressable onPress={onPress} style={style} onPressIn={onPressIn} onPressOut={onPressOut}>
             <View style={[buttonStyles.button, containerStyles, tempStyles]}>
                 {leftIcon && (
                     <>
