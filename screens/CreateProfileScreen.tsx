@@ -8,24 +8,23 @@ import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { AuthAction, AuthContext, MessageType, validateProfile, writeUser } from "../firebase/auth";
 
-type props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-export default function CreateProfileScreen({ route }: props) {
-    let authDispatch: Dispatch<AuthAction> | null = null;
-    if (route.params) {
-        authDispatch = route.params.authDispatch;
-    }
+type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
+type UniqueProps = {
+    authDispatch: Dispatch<AuthAction>;
+};
+type Props = NativeProps & UniqueProps;
+export default function CreateProfileScreen({ authDispatch }: Props) {
     const headerHeight = useHeaderHeight();
-
     const nameState = useState("");
     const majorState = useState("");
     const gradState = useState("");
     const genderState = useState("");
     const authState = useContext(AuthContext);
 
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState<string | null>(null);
 
     const onSubmit = async () => {
-        const user = authState?.user;
+        const user = authState.user;
 
         if (user && user.phoneNumber) {
             const valid = validateProfile({
@@ -43,8 +42,8 @@ export default function CreateProfileScreen({ route }: props) {
             if (!valid.data) return;
 
             const res = await writeUser({ user: user, userInfo: valid.data });
-            if (res.type === MessageType.success && authDispatch)
-                authDispatch({ type: "COLLECTED" });
+            if (res.type === MessageType.success) authDispatch({ type: "COLLECTED" });
+            else setMessage(res.message);
         }
     };
 
@@ -67,7 +66,7 @@ export default function CreateProfileScreen({ route }: props) {
                     Please complete your profile.
                 </Text>
                 {message && (
-                    <Text textStyle="body" styleSize="s" style={{ color: Colors.red.p }}>
+                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
                         {message}
                     </Text>
                 )}

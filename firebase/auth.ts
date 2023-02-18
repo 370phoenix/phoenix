@@ -12,9 +12,8 @@ import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
-import { fire } from "../firebaseConfig";
+import { fire, auth } from "../firebaseConfig";
 
-const auth = getAuth(fire);
 auth.useDeviceLanguage();
 
 export type AuthState = {
@@ -66,7 +65,11 @@ export function authReducer(prevState: AuthState, action: AuthAction) {
     }
 }
 
-export const AuthContext = createContext<AuthState | null>(null);
+export const AuthContext = createContext<AuthState>({
+    signedIn: false,
+    needsInfo: false,
+    user: null,
+});
 
 type GetVerificationParams = {
     phoneNumber: string;
@@ -155,7 +158,15 @@ export async function writeUser({
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
         const db = getDatabase();
-        await set(ref(db, "users/" + user.uid), userInfo);
+        await set(ref(db, "users/" + user.uid), {
+            username: userInfo.username,
+            major: userInfo.major,
+            gender: userInfo.gender,
+            gradYear: userInfo.gradYear,
+            phone: userInfo.phone ? userInfo.phone : user.phoneNumber,
+            chillIndex: userInfo.chillIndex ? userInfo.chillIndex : null,
+            ridesCompleted: userInfo.ridesCompleted ? userInfo.ridesCompleted : 0,
+        });
         return { type: MessageType.success };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };

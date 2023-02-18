@@ -6,7 +6,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as React from "react";
 
 import {
@@ -101,11 +101,11 @@ function RootNavigator() {
                 }}>
                 {authState.signedIn ? (
                     authState.needsInfo ? (
-                        <Stack.Screen
-                            name="CreateProfile"
-                            component={CreateProfileScreen}
-                            initialParams={{ authDispatch: authDispatch }}
-                        />
+                        <Stack.Screen name="CreateProfile">
+                            {(props) => (
+                                <CreateProfileScreen {...props} authDispatch={authDispatch} />
+                            )}
+                        </Stack.Screen>
                     ) : (
                         <>
                             <Stack.Screen

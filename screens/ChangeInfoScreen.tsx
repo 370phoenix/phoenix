@@ -1,14 +1,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { RootStackParamList } from "../types";
 import { Button, Spacer, Text, TextField, View } from "../components/Themed";
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../firebase/auth";
 import { getAuth } from "firebase/auth/react-native";
 import Colors from "../constants/Colors";
-import { FontAwesome } from "@expo/vector-icons";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useState } from "react";
-import ModalHeader from "../components/ModalHeader";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
@@ -25,7 +23,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const gradState = useState(userInfo ? String(userInfo.gradYear) : "");
     const genderState = useState(userInfo ? userInfo.gender : "");
 
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState<string | null>(null);
 
     const onConfirm = async () => {
         if (!user || !userInfo) {
@@ -45,18 +43,31 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             setMessage(valid.message);
             return;
         }
-        if (!valid.data) return;
 
-        const res = await writeUser({
-            user: user,
-            userInfo: valid.data,
-        });
+        debugger;
 
-        if (res.type === MessageType.error) {
-            setMessage(res.message);
-        } else {
-            navigation.goBack();
-        }
+        Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
+            {
+                text: "Cancel",
+                onPress: () => {},
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (!valid.data) return;
+                    const res = await writeUser({
+                        user: user,
+                        userInfo: valid.data,
+                    });
+
+                    if (res.type === MessageType.error) {
+                        setMessage(res.message);
+                    } else {
+                        if (navigation.canGoBack()) navigation.goBack();
+                    }
+                },
+            },
+        ]);
     };
 
     const onDelete = async () => {

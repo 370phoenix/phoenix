@@ -73,26 +73,25 @@ export default function CreateScreen({ navigation }: Props) {
                     attemptInvisibleVerification={Platform.OS === "ios" ? true : false}
                 />
                 <Text style={styles.title} textStyle="header" styleSize="l">
-                    Enter Phone Number
+                    {vId === null ? "Enter Phone Number" : "Enter verification code"}
                 </Text>
 
                 {message ? <Text style={[styles.message]}>{message}</Text> : ""}
 
-                <TextField
-                    editable={vId === null}
-                    autoFocus
-                    autoComplete="tel"
-                    textContentType={Platform.OS === "ios" ? "telephoneNumber" : undefined}
-                    keyboardType="phone-pad"
-                    clearTextOnFocus
-                    validationState={ValidationState.default}
-                    inputState={[phone, setPhone]}
-                    label="phone number (US)"
-                    style={styles.inputs}
-                    light
-                />
-
-                {vId !== null ? (
+                {vId === null ? (
+                    <TextField
+                        autoFocus
+                        autoComplete="tel"
+                        textContentType={Platform.OS === "ios" ? "telephoneNumber" : undefined}
+                        keyboardType="phone-pad"
+                        clearTextOnFocus
+                        validationState={ValidationState.default}
+                        inputState={[phone, setPhone]}
+                        label="phone number (US)"
+                        style={styles.inputs}
+                        light
+                    />
+                ) : (
                     <TextField
                         autoFocus
                         autoComplete="sms-otp"
@@ -104,8 +103,6 @@ export default function CreateScreen({ navigation }: Props) {
                         style={styles.inputs}
                         light
                     />
-                ) : (
-                    ""
                 )}
 
                 <Button
