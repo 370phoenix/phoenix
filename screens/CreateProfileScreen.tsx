@@ -66,8 +66,12 @@ export default function CreateProfileScreen({ route }: props) {
                     style={{ color: Colors.gray.w, marginBottom: 32 }}>
                     Please complete your profile.
                 </Text>
+                {message && (
+                    <Text textStyle="body" styleSize="s" style={{ color: Colors.red.p }}>
+                        {message}
+                    </Text>
+                )}
                 <TextField
-                    autoFocus
                     label="name"
                     inputState={nameState}
                     keyboardType="default"
