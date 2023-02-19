@@ -6,6 +6,7 @@ import { PostType } from "../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
 import { useNavigation } from "@react-navigation/native";
 import { Right } from "../assets/icons/Arrow";
+import { Full, Outline } from "../assets/icons/User";
 
 export default function PostCard({ post }: { post: PostType }) {
     const navigation = useNavigation();
@@ -18,22 +19,27 @@ export default function PostCard({ post }: { post: PostType }) {
     return (
         <Pressable onPress={() => navigation.navigate("PostDetails", { post: post })}>
             <View style={styles.cardContainer}>
-                <View style={styles.headerContainer}>
+                <View style={styles.body}>
                     <Text textStyle="header" styleSize="s" style={styles.text}>
                         {pickup}
                     </Text>
-                    <Spacer direction="row" size={16} />
-                    <Right color={Colors.purple.p} />
-                </View>
-                <Text textStyle="header" styleSize="s" style={styles.text}>
-                    {dropoff}
-                </Text>
-                <Spacer direction="column" size={16} />
+                    <View style={styles.headerContainer}>
+                        <Right color={Colors.purple.p} height={20} />
+                        <Spacer direction="row" size={4} />
+                        <Text textStyle="header" styleSize="s" style={styles.text}>
+                            {dropoff}
+                        </Text>
+                    </View>
+                    <Spacer direction="column" size={16} />
 
-                <Text style={styles.text}>{fDate}</Text>
-                <Text style={styles.text}>
-                    {fStartTime} - {fEndTime}
-                </Text>
+                    <Text textStyle="label" style={styles.text}>
+                        {fDate}
+                    </Text>
+                    <Text textStyle="body" styleSize="s" style={styles.text}>
+                        {fStartTime} - {fEndTime}
+                    </Text>
+                </View>
+                <Spacer direction="row" size={16} />
                 <RiderBadge post={post} />
             </View>
         </Pressable>
@@ -41,12 +47,39 @@ export default function PostCard({ post }: { post: PostType }) {
 }
 
 function RiderBadge({ post }: { post: PostType }) {
+    const total = post.numFriends + post.availableSpots + 1;
+    const rows = new Array<Array<number>>(total > 4 ? 2 : 1);
+    rows[0] = new Array(total > 4 ? 4 : total);
+    rows[0].fill(0);
+
+    if (total - post.availableSpots > 4) rows[0].fill(1);
+    else rows[0].fill(1, 0, post.availableSpots);
+
+    if (rows.length === 2) {
+        const temp = rows[0];
+        rows[0] = new Array(total - 4);
+        rows[0].fill(0);
+        if (total - post.availableSpots - 4 > 0)
+            rows[0].fill(1, 0, total - post.availableSpots - 4);
+        rows[1] = temp;
+    }
+
     return (
-        <View style={styles.riderBadge}>
-            <Text>
-                {post.availableSpots} / {post.numFriends + post.availableSpots + 1}
-            </Text>
-        </View>
+        <>
+            {rows.map((row, index) => (
+                <View style={styles.riderBadge} key={`row-${index}`}>
+                    {row.map((rider, index) => (
+                        <View style={styles.riderIndicator}>
+                            {rider === 1 ? (
+                                <Full key={index} color={Colors.purple.p} height={20} />
+                            ) : (
+                                <Outline key={index} color={Colors.purple.p} height={20} />
+                            )}
+                        </View>
+                    ))}
+                </View>
+            ))}
+        </>
     );
 }
 
@@ -57,19 +90,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         backgroundColor: Colors.gray.w,
         borderRadius: 8,
-        justifyContent: "center",
+        flexDirection: "row",
+        alignItems: "center",
     },
+    body: { flex: 1 },
+    riderIndicator: { flex: 1, justifyContent: "center", alignItems: "center" },
     text: {
         color: Colors.purple.p,
     },
-    riderBadge: {
-        marginTop: 8,
-        marginBottom: 16,
-        backgroundColor: "white",
-        borderRadius: 48,
-        padding: 8,
-        alignSelf: "flex-start",
-    },
+    riderBadge: { height: 100, flexDirection: "column", justifyContent: "center" },
     headerContainer: {
         flexDirection: "row",
         alignItems: "center",

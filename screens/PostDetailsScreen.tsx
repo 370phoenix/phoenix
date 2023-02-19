@@ -6,7 +6,7 @@ import { View, Text, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { PostID, PostType } from "../constants/DataTypes";
 import { MessageType } from "../firebase/auth";
-import Convert from "../firebase/ConvertPostTypes";
+import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
 import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
 
@@ -47,11 +47,11 @@ function MoreInfo({ post }: { post: PostType }) {
     const [matched, setMatched] = useState(false);
     const onChangeMatched = () => setMatched(!matched);
 
-    const pickup = Convert.convertLocation(post.pickup);
-    const dropoff = Convert.convertLocation(post.dropoff);
-    const date = Convert.convertDate(post.startTime);
-    const startTime = Convert.convertTime(post.startTime);
-    const endTime = Convert.convertTime(post.endTime);
+    const pickup = convertLocation(post.pickup);
+    const dropoff = convertLocation(post.dropoff);
+    const date = convertDate(post.startTime);
+    const startTime = convertTime(post.startTime);
+    const endTime = convertTime(post.endTime);
     return (
         <View style={styles.infoContainer}>
             <Text textStyle="header">Ride Information</Text>
