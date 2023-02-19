@@ -11,8 +11,9 @@ import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
-import { auth } from "../firebaseConfig";
+import { auth, fire } from "../firebaseConfig";
 
+const db = getDatabase(fire);
 auth.useDeviceLanguage();
 
 export type AuthState = {
@@ -147,25 +148,16 @@ export type UserInfo = {
 };
 
 interface WriteUserParams {
-    user: User;
+    userId: string;
     userInfo: UserInfo;
 }
 
 export async function writeUser({
-    user,
+    userId,
     userInfo,
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const db = getDatabase();
-        await set(ref(db, "users/" + user.uid), {
-            username: userInfo.username,
-            major: userInfo.major,
-            gender: userInfo.gender,
-            gradYear: userInfo.gradYear,
-            phone: userInfo.phone ? userInfo.phone : user.phoneNumber,
-            chillIndex: userInfo.chillIndex ? userInfo.chillIndex : null,
-            ridesCompleted: userInfo.ridesCompleted ? userInfo.ridesCompleted : 0,
-        });
+        await set(ref(db, "users/" + userId), userInfo);
         return { type: MessageType.success };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -177,7 +169,6 @@ export async function getUserUpdates(
     onUpdate: (data: any) => void
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const db = getDatabase();
         const userRef = ref(db, "users/" + user.uid);
         onValue(userRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -193,7 +184,6 @@ export async function getUserUpdates(
 
 export async function getUserOnce(user: User): Promise<Message<any>> {
     try {
-        const db = getDatabase();
         const userRef = ref(db, "users/" + user.uid);
         const snapshot = await get(userRef);
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
@@ -205,9 +195,7 @@ export async function getUserOnce(user: User): Promise<Message<any>> {
 
 export async function deleteAccount(user: User): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const db = getDatabase();
         await remove(ref(db, "users/" + user.uid));
-        await deleteUser(user);
         return { type: MessageType.success };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };

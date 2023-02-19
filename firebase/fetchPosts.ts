@@ -1,12 +1,13 @@
-import { getDatabase, ref, child, get } from "firebase/database";
+import { getDatabase, ref, get } from "firebase/database";
 import { PostID } from "../constants/DataTypes";
+import { fire } from "../firebaseConfig";
 import { ErrorMessage, MessageType, SuccessMessage } from "./auth";
 
-const dbRef = ref(getDatabase());
+const db = getDatabase(fire);
 
 export async function fetchPosts(): Promise<any> {
     try {
-        const response = await get(child(dbRef, "posts"));
+        const response = await get(ref(db, "posts"));
         const data = response.val();
         return data;
     } catch (e: any) {
@@ -16,7 +17,7 @@ export async function fetchPosts(): Promise<any> {
 
 export async function fetchPost(postId: PostID): Promise<SuccessMessage<any> | ErrorMessage> {
     try {
-        const snapshot = await get(child(dbRef, "posts/" + String(postId)));
+        const snapshot = await get(ref(db, "posts/" + String(postId)));
         if (snapshot.exists()) return { type: MessageType.success, data: snapshot.val() };
         else return { type: MessageType.error, message: "Error: post missing or not found." };
     } catch (e: any) {

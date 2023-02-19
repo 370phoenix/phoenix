@@ -51,16 +51,20 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!valid.data) return;
-                    const res = await writeUser({
-                        user: user,
-                        userInfo: valid.data,
-                    });
+                    try {
+                        if (!valid.data) return;
+                        const res = await writeUser({
+                            userId: user.uid,
+                            userInfo: valid.data,
+                        });
 
-                    if (res.type === MessageType.error) {
-                        setMessage(res.message);
-                    } else {
-                        if (navigation.canGoBack()) navigation.goBack();
+                        if (res.type === MessageType.error) {
+                            setMessage(res.message);
+                        } else {
+                            if (navigation.canGoBack()) navigation.goBack();
+                        }
+                    } catch (e: any) {
+                        console.log(e.message);
                     }
                 },
             },
@@ -99,9 +103,14 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
 
                 <Spacer direction="column" size={50} />
 
-                <Button onPress={onConfirm} title="Confirm?" color="navy" style={styles.button} />
                 <Button
-                    onPress={onDelete}
+                    onPress={() => onConfirm}
+                    title="Confirm?"
+                    color="navy"
+                    style={styles.button}
+                />
+                <Button
+                    onPress={() => onDelete}
                     title="DELETE ACCOUNT"
                     color="red"
                     style={styles.button}

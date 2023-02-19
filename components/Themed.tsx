@@ -7,6 +7,7 @@ import {
     Pressable,
     Platform,
     Switch,
+    GestureResponderEvent,
 } from "react-native";
 
 import Colors, { BaseColor, BaseColorIndicators } from "../constants/Colors";
@@ -71,7 +72,7 @@ type ButtonOnly = {
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
     color: "purple" | "navy" | "gold" | "gray" | "red" | "green";
-    onPress: (event?: any) => any;
+    onPress: (event?: GestureResponderEvent) => void;
 };
 export type ButtonProps = DefaultView["props"] & ButtonOnly;
 

@@ -24,6 +24,7 @@ export default function CreateProfileScreen({ authDispatch }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
     const onSubmit = async () => {
+        debugger;
         const user = authState.user;
 
         if (user && user.phoneNumber) {
@@ -41,7 +42,7 @@ export default function CreateProfileScreen({ authDispatch }: Props) {
             }
             if (!valid.data) return;
 
-            const res = await writeUser({ user: user, userInfo: valid.data });
+            const res = await writeUser({ userId: user.uid, userInfo: valid.data });
             if (res.type === MessageType.success) authDispatch({ type: "COLLECTED" });
             else setMessage(res.message);
         }
@@ -104,7 +105,7 @@ export default function CreateProfileScreen({ authDispatch }: Props) {
                 <Spacer direction="column" size={32} />
                 <Button
                     title="continue"
-                    onPress={onSubmit}
+                    onPress={() => onSubmit()}
                     color="purple"
                     style={styles.submit}
                     light
