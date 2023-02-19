@@ -103,7 +103,12 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
 
                 <Spacer direction="column" size={50} />
 
-                <Button onPress={() => {}} title="Confirm?" color="navy" style={styles.button} />
+                <Button
+                    onPress={() => onConfirm()}
+                    title="Confirm?"
+                    color="navy"
+                    style={styles.button}
+                />
                 <Button
                     onPress={() => onDelete()}
                     title="DELETE ACCOUNT"
