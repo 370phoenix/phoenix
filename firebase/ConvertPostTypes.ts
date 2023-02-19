@@ -1,17 +1,17 @@
 import { Coords } from "../constants/DataTypes";
 
-function convertDate(date: number | Date) {
+export function convertDate(date: number | Date) {
     let tempDate;
     if (typeof date === "number") tempDate = new Date(date);
     else tempDate = date;
-    const dayOfWeek = tempDate.toLocaleString('en-us', {  weekday: 'long' });
-    const month = tempDate.toLocaleString('en-us', {  month: 'long' });
+    const dayOfWeek = tempDate.toLocaleString("en-us", { weekday: "long" }).split(",")[0];
+    const month = tempDate.toLocaleString("en-us", { month: "long" });
 
     const fDate = `${dayOfWeek}, ${month} ${tempDate.getDate()}`;
     return fDate;
 }
 
-function convertTime(date: number | Date) {
+export function convertTime(date: number | Date) {
     let tempDate;
     if (typeof date === "number") tempDate = new Date(date);
     else tempDate = date;
@@ -19,15 +19,13 @@ function convertTime(date: number | Date) {
     minutes = minutes < 10 ? "0" + minutes : minutes;
     let hours: string | number = tempDate.getHours();
     hours = hours > 12 ? hours - 12 : hours;
-    const ampm = tempDate.getHours() >= 12 ? 'pm' : 'am';
+    const ampm = tempDate.getHours() >= 12 ? "pm" : "am";
 
     const fTime = `${hours}:${minutes}${ampm}`;
     return fTime;
 }
 
-function convertLocation(location: string | Coords) {
+export function convertLocation(location: string | Coords) {
     // TODO: Convert coords to string, string to coords with geocoding
-    return typeof location === "string" ? location : "Could not parse date from location"
+    return typeof location === "string" ? location : "Could not parse date from location";
 }
-
-export default { convertLocation, convertDate, convertTime };
