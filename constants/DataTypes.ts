@@ -1,13 +1,3 @@
-type UserType = {
-    firstName: string;
-    lastName: string;
-    userID: string;
-    gender: string;
-    gradYear: number;
-    major: string;
-    email: string;
-};
-
 type UserID = string;
 
 type PostID = number[] | string;
@@ -32,4 +22,4 @@ type PostType = {
     riders: UserID[];
 };
 
-export { PostID, UserType, PostType, Coords };
+export { PostID, PostType, Coords };
