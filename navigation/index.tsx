@@ -6,7 +6,7 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
 import {
@@ -24,7 +24,7 @@ import ViewPostsScreen from "../screens/ViewPostScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { getAuth, onAuthStateChanged } from "firebase/auth/react-native";
+import { onAuthStateChanged } from "firebase/auth/react-native";
 import { Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
@@ -38,6 +38,7 @@ import ChangeInfoScreen from "../screens/ChangeInfoScreen";
 import CreatePostScreen from "../screens/CreatePostScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
 import ModalHeader from "../components/ModalHeader";
+import { auth } from "../firebaseConfig";
 
 export default function Navigation() {
     return (
@@ -54,7 +55,6 @@ export default function Navigation() {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const auth = getAuth();
     const currentUser = auth.currentUser;
     const initialAuth = {
         signedIn: currentUser ? true : false,
@@ -178,8 +178,6 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-    const auth = getAuth();
-
     return (
         <BottomTab.Navigator
             initialRouteName="Feed"

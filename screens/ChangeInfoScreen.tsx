@@ -3,7 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, StyleSheet } from "react-native"
 import { RootStackParamList } from "../types";
 import { Button, Spacer, Text, TextField, View } from "../components/Themed";
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../firebase/auth";
-import { getAuth } from "firebase/auth/react-native";
+import { auth } from "../firebaseConfig";
 import Colors from "../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useState } from "react";
@@ -12,7 +12,6 @@ type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
     const headerheight = useHeaderHeight();
 
-    const auth = getAuth();
     const user = auth.currentUser;
     let userInfo: UserInfo | null = null;
 
@@ -43,8 +42,6 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             setMessage(valid.message);
             return;
         }
-
-        debugger;
 
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
