@@ -7,6 +7,7 @@ import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPo
 import { useNavigation } from "@react-navigation/native";
 import { Right } from "../assets/icons/Arrow";
 import { Full, Outline } from "../assets/icons/User";
+import RoundTrip from "../assets/icons/RoundTrip";
 
 export default function PostCard({ post }: { post: PostType }) {
     const navigation = useNavigation();
@@ -24,8 +25,11 @@ export default function PostCard({ post }: { post: PostType }) {
                         {pickup}
                     </Text>
                     <View style={styles.headerContainer}>
-                        <Right color={Colors.purple.p} height={20} />
-                        <Spacer direction="row" size={4} />
+                        {post.roundTrip ? (
+                            <RoundTrip color={Colors.purple.p} height={20} />
+                        ) : (
+                            <Right color={Colors.purple.p} height={20} />
+                        )}
                         <Text textStyle="header" styleSize="s" style={styles.text}>
                             {dropoff}
                         </Text>
@@ -100,6 +104,8 @@ const styles = StyleSheet.create({
     },
     riderBadge: { height: 100, flexDirection: "column", justifyContent: "center" },
     headerContainer: {
+        marginLeft: -4,
+        marginTop: 4,
         flexDirection: "row",
         alignItems: "center",
     },
