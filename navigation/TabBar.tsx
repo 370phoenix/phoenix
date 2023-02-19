@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
 import CreateButton from "../assets/icons/CreateButton";
 import SteeringWheel from "../assets/icons/SteeringWheel";
+import { Full } from "../assets/icons/User";
 import { View, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 
@@ -65,11 +66,7 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                         {route.name === "Feed" ? (
                             <SteeringWheel height={30} width={30} color={Colors.gray.w} />
                         ) : (
-                            <FontAwesome
-                                color={Colors.gray.w}
-                                size={30}
-                                name={route.name === "Feed" ? "rss" : "user"}
-                            />
+                            <Full height={28} width={28} color={Colors.gray.w} />
                         )}
                         <Text
                             textStyle="lineTitle"
