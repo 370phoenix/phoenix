@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     body: { flex: 1 },
-    riderIndicator: { flex: 1, justifyContent: "center", alignItems: "center" },
+    riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
     text: {
         color: Colors.purple.p,
     },
