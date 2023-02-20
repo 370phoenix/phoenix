@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
-import { View, Text } from "./Themed";
+import { View, Text, Spacer } from "./Themed";
 import { fetchPosts } from "../firebase/fetchPosts";
 import Colors from "../constants/Colors";
 
@@ -33,15 +33,16 @@ export default function PostList() {
     }, [posts, isLoading]);
 
     return (
-        <View>
+        <View style={{ marginTop: 20 }}>
             {typeof posts === "string" && (
-                <Text style={{color: Colors.red.p}} textStyle="label" styleSize="l">
+                <Text style={{ color: Colors.red.p }} textStyle="label" styleSize="l">
                     Failed to retrieve posts
                 </Text>
             )}
             {typeof posts !== "string" && posts.length !== 0 && (
                 <FlatList
                     data={posts}
+                    style={{ paddingTop: 16 }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }

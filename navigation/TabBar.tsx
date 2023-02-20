@@ -3,21 +3,19 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useState } from "react";
 import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
 import CreateButton from "../assets/icons/CreateButton";
+import SteeringWheel from "../assets/icons/SteeringWheel";
+import { Full } from "../assets/icons/User";
 import { View, Text } from "../components/Themed";
 import Colors from "../constants/Colors";
 
 export default function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
-    const activeColor = Colors.navy["1"];
-    const passiveColor = Colors.navy["2"];
+    const activeColor = Colors.navy["p"];
+    const passiveColor = Colors.navy["1"];
     const activePressedColor = Colors.navy["m"];
-    const textActive = Colors.gray.w;
-    const textPassive = Colors.navy.p;
     const [createColor, setCreateColor] = useState(Colors.gray.w);
 
     const screenWidth = Dimensions.get("window").width;
     const createLayout = {
-        position: "absolute",
-        bottom: 10,
         left: screenWidth / 2 - 40,
     };
 
@@ -47,8 +45,10 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                 return (
                     <Pressable
                         style={({ pressed }) => {
+                            const localStyle = route.name === "Feed" ? styles.feed : styles.profile;
                             return [
                                 styles.tabButton,
+                                localStyle,
                                 {
                                     backgroundColor: isFocused
                                         ? pressed
@@ -63,15 +63,15 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
                         onPress={onPress}
                         onLongPress={longPress}
                         key={route.key}>
-                        <FontAwesome
-                            color={isFocused ? textActive : textPassive}
-                            size={20}
-                            name={route.name == "Feed" ? "rss" : "user"}
-                        />
+                        {route.name === "Feed" ? (
+                            <SteeringWheel height={30} width={30} color={Colors.gray.w} />
+                        ) : (
+                            <Full height={28} width={28} color={Colors.gray.w} />
+                        )}
                         <Text
                             textStyle="lineTitle"
                             styleSize="l"
-                            style={{ color: isFocused ? textActive : textPassive, marginLeft: 8 }}>
+                            style={{ color: Colors.gray.w, marginLeft: 8 }}>
                             {label}
                         </Text>
                     </Pressable>
@@ -101,5 +101,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "row",
     },
-    button: {},
+    feed: {
+        paddingRight: 20,
+    },
+    profile: {
+        paddingLeft: 20,
+    },
+    button: {
+        position: "absolute",
+        bottom: 14,
+    },
 });

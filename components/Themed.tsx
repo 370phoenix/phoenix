@@ -7,6 +7,7 @@ import {
     Pressable,
     Platform,
     Switch,
+    GestureResponderEvent,
 } from "react-native";
 
 import Colors, { BaseColor, BaseColorIndicators } from "../constants/Colors";
@@ -70,8 +71,8 @@ type ButtonOnly = {
     fontSize?: number;
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
-    color: "purple" | "navy" | "gold" | "gray";
-    onPress: (event?: any) => any;
+    color: "purple" | "navy" | "gold" | "gray" | "red" | "green";
+    onPress: (event?: GestureResponderEvent) => void;
 };
 export type ButtonProps = DefaultView["props"] & ButtonOnly;
 
@@ -164,11 +165,7 @@ export function Button({
     const iconSize = short && text !== "" ? 10 : 20;
 
     return (
-        <Pressable
-            onPress={onPress}
-            style={Platform.OS == "ios" ? style : null}
-            onPressIn={onPressIn}
-            onPressOut={onPressOut}>
+        <Pressable onPress={onPress} style={style} onPressIn={onPressIn} onPressOut={onPressOut}>
             <View style={[buttonStyles.button, containerStyles, tempStyles]}>
                 {leftIcon && (
                     <>

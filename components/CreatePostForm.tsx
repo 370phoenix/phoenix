@@ -1,4 +1,3 @@
-import { getAuth } from "firebase/auth/react-native";
 import React, { useState } from "react";
 import {
     TouchableWithoutFeedback,
@@ -16,13 +15,12 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
-import PostValidation from "./PostValidation";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
-import { fire } from "../firebaseConfig";
-import { Message } from "../firebase/auth";
+import Colors from "../constants/Colors";
+import { auth } from "../firebaseConfig";
 
 // stores options for number picker form inputs
 
@@ -74,15 +72,14 @@ export default function CreatePostForm() {
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
     // find current userID
-    const Auth = getAuth(fire);
-    const user = Auth.currentUser;
+    const user = auth.currentUser;
     const userID = user ? user.uid : "No user found";
 
     //error message
-    const [message1, setMessage1] = React.useState<Message | null>(null);
-    const [message2, setMessage2] = React.useState<Message | null>(null);
-    const [message3, setMessage3] = React.useState<Message | null>(null);
-    const [message4, setMessage4] = React.useState<Message | null>(null);
+    const [message1, setMessage1] = React.useState<string | null>(null);
+    const [message2, setMessage2] = React.useState<string | null>(null);
+    const [message3, setMessage3] = React.useState<string | null>(null);
+    const [message4, setMessage4] = React.useState<string | null>(null);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
@@ -92,32 +89,20 @@ export default function CreatePostForm() {
         if (startTime.getTime() === endTime.getTime()) {
             isValid = false;
             console.log("not valid date, no submit");
-            setMessage1({
-                message: "Error: Invalid time window",
-                type: "error",
-            });
+            setMessage1("Error: Invalid time window");
         }
         if (pickupText === "") {
             isValid = false;
             console.log("not valid pickup, no submit");
-            setMessage2({
-                message: "Error: Invalid pickup location",
-                type: "error",
-            });
+            setMessage2("Error: Invalid pickup location");
         }
         if (dropoffText === "") {
             isValid = false;
             console.log("not valid drop, no submit");
-            setMessage3({
-                message: "Error: Invalid dropoff location",
-                type: "error",
-            });
+            setMessage3("Error: Invalid dropoff location");
             if (numFriends >= numSeats) {
                 isValid = false;
-                setMessage4({
-                    message: "Error: Number of friends must be less than number of seats",
-                    type: "error",
-                });
+                setMessage4("Error: Number of friends must be less than number of seats");
             }
         }
 
@@ -140,7 +125,7 @@ export default function CreatePostForm() {
             console.log(Post);
 
             //Verify completion
-            const writeComplete = await writeUserData(Post) ?? false;
+            const writeComplete = (await writeUserData(Post)) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
 
@@ -167,17 +152,7 @@ export default function CreatePostForm() {
                         inputText={pickupText}
                         onChangeText={onChangePickup}
                     />
-                    {message2 ? (
-                        <Text
-                            style={[
-                                styles.message,
-                                { color: message2.type === "error" ? "red" : "blue" },
-                            ]}>
-                            {message2.message}
-                        </Text>
-                    ) : (
-                        ""
-                    )}
+                    {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
                     <LocationButton
                         setLocation={setPickup}
                         inputText={pickupText}
@@ -192,17 +167,7 @@ export default function CreatePostForm() {
                         inputText={dropoffText}
                         onChangeText={onChangeDropoff}
                     />
-                    {message3 ? (
-                        <Text
-                            style={[
-                                styles.message,
-                                { color: message3.type === "error" ? "red" : "blue" },
-                            ]}>
-                            {message3.message}
-                        </Text>
-                    ) : (
-                        ""
-                    )}
+                    {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Round trip
                     </Text>
@@ -220,17 +185,7 @@ export default function CreatePostForm() {
                         onChangeStart={onChangeStartTime}
                         onChangeEnd={onChangeEndTime}
                     />
-                    {message1 ? (
-                        <Text
-                            style={[
-                                styles.message,
-                                { color: message1.type === "error" ? "red" : "blue" },
-                            ]}>
-                            {message1.message}
-                        </Text>
-                    ) : (
-                        ""
-                    )}
+                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         How many friends are you riding with?
                     </Text>
@@ -247,17 +202,7 @@ export default function CreatePostForm() {
                         handlePlus={addNumSeats}
                         handleMinus={deleteNumSeats}
                     />
-                    {message4 ? (
-                        <Text
-                            style={[
-                                styles.message,
-                                { color: message4.type === "error" ? "red" : "blue" },
-                            ]}>
-                            {message4.message}
-                        </Text>
-                    ) : (
-                        ""
-                    )}
+                    {message4 ? <Text style={styles.message}>{message4}</Text> : ""}
 
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Is there anything else your match needs to know?
@@ -265,7 +210,7 @@ export default function CreatePostForm() {
                     <KeyboardAvoidingView
                         behavior={Platform.OS === "ios" ? "padding" : undefined}
                         keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]}/>
+                        <TextArea label="Notes" inputState={[notes, setNotes]} />
                         <Button onPress={onSubmit} color="navy" title="Post" />
                         <Spacer direction="column" size={128} style={{ flex: 1 }} />
                     </KeyboardAvoidingView>
@@ -281,7 +226,7 @@ const styles = StyleSheet.create({
         marginTop: 0,
         height: "100%",
         justifyContent: "flex-end",
-        flexDirection: "column"
+        flexDirection: "column",
     },
     label: {
         marginBottom: 8,
@@ -289,5 +234,6 @@ const styles = StyleSheet.create({
     },
     message: {
         paddingVertical: 10,
+        color: Colors.red.p,
     },
 });
