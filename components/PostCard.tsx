@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable, Platform } from "react-native";
 
 import { View, Text, Spacer } from "./Themed";
 import Colors from "../constants/Colors";
@@ -18,34 +18,39 @@ export default function PostCard({ post }: { post: PostType }) {
     const fEndTime = convertTime(post.endTime);
 
     return (
-        <Pressable onPress={() => navigation.navigate("PostDetails", { post: post })}>
-            <View style={styles.cardContainer}>
-                <View style={styles.body}>
+        <Pressable
+            onPress={() => navigation.navigate("PostDetails", { post: post })}
+            style={({ pressed }) => [
+                styles.cardContainer,
+                {
+                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
+                },
+            ]}>
+            <View style={styles.body}>
+                <Text textStyle="header" styleSize="s" style={styles.text}>
+                    {pickup}
+                </Text>
+                <View style={styles.headerContainer}>
+                    {post.roundTrip ? (
+                        <RoundTrip color={Colors.purple.p} height={20} />
+                    ) : (
+                        <Right color={Colors.purple.p} height={20} />
+                    )}
                     <Text textStyle="header" styleSize="s" style={styles.text}>
-                        {pickup}
-                    </Text>
-                    <View style={styles.headerContainer}>
-                        {post.roundTrip ? (
-                            <RoundTrip color={Colors.purple.p} height={20} />
-                        ) : (
-                            <Right color={Colors.purple.p} height={20} />
-                        )}
-                        <Text textStyle="header" styleSize="s" style={styles.text}>
-                            {dropoff}
-                        </Text>
-                    </View>
-                    <Spacer direction="column" size={16} />
-
-                    <Text textStyle="label" style={styles.text}>
-                        {fDate}
-                    </Text>
-                    <Text textStyle="body" styleSize="s" style={styles.text}>
-                        {fStartTime} - {fEndTime}
+                        {dropoff}
                     </Text>
                 </View>
-                <Spacer direction="row" size={16} />
-                <RiderBadge post={post} />
+                <Spacer direction="column" size={16} />
+
+                <Text textStyle="label" style={styles.text}>
+                    {fDate}
+                </Text>
+                <Text textStyle="body" styleSize="s" style={styles.text}>
+                    {fStartTime} - {fEndTime}
+                </Text>
             </View>
+            <Spacer direction="row" size={16} />
+            <RiderBadge post={post} />
         </Pressable>
     );
 }
@@ -75,9 +80,9 @@ function RiderBadge({ post }: { post: PostType }) {
                     {row.map((rider, index) => (
                         <View style={styles.riderIndicator}>
                             {rider === 1 ? (
-                                <Full key={index} color={Colors.purple.p} height={20} />
+                                <Full key={Math.random()} color={Colors.purple.p} height={20} />
                             ) : (
-                                <Outline key={index} color={Colors.purple.p} height={20} />
+                                <Outline key={Math.random()} color={Colors.purple.p} height={20} />
                             )}
                         </View>
                     ))}
@@ -90,12 +95,20 @@ function RiderBadge({ post }: { post: PostType }) {
 const styles = StyleSheet.create({
     cardContainer: {
         marginBottom: 16,
+        marginHorizontal: 16,
         paddingVertical: 16,
         paddingHorizontal: 16,
-        backgroundColor: Colors.gray.w,
         borderRadius: 8,
         flexDirection: "row",
         alignItems: "center",
+        shadowColor: Platform.OS === "ios" ? Colors.purple.p : undefined,
+        shadowOpacity: 0.5,
+        elevation: 10,
+        shadowOffset: {
+            width: 2,
+            height: 4,
+        },
+        shadowRadius: 4,
     },
     body: { flex: 1 },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
