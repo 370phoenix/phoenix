@@ -2,11 +2,12 @@ import { StyleSheet } from "react-native";
 
 import { Text, View } from "../components/Themed";
 import Colors from "../constants/Colors";
+import MatchList from "../components/MatchList";
 
 export default function MatchesScreen() {
     return (
         <View style={styles.container}>
-            <Text>Matches</Text>
+            <MatchList/>
         </View>
     );
 }
