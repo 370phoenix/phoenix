@@ -22,4 +22,14 @@ type PostType = {
     riders: UserID[];
 };
 
-export { PostID, PostType, Coords };
+
+type UserType = {
+    gender: string;
+    gradyear: string;
+    major: string;
+    phone: string;
+    ridesCompleted: Number;
+    username: string;
+};
+
+export { PostID, PostType, Coords, UserType, UserID };
