@@ -12,6 +12,7 @@ import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
 import { auth, fire } from "../firebaseConfig";
+import { PostID } from "../constants/DataTypes";
 
 const db = getDatabase(fire);
 auth.useDeviceLanguage();
@@ -145,6 +146,9 @@ export type UserInfo = {
     gender: string;
     chillIndex: number | null;
     ridesCompleted: number;
+    posts: PostID[];
+    pending: PostID[];
+    matches: PostID[];
 };
 
 interface WriteUserParams {
@@ -247,6 +251,7 @@ export function validateProfile({
 
         const gradYear = Number(gradString);
         if (userInfo)
+            // Changing Info
             return {
                 type: MessageType.success,
                 data: {
@@ -257,9 +262,13 @@ export function validateProfile({
                     phone: userInfo.phone,
                     chillIndex: userInfo.chillIndex,
                     ridesCompleted: userInfo.ridesCompleted,
+                    posts: userInfo.posts,
+                    pending: userInfo.pending,
+                    matches: userInfo.matches,
                 },
             };
         else if (phone) {
+            // Inital Profile Setup
             return {
                 type: MessageType.success,
                 data: {
@@ -270,6 +279,9 @@ export function validateProfile({
                     phone: phone,
                     chillIndex: null,
                     ridesCompleted: 0,
+                    posts: [],
+                    pending: [],
+                    matches: [],
                 },
             };
         } else return noUserError;

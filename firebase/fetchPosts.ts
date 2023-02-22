@@ -17,7 +17,7 @@ export async function fetchPosts(): Promise<any> {
 
 export async function fetchPost(postId: PostID): Promise<SuccessMessage<any> | ErrorMessage> {
     try {
-        const snapshot = await get(ref(db, "posts/" + String(postId)));
+        const snapshot = await get(ref(db, "posts/" + postId));
         if (snapshot.exists()) return { type: MessageType.success, data: snapshot.val() };
         else return { type: MessageType.error, message: "Error: post missing or not found." };
     } catch (e: any) {

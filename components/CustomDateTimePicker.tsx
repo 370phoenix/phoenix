@@ -1,10 +1,9 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import { StyleSheet, Platform, TouchableOpacity } from "react-native";
+import { convertDate, convertTime } from "../firebase/ConvertPostTypes";
 
 import { Text, View } from "./Themed";
-import ConvertPostTypes from "../firebase/ConvertPostTypes";
-
 
 export default function CustomDateTimePicker({
     onChangeStart,
@@ -66,13 +65,13 @@ export default function CustomDateTimePicker({
             {Platform.OS !== "ios" && (
                 <View>
                     <TouchableOpacity onPress={() => showMode("date", "start")}>
-                        <Text>{ConvertPostTypes.convertDate(start)}</Text>
+                        <Text>{convertDate(start)}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => showMode("time", "start")}>
-                        <Text>{ConvertPostTypes.convertTime(start)}</Text>
+                        <Text>{convertTime(start)}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => showMode("time", "end")}>
-                        <Text>{ConvertPostTypes.convertTime(end)}</Text>
+                        <Text>{convertTime(end)}</Text>
                     </TouchableOpacity>
                 </View>
             )}

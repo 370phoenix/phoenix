@@ -36,16 +36,9 @@ export default function CreatePostForm() {
     const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
     const [isRoundtrip, setIsRoundtrip] = useState(true);
-    const [numFriends, setNumFriends] = useState(0);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = React.useState("");
 
-    const addNumFriends = () => {
-        if (numFriends < 6) setNumFriends(numFriends + 1);
-    };
-    const deleteNumFriends = () => {
-        if (numFriends > 0) setNumFriends(numFriends - 1);
-    };
     const addNumSeats = () => {
         if (numSeats < 6) setNumSeats(numSeats + 1);
     };
@@ -79,7 +72,6 @@ export default function CreatePostForm() {
     const [message1, setMessage1] = React.useState<string | null>(null);
     const [message2, setMessage2] = React.useState<string | null>(null);
     const [message3, setMessage3] = React.useState<string | null>(null);
-    const [message4, setMessage4] = React.useState<string | null>(null);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
@@ -100,10 +92,6 @@ export default function CreatePostForm() {
             isValid = false;
             console.log("not valid drop, no submit");
             setMessage3("Error: Invalid dropoff location");
-            if (numFriends >= numSeats) {
-                isValid = false;
-                setMessage4("Error: Number of friends must be less than number of seats");
-            }
         }
 
         // Push to database
@@ -111,16 +99,15 @@ export default function CreatePostForm() {
             const Post: PostType = {
                 pickup,
                 dropoff,
-                postID: uuid.v4(),
-                numFriends,
-                availableSpots: numSeats,
+                postID: String(uuid.v4()),
+                totalSpots: numSeats,
                 notes,
                 startTime: startTime.getTime(),
                 endTime: endTime.getTime(),
                 roundTrip: isRoundtrip,
-                isMatched: false,
-                isRequested: false,
-                riders: [userID],
+                user: userID,
+                riders: [],
+                pending: [],
             };
             console.log(Post);
 
@@ -187,14 +174,6 @@ export default function CreatePostForm() {
                     />
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
-                        How many friends are you riding with?
-                    </Text>
-                    <NumberPicker
-                        count={numFriends}
-                        handlePlus={addNumFriends}
-                        handleMinus={deleteNumFriends}
-                    />
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
                         How many spots are available?
                     </Text>
                     <NumberPicker
@@ -202,7 +181,6 @@ export default function CreatePostForm() {
                         handlePlus={addNumSeats}
                         handleMinus={deleteNumSeats}
                     />
-                    {message4 ? <Text style={styles.message}>{message4}</Text> : ""}
 
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Is there anything else your match needs to know?

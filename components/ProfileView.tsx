@@ -28,6 +28,9 @@ export default function ProfileView({ user }: props) {
                             gender: data.gender,
                             ridesCompleted: data.ridesCompleted ? data.ridesCompleted : 0,
                             chillIndex: data.chillIndex ? data.chillIndex : null,
+                            posts: data.posts,
+                            pending: data.pending,
+                            matches: data.matches,
                         });
                     }
                 });
