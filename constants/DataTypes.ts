@@ -1,35 +1,22 @@
-type UserID = string;
+export type UserID = string;
 
-type PostID = number[] | string;
+export type PostID = string;
 
-type Coords = {
+export type Coords = {
     lat: number;
     lng: number;
 };
 
-type PostType = {
+export type PostType = {
     pickup: Coords | string;
     dropoff: Coords | string;
     postID: PostID;
-    numFriends: number;
-    availableSpots: number;
+    totalSpots: number;
     notes: string;
     startTime: number;
     endTime: number;
     roundTrip: boolean;
-    isMatched: boolean;
-    isRequested: boolean;
-    riders: UserID[];
+    user: UserID;
+    riders: UserID[] | undefined;
+    pending: UserID[] | undefined;
 };
-
-
-type UserType = {
-    gender: string;
-    gradyear: string;
-    major: string;
-    phone: string;
-    ridesCompleted: Number;
-    username: string;
-};
-
-export { PostID, PostType, Coords, UserType, UserID };

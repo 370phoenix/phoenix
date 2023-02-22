@@ -1,165 +1,155 @@
 {
-  "posts": [
-    {
-      "postID": 1,
-      "dropoffLocation": "Publix",
-      "date": "02/22/2023",
-      "earliestTime": "1PM",
-      "isMatched": false,
-      "isRequested": false,
-      "roundTrip": true,
-      "latestTime": "3PM",
-      "pickupLocation": "Eagle Hall",
-      "numFriends": 1,
-      "remainingSpots": {
-        "capacity": 4,
-        "filled": 2
-      },
-      "rideNotes": [
-        "This is a note example!"
-      ],
-      "riders": [
+    "posts": [
         {
-          "first": "Greg",
-          "gender": "M",
-          "gradYear": 2024,
-          "last": "Fenves",
-          "userID": 10001
+            "postID": "1",
+            "dropoffLocation": "Publix",
+            "date": "02/22/2023",
+            "earliestTime": "1PM",
+            "isMatched": false,
+            "isRequested": false,
+            "roundTrip": true,
+            "latestTime": "3PM",
+            "pickupLocation": "Eagle Hall",
+            "numFriends": 1,
+            "remainingSpots": {
+                "capacity": 4,
+                "filled": 2
+            },
+            "rideNotes": ["This is a note example!"],
+            "riders": [
+                {
+                    "first": "Greg",
+                    "gender": "M",
+                    "gradYear": 2024,
+                    "last": "Fenves",
+                    "userID": 10001
+                },
+                {
+                    "first": "Gordon",
+                    "gender": "T",
+                    "gradYear": 2020,
+                    "last": "Mezli",
+                    "userID": 10002
+                }
+            ]
         },
         {
-          "first": "Gordon",
-          "gender": "T",
-          "gradYear": 2020,
-          "last": "Mezli",
-          "userID": 10002
-        }
-      ]
-    },
-    {
-      "postID": 2,
-      "dropoffLocation": "Airport",
-      "date": "02/19/2023",
-      "earliestTime": "2PM",
-      "isMatched": false,
-      "isRequested": false,
-      "roundTrip": true,
-      "latestTime": "4PM",
-      "pickupLocation": "Alabama Hall",
-      "numFriends": 0,
-      "remainingSpots": {
-        "capacity": 4,
-        "filled": 1
-      },
-      "rideNotes": [
-        "I will be riding with my pet bear"
-      ],
-      "riders": [
-        {
-          "first": "Gordon",
-          "gender": "T",
-          "gradYear": 2020,
-          "last": "Mezli",
-          "userID": 10002
-        }
-      ]
-    },
-    {
-      "postID": 4,
-      "dropoffLocation": "Publix",
-      "date": "02/20/2023",
-      "earliestTime": "1PM",
-      "isMatched": true,
-      "isRequested": false,
-      "roundTrip": true,
-      "latestTime": "3PM",
-      "pickupLocation": "Eagle Hall",
-      "numFriends": 0,
-      "remainingSpots": {
-        "capacity": 2,
-        "filled": 2
-      },
-      "rideNotes": [
-        "This is a note example!"
-      ],
-      "riders": [
-        {
-          "first": "Connie",
-          "gender": "M",
-          "gradYear": 2024,
-          "last": "Lingus",
-          "userID": 10004
+            "postID": "2",
+            "dropoffLocation": "Airport",
+            "date": "02/19/2023",
+            "earliestTime": "2PM",
+            "isMatched": false,
+            "isRequested": false,
+            "roundTrip": true,
+            "latestTime": "4PM",
+            "pickupLocation": "Alabama Hall",
+            "numFriends": 0,
+            "remainingSpots": {
+                "capacity": 4,
+                "filled": 1
+            },
+            "rideNotes": ["I will be riding with my pet bear"],
+            "riders": [
+                {
+                    "first": "Gordon",
+                    "gender": "T",
+                    "gradYear": 2020,
+                    "last": "Mezli",
+                    "userID": 10002
+                }
+            ]
         },
         {
-          "first": "Dooley",
-          "gender": "T",
-          "gradYear": 1969,
-          "last": "Skeleton",
-          "userID": 10003
-        }
-      ]
-    },
-    {
-      "postID": 5,
-      "dropoffLocation": "Dick's",
-      "date": "02/28/2023",
-      "earliestTime": "1PM",
-      "isMatched": false,
-      "isRequested": false,
-      "roundTrip": true,
-      "latestTime": "4:20PM",
-      "pickupLocation": "Cox",
-      "numFriends": 0,
-      "remainingSpots": {
-        "capacity": 2,
-        "filled": 1
-      },
-      "rideNotes": [
-        "This is a note example!"
-      ],
-      "riders": [
-        {
-          "first": "Gordon",
-          "gender": "T",
-          "gradYear": 2020,
-          "last": "Mezli",
-          "userID": 10002
-        }
-      ]
-    },
-    {
-      "postID": 3,
-      "dropoffLocation": "Raoul",
-      "date": "02/18/2023",
-      "earliestTime": "1PM",
-      "isMatched": false,
-      "isRequested": false,
-      "roundTrip": true,
-      "latestTime": "3PM",
-      "pickupLocation": "Publix",
-      "numFriends": 0,
-      "remainingSpots": {
-        "capacity": 4,
-        "filled": 2
-      },
-      "rideNotes": [
-        "Cole Smiff"
-      ],
-      "riders": [
-        {
-          "first": "Greg",
-          "gender": "M",
-          "gradYear": 2024,
-          "last": "Fenves",
-          "userID": 10001
+            "postID": "4",
+            "dropoffLocation": "Publix",
+            "date": "02/20/2023",
+            "earliestTime": "1PM",
+            "isMatched": true,
+            "isRequested": false,
+            "roundTrip": true,
+            "latestTime": "3PM",
+            "pickupLocation": "Eagle Hall",
+            "numFriends": 0,
+            "remainingSpots": {
+                "capacity": 2,
+                "filled": 2
+            },
+            "rideNotes": ["This is a note example!"],
+            "riders": [
+                {
+                    "first": "Connie",
+                    "gender": "M",
+                    "gradYear": 2024,
+                    "last": "Lingus",
+                    "userID": 10004
+                },
+                {
+                    "first": "Dooley",
+                    "gender": "T",
+                    "gradYear": 1969,
+                    "last": "Skeleton",
+                    "userID": 10003
+                }
+            ]
         },
         {
-          "first": "Gordon",
-          "gender": "T",
-          "gradYear": 2020,
-          "last": "Mezli",
-          "userID": 10002
+            "postID": "5",
+            "dropoffLocation": "Dick's",
+            "date": "02/28/2023",
+            "earliestTime": "1PM",
+            "isMatched": false,
+            "isRequested": false,
+            "roundTrip": true,
+            "latestTime": "4:20PM",
+            "pickupLocation": "Cox",
+            "numFriends": 0,
+            "remainingSpots": {
+                "capacity": 2,
+                "filled": 1
+            },
+            "rideNotes": ["This is a note example!"],
+            "riders": [
+                {
+                    "first": "Gordon",
+                    "gender": "T",
+                    "gradYear": 2020,
+                    "last": "Mezli",
+                    "userID": 10002
+                }
+            ]
+        },
+        {
+            "postID": "3",
+            "dropoffLocation": "Raoul",
+            "date": "02/18/2023",
+            "earliestTime": "1PM",
+            "isMatched": false,
+            "isRequested": false,
+            "roundTrip": true,
+            "latestTime": "3PM",
+            "pickupLocation": "Publix",
+            "numFriends": 0,
+            "remainingSpots": {
+                "capacity": 4,
+                "filled": 2
+            },
+            "rideNotes": ["Cole Smiff"],
+            "riders": [
+                {
+                    "first": "Greg",
+                    "gender": "M",
+                    "gradYear": 2024,
+                    "last": "Fenves",
+                    "userID": 10001
+                },
+                {
+                    "first": "Gordon",
+                    "gender": "T",
+                    "gradYear": 2020,
+                    "last": "Mezli",
+                    "userID": 10002
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
