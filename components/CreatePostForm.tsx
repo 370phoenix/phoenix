@@ -18,9 +18,9 @@ import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import { PostType, Coords } from "../constants/DataTypes";
-import writeUserData from "../firebase/makePosts";
 import Colors from "../constants/Colors";
 import { auth } from "../firebaseConfig";
+import { createPost } from "../firebase/makePosts";
 
 // stores options for number picker form inputs
 
@@ -112,14 +112,9 @@ export default function CreatePostForm() {
             console.log(post);
 
             //Verify completion
-            const writeComplete = (await writeUserData(post, user)) ?? false;
+            const writeComplete = (await createPost(post, user)) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
-
-            //const writeComplete = (await writeUserData(Post)) ?? false;
-            // if(writeComplete){
-            //     // alert("Write to database complete!")
-            // }
         }
     };
 

@@ -8,11 +8,11 @@ import {
 
 import { createContext } from "react";
 import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
+import { get, getDatabase, onValue, ref, remove, set, Unsubscribe } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
 import { auth, fire } from "../firebaseConfig";
-import { PostID } from "../constants/DataTypes";
+import { PostID, UserID } from "../constants/DataTypes";
 
 const db = getDatabase(fire);
 auth.useDeviceLanguage();
@@ -149,6 +149,7 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
+    requests: [UserID, PostID][];
 };
 
 interface WriteUserParams {
@@ -171,24 +172,24 @@ export async function writeUser({
 export async function getUserUpdates(
     user: User,
     onUpdate: (data: any) => void
-): Promise<SuccessMessage | ErrorMessage> {
+): Promise<SuccessMessage<Unsubscribe> | ErrorMessage> {
     try {
         const userRef = ref(db, "users/" + user.uid);
-        onValue(userRef, (snapshot) => {
+        const unsub = onValue(userRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 onUpdate(data);
             }
         });
-        return { message: "Listener attached.", type: MessageType.success };
+        return { message: "Listener attached.", type: MessageType.success, data: unsub };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
 }
 
-export async function getUserOnce(user: User): Promise<Message<UserInfo>> {
+export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     try {
-        const userRef = ref(db, "users/" + user.uid);
+        const userRef = ref(db, "users/" + userID);
         const snapshot = await get(userRef);
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
@@ -265,6 +266,7 @@ export function validateProfile({
                     posts: userInfo.posts ? userInfo.posts : [],
                     pending: userInfo.pending ? userInfo.pending : [],
                     matches: userInfo.matches ? userInfo.matches : [],
+                    requests: userInfo.requests ? userInfo.requests : [],
                 },
             };
         else if (phone) {
@@ -282,6 +284,7 @@ export function validateProfile({
                     posts: [],
                     pending: [],
                     matches: [],
+                    requests: [],
                 },
             };
         } else return noUserError;
