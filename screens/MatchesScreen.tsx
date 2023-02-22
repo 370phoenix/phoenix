@@ -3,11 +3,21 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../components/Themed";
 import Colors from "../constants/Colors";
 import MatchList from "../components/MatchList";
+import { getAuth } from "firebase/auth/react-native";
 
 export default function MatchesScreen() {
+    const auth = getAuth();
+    if (!auth.currentUser)
+        return (
+            <View style={styles.container}>
+                <Text textStyle="label" style={styles.err}>
+                    Could not find current user
+                </Text>
+            </View>
+        );
     return (
         <View style={styles.container}>
-            <MatchList/>
+            <MatchList user={auth.currentUser} />
         </View>
     );
 }
@@ -15,7 +25,7 @@ export default function MatchesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: Colors.gray.w,
         marginTop: -20,
     },
     title: {
@@ -26,5 +36,8 @@ const styles = StyleSheet.create({
         marginVertical: 30,
         height: 1,
         width: "80%",
+    },
+    err: {
+        color: Colors.red.p,
     },
 });

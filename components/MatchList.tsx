@@ -1,89 +1,78 @@
 import { useState, useEffect } from "react";
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
 
-import PostCard from "./PostCard";
 import MatchCard from "./MatchCard";
 import { View, Text } from "./Themed";
-import { fetchPosts, fetchUsers } from "../firebase/fetchPosts";
 import Colors from "../constants/Colors";
-import matches from "../constants/MatchTestData.json";
+import { PostID, UserID } from "../constants/DataTypes";
+import { getUserOnce, MessageType, UserInfo } from "../firebase/auth";
+import { User } from "firebase/auth/react-native";
 
-
-export default function MatchList(){
+type Props = {
+    user: User;
+};
+export default function MatchList({ user }: Props) {
     const [isLoading, setLoading] = useState(true);
-    const [posts, setPosts] = useState<[string, any][]>([]);
-    const [refreshing, setRefreshing] = useState(false);
-    const [isMatch, setIsMatch] = useState(true);
-    const [users, setUsers] = useState<[string, any][]>([]);
-
-
-    const fetchData = async () => {
-        if ((posts.length === 0 && isLoading) || refreshing) {
-            const res = await fetchPosts();
-            if (typeof res !== "string") setPosts(Object.entries(res));
-            setLoading(false);
-        }
-    };
-
-    const fetchUserData = async () =>{
-        const res = await fetchUsers();
-        if (typeof res !== "string") setUsers(Object.entries(res));
-    }
-
-    // pull down to refresh, updates posts
-    const onRefresh: any = async () => {
-        setLoading(true);
-        setRefreshing(true);
-        await fetchData();
-        setRefreshing(false);
-        setLoading(false);
-    };
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [requests, setRequests] = useState<[UserID] | null>(null);
+    const [matches, setMatches] = useState<[PostID] | null>(null);
+    const [pending, setPending] = useState<[PostID] | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchData();
-    }, [posts, isLoading]);
+        loadUserInfo();
+    }, [user]);
 
+    // Update the arrays with info from user
+    useEffect(() => {
+        if (!userInfo) return;
 
-if(isMatch) {
-    return (
-        <View style={{ marginTop: 20}}>
-            <Text textStyle="title" styleSize="l" style={styles.title}>Requests </Text>
-            <FlatList
-                data={posts}
-                style={{ paddingTop: 16 }}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
-                }
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => <MatchCard user={item[1]} />}
+        const p = userInfo.pending ? userInfo.pending : [];
+    }, [userInfo]);
+
+    // Load the user info for the current user
+    const loadUserInfo = async () => {
+        const res = await getUserOnce(user);
+        if (res.type !== MessageType.success) setMessage(res.message);
+        else if (!res.data) setMessage("Could not locate user data.");
+        else setUserInfo(res.data);
+    };
+
+    if (!isLoading) {
+        return (
+            <View style={{ marginTop: 20 }}>
+                <Text textStyle="title" styleSize="l" style={styles.title}>
+                    Requests{" "}
+                </Text>
+                <FlatList
+                    data={posts}
+                    style={{ paddingTop: 16 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => <MatchCard user={item[1]} />}
                 />
-        </View>
-
-
-    )
-
+            </View>
+        );
+    } else
+        return (
+            <View style={{ marginTop: 0 }}>
+                {
+                    <Text style={{ color: "white" }} textStyle="title" styleSize="l">
+                        Loading...
+                    </Text>
+                }
+            </View>
+        );
 }
-else
-return (
-    <View style={{ marginTop: 0}}>
-        {
-        <Text style={{ color: "white" }} textStyle="title" styleSize="l">
-            No matches yet
-        </Text>
-        }   
-
-    </View>
-);
-};
-
 
 const styles = StyleSheet.create({
-title: {
-    paddingHorizontal: 16,
-    paddingVertical: 0,
-    marginBottom: 0,
-    marginTop: 8,
-    color: Colors.gray[1]
-}
-
-})
+    title: {
+        paddingHorizontal: 16,
+        paddingVertical: 0,
+        marginBottom: 0,
+        marginTop: 8,
+        color: Colors.gray[1],
+    },
+});

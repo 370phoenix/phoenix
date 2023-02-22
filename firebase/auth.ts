@@ -182,7 +182,7 @@ export async function getUserUpdates(
     }
 }
 
-export async function getUserOnce(user: User): Promise<Message<any>> {
+export async function getUserOnce(user: User): Promise<Message<UserInfo>> {
     try {
         const userRef = ref(db, "users/" + user.uid);
         const snapshot = await get(userRef);
