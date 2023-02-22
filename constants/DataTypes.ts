@@ -17,6 +17,6 @@ export type PostType = {
     endTime: number;
     roundTrip: boolean;
     user: UserID;
-    riders: UserID[];
-    pending: UserID[];
+    riders: UserID[] | undefined;
+    pending: UserID[] | undefined;
 };

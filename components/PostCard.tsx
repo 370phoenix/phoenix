@@ -25,7 +25,8 @@ export default function PostCard({ post }: { post: PostType }) {
                 {
                     backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
                 },
-            ]}>
+            ]}
+            key={post.postID}>
             <View style={styles.body}>
                 <Text textStyle="header" styleSize="s" style={styles.text}>
                     {pickup}
@@ -57,13 +58,14 @@ export default function PostCard({ post }: { post: PostType }) {
 
 function RiderBadge({ post }: { post: PostType }) {
     const total = post.totalSpots;
-    const filled = post.riders.length + post.pending.length;
+    const filled =
+        (post.riders ? post.riders.length : 0) + (post.pending ? post.pending.length : 0) + 1;
     const rows = new Array<Array<number>>(total > 4 ? 2 : 1);
     rows[0] = new Array(total > 4 ? 4 : total);
     rows[0].fill(0);
 
-    if (filled > 4) rows[0].fill(1);
-    else rows[0].fill(1, 0, total - filled);
+    if (filled >= 4) rows[0].fill(1);
+    else rows[0].fill(1, 0, filled);
 
     if (rows.length === 2) {
         const temp = rows[0];

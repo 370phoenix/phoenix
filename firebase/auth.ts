@@ -146,9 +146,9 @@ export type UserInfo = {
     gender: string;
     chillIndex: number | null;
     ridesCompleted: number;
-    posts: PostID[];
-    pending: PostID[];
-    matches: PostID[];
+    posts: PostID[] | undefined;
+    pending: PostID[] | undefined;
+    matches: PostID[] | undefined;
 };
 
 interface WriteUserParams {
@@ -262,9 +262,9 @@ export function validateProfile({
                     phone: userInfo.phone,
                     chillIndex: userInfo.chillIndex,
                     ridesCompleted: userInfo.ridesCompleted,
-                    posts: userInfo.posts,
-                    pending: userInfo.pending,
-                    matches: userInfo.matches,
+                    posts: userInfo.posts ? userInfo.posts : [],
+                    pending: userInfo.pending ? userInfo.pending : [],
+                    matches: userInfo.matches ? userInfo.matches : [],
                 },
             };
         else if (phone) {

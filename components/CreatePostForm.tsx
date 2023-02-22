@@ -174,7 +174,7 @@ export default function CreatePostForm() {
                     />
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
-                        How many spots are available?
+                        How many free spots in the car?
                     </Text>
                     <NumberPicker
                         count={numSeats}
