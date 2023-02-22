@@ -96,7 +96,7 @@ export default function CreatePostForm() {
 
         // Push to database
         if (isValid) {
-            const Post: PostType = {
+            const post: PostType = {
                 pickup,
                 dropoff,
                 postID: String(uuid.v4()),
@@ -109,10 +109,10 @@ export default function CreatePostForm() {
                 riders: [],
                 pending: [],
             };
-            console.log(Post);
+            console.log(post);
 
             //Verify completion
-            const writeComplete = (await writeUserData(Post)) ?? false;
+            const writeComplete = (await writeUserData(post, user)) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
 
