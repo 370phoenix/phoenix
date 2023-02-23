@@ -16,26 +16,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
     const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const [riders, setRiders] = useState<UserInfo[]>([]);
 
     useEffect(() => {
-        // async function fetchRiders() {
-        //     await post?.riders?.forEach(async (uid) => {
-        //         const res = await getUserOnce(uid);
-        //         if (res.type === MessageType.error) setMessage(res.message);
-        //         if (res.type !== MessageType.success)
-        //             throw Error(`Error fetching user data: ${res.message}`);
-        //         const userInfo = res.data;
-        
-        //         if (!userInfo) throw new Error("Could not find user info.");
-        //         riders.push(userInfo);
-        //     });
-        //     console.log(riders);
-        //     setRiders(riders);
-        // // };
-        
-        // fetchRiders();
-
         const getPostInfo = async (postID: PostID) => {
             const res = await fetchPost(postID);
             if (res.type === MessageType.error) setMessage(res.message);
@@ -58,13 +40,15 @@ export default function DetailsModal({ route }: Props) {
                     {message}
                 </Text>
             )}
-            {post && <MoreInfo post={post} matches={riders} />}
+            {post && <MoreInfo post={post} />}
         </ScrollView>
     );
 }
 
-function MoreInfo({ post, matches }: { post: PostType; matches: UserInfo[] }) {
+function MoreInfo({ post }: { post: PostType }) {
     const [matched, setMatched] = useState(false);
+    const [matches, setMatches] = useState<UserInfo[]>([]);
+    const [message, setMessage] = useState<string | null>(null);
     const onChangeMatched = () => setMatched(!matched);
 
     const pickup = convertLocation(post.pickup);
@@ -73,6 +57,22 @@ function MoreInfo({ post, matches }: { post: PostType; matches: UserInfo[] }) {
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);
     const riders = post.riders;
+
+    useEffect(() => {
+        async function fetchRiders() {
+            if (riders === undefined) return;
+            await riders.forEach(async (uid) => {
+                const res = await getUserOnce(uid);
+                if (res.type === MessageType.error) setMessage(res.message);
+                if (res.type !== MessageType.success)
+                    throw Error(`Error fetching user data: ${res.message}`);
+                const userInfo = res.data;
+                if (!userInfo) throw new Error("Could not find user info.");
+                else setMatches([...matches, userInfo]);
+            });
+        }
+        fetchRiders();
+    }, []);
 
     return (
         <View style={styles.infoContainer}>
@@ -126,6 +126,11 @@ function MoreInfo({ post, matches }: { post: PostType; matches: UserInfo[] }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
+            {message && (
+                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
+                    {message}
+                </Text>
+            )}
             <UserList matches={matches} />
             <Spacer direction="column" size={48} />
             <Button
@@ -139,19 +144,14 @@ function MoreInfo({ post, matches }: { post: PostType; matches: UserInfo[] }) {
 }
 
 function UserList({ matches }: { matches: UserInfo[] }) {
-    return (<View style={{ marginTop: 20 }}>
-    {typeof matches !== "string" && matches.length !== 0 && (
-        <FlatList
-            data={matches}
-            style={{ paddingTop: 16 }}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => <UserDetails user={item} />}
-        />
-    )}
-</View>);
+    const MatchCards = matches.map((match) => {
+        return <UserDetails user={match} key={Math.random()} />;
+    });
+
+    return <View style={{ marginTop: 20 }}>{MatchCards}</View>;
 }
 
-function UserDetails({user} : {user: UserInfo}) {
+function UserDetails({ user }: { user: UserInfo }) {
     return (
         <View>
             <Text textStyle="header">Rider Profile</Text>
@@ -160,7 +160,7 @@ function UserDetails({user} : {user: UserInfo}) {
                 Major
             </Text>
             <Text textStyle="body" styleSize="s">
-                {/* {userInfo.major} */}
+                {user.major}
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
@@ -169,7 +169,7 @@ function UserDetails({user} : {user: UserInfo}) {
                         Gender
                     </Text>
                     <Text textStyle="body" styleSize="s">
-                        {/* {userInfo.gender} */}
+                        {user.gender}
                     </Text>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -177,7 +177,7 @@ function UserDetails({user} : {user: UserInfo}) {
                         Grad Year
                     </Text>
                     <Text textStyle="body" styleSize="s">
-                        {/* {userInfo.gradYear} */}
+                        {user.gradYear}
                     </Text>
                 </View>
             </View>
