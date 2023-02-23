@@ -12,7 +12,7 @@ import { get, getDatabase, onValue, ref, remove, set } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
 import { auth, fire } from "../firebaseConfig";
-import { PostID } from "../constants/DataTypes";
+import { PostID, UserID } from "../constants/DataTypes";
 
 const db = getDatabase(fire);
 auth.useDeviceLanguage();
@@ -156,12 +156,24 @@ interface WriteUserParams {
     userInfo: UserInfo;
 }
 
+type Clean<T> = {
+    [K in keyof T]?: any;
+};
+
+function cleanUndefined<T extends Object>(obj: T): T {
+    let clean: Clean<T> = {};
+    for (const k in obj) {
+        if (obj[k]) clean[k] = obj[k];
+    }
+    return clean as T;
+}
+
 export async function writeUser({
     userId,
     userInfo,
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        await set(ref(db, "users/" + userId), userInfo);
+        await set(ref(db, "users/" + userId), cleanUndefined(userInfo));
         return { type: MessageType.success };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -186,9 +198,9 @@ export async function getUserUpdates(
     }
 }
 
-export async function getUserOnce(user: User): Promise<Message<any>> {
+export async function getUserOnce(userId: UserID): Promise<Message<UserInfo>> {
     try {
-        const userRef = ref(db, "users/" + user.uid);
+        const userRef = ref(db, "users/" + userId);
         const snapshot = await get(userRef);
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };

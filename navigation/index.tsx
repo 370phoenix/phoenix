@@ -73,7 +73,7 @@ function RootNavigator() {
             if (user) {
                 // User is signed in
                 try {
-                    const userInfo = await getUserOnce(user);
+                    const userInfo = await getUserOnce(user.uid);
                     if (userInfo.type === MessageType.info)
                         authDispatch({ type: "COLLECT_INFO", user: user });
                     else authDispatch({ type: "SIGN_IN", user: user });
