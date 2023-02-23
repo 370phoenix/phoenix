@@ -17,18 +17,21 @@ export default async function writeUserData(
             ...post,
         });
 
-        const r1 = await getUserOnce(user);
+        const r1 = await getUserOnce(user.uid);
         if (r1.type !== MessageType.success) throw Error(`Error fetching user data: ${r1.message}`);
 
         let userInfo = r1.data;
-        const riders: Array<PostID> = userInfo["riders"];
-        riders.push(post.postID);
-        userInfo["riders"] = riders;
+        if (!userInfo) throw new Error("Could not find user info.");
+
+        const posts: Array<PostID> = userInfo.posts ? userInfo.posts : [];
+        posts.push(post.postID);
+        userInfo.posts = posts;
         const r2 = await writeUser({ userId: user.uid, userInfo });
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
         return true;
     } catch (e: any) {
+        console.log(`Error in Write user Data: ${e.message}`);
         return "Error: " + e.message;
     }
 }

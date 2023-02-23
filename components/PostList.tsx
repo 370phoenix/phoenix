@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
-import { View, Text, Spacer } from "./Themed";
+import { View, Text } from "./Themed";
 import { fetchPosts } from "../firebase/fetchPosts";
 import Colors from "../constants/Colors";
+import { PostType } from "../constants/DataTypes";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
-    const [posts, setPosts] = useState<[string, any][]>([]);
+    const [posts, setPosts] = useState<PostType[]>([]);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchData = async () => {
         if ((posts.length === 0 && isLoading) || refreshing) {
             const res = await fetchPosts();
-            if (typeof res !== "string") setPosts(Object.entries(res));
+            if (typeof res !== "string") setPosts(res);
             setLoading(false);
         }
     };
@@ -47,7 +48,7 @@ export default function PostList() {
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => <PostCard post={item[1]} />}
+                    renderItem={({ item }) => <PostCard post={item} />}
                 />
             )}
         </View>

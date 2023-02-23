@@ -1,48 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { User } from "firebase/auth/react-native";
-import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
-import { getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
+import { UserInfo } from "../firebase/auth";
 import { View, Text, Spacer, Button } from "./Themed";
 
-type props = {
+type Props = {
     user: User | null | undefined;
+    userInfo: UserInfo | null;
+    message: string | null;
 };
-export default function ProfileView({ user }: props) {
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-    const [message, setMessage] = useState("Loading user info...");
-
+export default function ProfileView({ user, userInfo, message }: Props) {
     const navigation = useNavigation();
-
-    useEffect(() => {
-        const setUpdates = async () => {
-            if (user) {
-                const res = await getUserUpdates(user, (data: any) => {
-                    if (data.username && data.phone && data.gradYear && data.major && data.gender) {
-                        setUserInfo({
-                            username: data.username,
-                            phone: data.phone,
-                            gradYear: data.gradYear,
-                            major: data.major,
-                            gender: data.gender,
-                            ridesCompleted: data.ridesCompleted ? data.ridesCompleted : 0,
-                            chillIndex: data.chillIndex ? data.chillIndex : null,
-                            posts: data.posts,
-                            pending: data.pending,
-                            matches: data.matches,
-                        });
-                    }
-                });
-
-                if (res.type === MessageType.error) setMessage(res.message);
-            } else {
-                setMessage("No user found");
-            }
-        };
-
-        setUpdates();
-    }, []);
 
     return (
         <View style={styles.container}>
