@@ -5,10 +5,11 @@ import { ErrorMessage, MessageType, SuccessMessage } from "./auth";
 
 const db = getDatabase(fire);
 
-export async function fetchPosts(): Promise<PostType[]> {
+export async function fetchPosts(): Promise<PostType[] | string> {
     try {
         const response = await get(ref(db, "posts"));
-        const data = response.val();
+        const data: PostType[] = Object.values(response.val());
+        data.sort((a, b) => a.startTime - b.startTime);
         return data;
     } catch (e: any) {
         return e.message;
