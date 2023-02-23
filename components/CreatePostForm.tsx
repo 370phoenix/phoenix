@@ -106,7 +106,7 @@ export default function CreatePostForm() {
                 endTime: endTime.getTime(),
                 roundTrip: isRoundtrip,
                 user: userID,
-                riders: [],
+                riders: [userID],
                 pending: [],
             };
             console.log(post);

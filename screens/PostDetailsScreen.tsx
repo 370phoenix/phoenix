@@ -1,6 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, FlatList } from "react-native";
 
 import { Right } from "../assets/icons/Arrow";
 import RoundTrip from "../assets/icons/RoundTrip";
@@ -8,7 +8,7 @@ import { View, Text, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { PostID, PostType } from "../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
-import { MessageType } from "../firebase/auth";
+import { MessageType, UserInfo, getUserOnce } from "../firebase/auth";
 import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
 
@@ -16,9 +16,26 @@ type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
     const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    
+    const [riders, setRiders] = useState<UserInfo[]>([]);
 
     useEffect(() => {
+        // async function fetchRiders() {
+        //     await post?.riders?.forEach(async (uid) => {
+        //         const res = await getUserOnce(uid);
+        //         if (res.type === MessageType.error) setMessage(res.message);
+        //         if (res.type !== MessageType.success)
+        //             throw Error(`Error fetching user data: ${res.message}`);
+        //         const userInfo = res.data;
+        
+        //         if (!userInfo) throw new Error("Could not find user info.");
+        //         riders.push(userInfo);
+        //     });
+        //     console.log(riders);
+        //     setRiders(riders);
+        // // };
+        
+        // fetchRiders();
+
         const getPostInfo = async (postID: PostID) => {
             const res = await fetchPost(postID);
             if (res.type === MessageType.error) setMessage(res.message);
@@ -41,12 +58,12 @@ export default function DetailsModal({ route }: Props) {
                     {message}
                 </Text>
             )}
-            {post && <MoreInfo post={post} />}
+            {post && <MoreInfo post={post} matches={riders} />}
         </ScrollView>
     );
 }
 
-function MoreInfo({ post }: { post: PostType }) {
+function MoreInfo({ post, matches }: { post: PostType; matches: UserInfo[] }) {
     const [matched, setMatched] = useState(false);
     const onChangeMatched = () => setMatched(!matched);
 
@@ -55,6 +72,8 @@ function MoreInfo({ post }: { post: PostType }) {
     const date = convertDate(post.startTime);
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);
+    const riders = post.riders;
+
     return (
         <View style={styles.infoContainer}>
             <Spacer direction="column" size={16} />
@@ -82,9 +101,9 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
                 Pickup window: {startTime}-{endTime}
             </Text>
-            {post.riders ? (
+            {riders ? (
                 <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {post.riders.length + 1}/{post.totalSpots} spots filled
+                    {riders.length + 1}/{post.totalSpots} spots filled
                 </Text>
             ) : (
                 <></>
@@ -107,7 +126,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
-            <UserDetails />
+            <UserList matches={matches} />
             <Spacer direction="column" size={48} />
             <Button
                 title={matched ? "Cancel Match" : "Match!"}
@@ -119,8 +138,20 @@ function MoreInfo({ post }: { post: PostType }) {
     );
 }
 
-function UserDetails() {
+function UserList({ matches }: { matches: UserInfo[] }) {
+    return (<View style={{ marginTop: 20 }}>
+    {typeof matches !== "string" && matches.length !== 0 && (
+        <FlatList
+            data={matches}
+            style={{ paddingTop: 16 }}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => <UserDetails user={item} />}
+        />
+    )}
+</View>);
+}
 
+function UserDetails({user} : {user: UserInfo}) {
     return (
         <View>
             <Text textStyle="header">Rider Profile</Text>
@@ -129,7 +160,7 @@ function UserDetails() {
                 Major
             </Text>
             <Text textStyle="body" styleSize="s">
-                Placeholder
+                {/* {userInfo.major} */}
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
@@ -138,7 +169,7 @@ function UserDetails() {
                         Gender
                     </Text>
                     <Text textStyle="body" styleSize="s">
-                        Placeholder
+                        {/* {userInfo.gender} */}
                     </Text>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -146,7 +177,7 @@ function UserDetails() {
                         Grad Year
                     </Text>
                     <Text textStyle="body" styleSize="s">
-                        Placeholder
+                        {/* {userInfo.gradYear} */}
                     </Text>
                 </View>
             </View>
