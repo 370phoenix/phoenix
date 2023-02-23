@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FlatList, RefreshControl, StyleSheet } from "react-native";
 
 import RequestCard from "./RequestCard";
+import MatchCard from "./MatchCard";
 import { View, Text } from "./Themed";
 import Colors from "../constants/Colors";
 import { PostID, UserID } from "../constants/DataTypes";
@@ -32,7 +33,7 @@ export default function MatchList({ user }: Props) {
         updateArrrays();
     }, [userInfo]);
 
-    useEffect(() => {});
+    useEffect(() => { });
 
     const updateArrrays = () => {
         if (!userInfo) return;
@@ -80,6 +81,17 @@ export default function MatchList({ user }: Props) {
                             posterID={user.uid}
                         />
                     )}
+                />
+                <Text textStyle="title" styleSize="l" style={styles.title}>
+                    Matches
+                </Text>
+                <FlatList
+                    data={matches}
+                    style={{ paddingTop: 16 }}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) =>
+                        <MatchCard post={item[1]} />
+                    }
                 />
             </View>
         );
