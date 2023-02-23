@@ -79,7 +79,9 @@ function MoreInfo({ post }: { post: PostType }) {
 
     useEffect(() => {
         async function fetchRiders() {
-            const ids = post.riders ? post.riders : null;
+            const ids = post.riders ? post.riders : [];
+            if(!ids.includes(post.user)) ids.push(post.user);
+            console.log(ids);
             if (riders) return;
             if (!ids) return;
 
@@ -109,10 +111,12 @@ function MoreInfo({ post }: { post: PostType }) {
                 Ride Information
             </Text>
             <Spacer direction="column" size={16} />
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text textStyle="header" styleSize="s">
                     {pickup}
                 </Text>
+                <Spacer direction="row" size={4} />
+
                 {post.roundTrip ? (
                     <RoundTrip color={Colors.gray.b} height={20} />
                 ) : (
@@ -143,7 +147,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 ) : (
                     <Right color={Colors.gray.b} height={20} />
                 )}
-                <Spacer direction="row" size={8} />
+                <Spacer direction="row" size={4} />
                 <Text textStyle="lineTitle">{post.roundTrip ? "ROUND TRIP" : "ONE WAY"}</Text>
             </View>
             <Spacer direction="column" size={16} />

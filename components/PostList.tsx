@@ -3,9 +3,9 @@ import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
 import { View, Text } from "./Themed";
-import { fetchPosts } from "../firebase/fetchPosts";
 import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
+import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export default function PostList() {
     }, [posts, isLoading]);
 
     return (
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 24 }}>
             {typeof posts === "string" && (
                 <Text style={{ color: Colors.red.p }} textStyle="label" styleSize="l">
                     Failed to retrieve posts
