@@ -2,18 +2,21 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
 
+import { Right } from "../assets/icons/Arrow";
+import RoundTrip from "../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { PostID, PostType } from "../constants/DataTypes";
-import { MessageType } from "../firebase/auth";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
+import { MessageType } from "../firebase/auth";
 import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
-    const [post, setPost] = useState<PostType | null>(null);
+    const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    
 
     useEffect(() => {
         const getPostInfo = async (postID: PostID) => {
@@ -54,25 +57,58 @@ function MoreInfo({ post }: { post: PostType }) {
     const endTime = convertTime(post.endTime);
     return (
         <View style={styles.infoContainer}>
-            <Text textStyle="header">Ride Information</Text>
             <Spacer direction="column" size={16} />
-            <Text textStyle="label">
-                {pickup} {"->"} {dropoff}
-            </Text>
-            <Text>{date}</Text>
-            <Text>
-                {startTime} - {endTime}
+            <Text textStyle="header" styleSize="l">
+                Ride Information
             </Text>
             <Spacer direction="column" size={16} />
-            <Text textStyle="label">{post.roundTrip ? "Round trip" : "One way"}</Text>
+            <View style={{ flexDirection: "row" }}>
+                <Text textStyle="header" styleSize="s">
+                    {pickup}
+                </Text>
+                {post.roundTrip ? (
+                    <RoundTrip color={Colors.gray.b} height={20} />
+                ) : (
+                    <Right color={Colors.gray.b} height={20} />
+                )}
+            </View>
+            <Text textStyle="header" styleSize="s">
+                {dropoff}
+            </Text>
             <Spacer direction="column" size={16} />
-            <Text>Notes: {post.notes}</Text>
-            <Spacer direction="column" size={40} />
-            <Text textStyle="header">Rider Profiles</Text>
+            <Text textStyle="label" styleSize="l">
+                {date}
+            </Text>
+            <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
+                Pickup window: {startTime}-{endTime}
+            </Text>
+            {post.riders ? (
+                <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
+                    {post.riders.length + 1}/{post.totalSpots} spots filled
+                </Text>
+            ) : (
+                <></>
+            )}
             <Spacer direction="column" size={16} />
-            <Text textStyle="label">Profile 1</Text>
-            <Text textStyle="label">Profile 2</Text>
-            <Spacer direction="column" size={40} />
+            <View style={{ flexDirection: "row" }}>
+                {post.roundTrip ? (
+                    <RoundTrip color={Colors.gray.b} height={20} />
+                ) : (
+                    <Right color={Colors.gray.b} height={20} />
+                )}
+                <Spacer direction="row" size={8} />
+                <Text textStyle="lineTitle">{post.roundTrip ? "ROUND TRIP" : "ONE WAY"}</Text>
+            </View>
+            <Spacer direction="column" size={16} />
+            <Text textStyle="label" styleSize="l">
+                Notes:
+            </Text>
+            <Text textStyle="body" styleSize="s">
+                {post.notes}
+            </Text>
+            <Spacer direction="column" size={48} />
+            <UserDetails />
+            <Spacer direction="column" size={48} />
             <Button
                 title={matched ? "Cancel Match" : "Match!"}
                 onPress={onChangeMatched}
@@ -83,30 +119,49 @@ function MoreInfo({ post }: { post: PostType }) {
     );
 }
 
+function UserDetails() {
+
+    return (
+        <View>
+            <Text textStyle="header">Rider Profile</Text>
+            <Spacer direction="column" size={16} />
+            <Text textStyle="label" styleSize="l">
+                Major
+            </Text>
+            <Text textStyle="body" styleSize="s">
+                Placeholder
+            </Text>
+            <Spacer direction="column" size={16} />
+            <View style={{ flexDirection: "row" }}>
+                <View style={{ flex: 1 }}>
+                    <Text textStyle="label" styleSize="l">
+                        Gender
+                    </Text>
+                    <Text textStyle="body" styleSize="s">
+                        Placeholder
+                    </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                    <Text textStyle="label" styleSize="l">
+                        Grad Year
+                    </Text>
+                    <Text textStyle="body" styleSize="s">
+                        Placeholder
+                    </Text>
+                </View>
+            </View>
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
-    modalView: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        backgroundColor: Colors.gray.w,
-        padding: 32,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
     background: {
         width: "100%",
-        height: 96,
     },
     container: {
         backgroundColor: Colors.gray[4],
     },
     infoContainer: {
-        paddingTop: 32,
         paddingHorizontal: 16,
     },
 });

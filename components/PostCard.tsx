@@ -80,11 +80,11 @@ function RiderBadge({ post }: { post: PostType }) {
             {rows.map((row, index) => (
                 <View style={styles.riderBadge} key={`row-${index}`}>
                     {row.map((rider, index) => (
-                        <View style={styles.riderIndicator}>
+                        <View style={styles.riderIndicator} key={Math.random()}>
                             {rider === 1 ? (
-                                <Full key={Math.random()} color={Colors.purple.p} height={20} />
+                                <Full color={Colors.purple.p} height={20} />
                             ) : (
-                                <Outline key={Math.random()} color={Colors.purple.p} height={20} />
+                                <Outline color={Colors.purple.p} height={20} />
                             )}
                         </View>
                     ))}
