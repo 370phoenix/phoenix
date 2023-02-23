@@ -59,7 +59,7 @@ export default function DetailsModal({ route }: Props) {
                     onPress={onChangeMatched}
                     color="purple"
                 />
-                <Spacer direction="column" size={32} />
+                <Spacer direction="column" size={24} />
             </View>
         </View>
     );
