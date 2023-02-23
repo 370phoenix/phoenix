@@ -56,16 +56,16 @@ function MoreInfo({ post }: { post: PostType }) {
     const date = convertDate(post.startTime);
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);
-    const currRiders = post.riders;
 
     useEffect(() => {
         async function fetchRiders() {
-            const ids = post.riders ? post.riders : []
-            if (riders !== null) return;
+            const ids = post.riders ? post.riders : null;
+            if (riders) return;
+            if (!ids) return;
 
-            const ridersInfo: UserInfo[] = []
-            await ids.forEach(async (uid) => {
-                const res = await getUserOnce(uid);
+            const ridersInfo: UserInfo[] = [];
+            for (const id of ids) {
+                const res = await getUserOnce(id);
                 if (res.type !== MessageType.success) {
                     setMessage(res.message);
                     return;
@@ -74,13 +74,13 @@ function MoreInfo({ post }: { post: PostType }) {
                 const userInfo = res.data;
                 if (!userInfo) throw new Error("Could not find user info.");
 
-                ridersInfo.push(userInfo)
-            });
+                ridersInfo.push(userInfo);
+            }
 
-            setRiders(ridersInfo)
+            setRiders(ridersInfo);
         }
         fetchRiders();
-    }, [post, riders]);
+    }, [post, riders, setRiders, setMessage]);
 
     return (
         <View style={styles.infoContainer}>
@@ -109,9 +109,9 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
                 Pickup window: {startTime}-{endTime}
             </Text>
-            {currRiders ? (
+            {post.riders ? (
                 <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {currRiders.length + 1}/{post.totalSpots} spots filled
+                    {post.riders.length + 1}/{post.totalSpots} spots filled
                 </Text>
             ) : (
                 <></>
@@ -134,7 +134,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
-            {riders && <UserList matches={riders} message={message} />}
+            {riders && <UserList riders={riders} message={message} />}
             <Spacer direction="column" size={48} />
             <Button
                 title={matched ? "Cancel Match" : "Match!"}
@@ -147,25 +147,19 @@ function MoreInfo({ post }: { post: PostType }) {
 }
 
 function UserList({ riders, message }: { riders: UserInfo[]; message: string | null }) {
-    if (riders.length === 0)
-        return (
-            <View style={{ marginTop: 20 }}>
-                {message && (
-                    <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                        {message}
-                    </Text>
-                )}
-            </View>
-        );
-
-    const MatchCards = riders.map((match) => {
-        return <UserDetails user={match} key={Math.random()} />;
-    });
-
-    return <View>{riders.map((match) => {
-        return <UserDetails user={match} key={Math.random()} />;
-    })}</View>;
-    // return <View>{MatchCards}</View>;
+    return (
+        <View style={{ marginTop: riders.length > 0 ? 0 : 20 }}>
+            {message && (
+                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
+                    {message}
+                </Text>
+            )}
+            {riders.length > 0 &&
+                riders.map((match) => {
+                    return <UserDetails user={match} key={Math.random()} />;
+                })}
+        </View>
+    );
 }
 
 function UserDetails({ user }: { user: UserInfo }) {
