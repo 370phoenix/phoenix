@@ -11,9 +11,13 @@ import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPo
 import { MessageType, UserInfo, getUserOnce } from "../firebase/auth";
 import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
+    const [matched, setMatched] = useState(false);
+    const onChangeMatched = () => setMatched(!matched);
+
     const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
@@ -34,22 +38,38 @@ export default function DetailsModal({ route }: Props) {
     }, [route.params]);
 
     return (
-        <ScrollView directionalLockEnabled style={styles.container}>
-            {message && (
-                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                    {message}
-                </Text>
-            )}
-            {post && <MoreInfo post={post} />}
-        </ScrollView>
+        <View style={styles.infoContainer}>
+            <ScrollView directionalLockEnabled style={styles.container}>
+                {message && (
+                    <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
+                        {message}
+                    </Text>
+                )}
+                {post && <MoreInfo post={post} />}
+                <Spacer direction="column" size={32} />
+            </ScrollView>
+            <View
+                style={{
+                    backgroundColor: Colors.gray[4],
+                    height: useHeaderHeight() + 16,
+                    padding: 16,
+                }}>
+                <Button
+                    title={matched ? "Cancel Match" : "Match!"}
+                    onPress={onChangeMatched}
+                    color="purple"
+                />
+                <Spacer direction="column" size={32} />
+            </View>
+        </View>
     );
 }
 
 function MoreInfo({ post }: { post: PostType }) {
-    const [matched, setMatched] = useState(false);
+    // const [matched, setMatched] = useState(false);
     const [riders, setRiders] = useState<UserInfo[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const onChangeMatched = () => setMatched(!matched);
+    // const onChangeMatched = () => setMatched(!matched);
 
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
@@ -135,18 +155,12 @@ function MoreInfo({ post }: { post: PostType }) {
             </Text>
             <Spacer direction="column" size={48} />
             {riders && <UserList riders={riders} message={message} />}
-            <Spacer direction="column" size={48} />
-            <Button
-                title={matched ? "Cancel Match" : "Match!"}
-                onPress={onChangeMatched}
-                color="purple"
-            />
-            <Spacer direction="column" size={800} />
         </View>
     );
 }
 
 function UserList({ riders, message }: { riders: UserInfo[]; message: string | null }) {
+    let i = 1;
     return (
         <View style={{ marginTop: riders.length > 0 ? 0 : 20 }}>
             {message && (
@@ -156,31 +170,30 @@ function UserList({ riders, message }: { riders: UserInfo[]; message: string | n
             )}
             {riders.length > 0 &&
                 riders.map((match) => {
-                    return <UserDetails user={match} key={Math.random()} />;
+                    return (
+                        <View key={Math.random()}>
+                            <UserDetails num={i++} user={match} />
+                            <Spacer direction="column" size={32} />
+                        </View>
+                    );
                 })}
         </View>
     );
 }
 
-function UserDetails({ user }: { user: UserInfo }) {
+function UserDetails({ user, num }: { user: UserInfo; num: number }) {
     return (
         <View>
-            <Text textStyle="header">{user.username}</Text>
+            <Text textStyle="header">Rider {num}</Text>
             <Spacer direction="column" size={16} />
-            <Text textStyle="label" styleSize="l">
-                Major
-            </Text>
-            <Text textStyle="body" styleSize="s">
-                {user.major}
-            </Text>
-            <Spacer direction="column" size={16} />
+
             <View style={{ flexDirection: "row" }}>
                 <View style={{ flex: 1 }}>
                     <Text textStyle="label" styleSize="l">
-                        Gender
+                        Major
                     </Text>
                     <Text textStyle="body" styleSize="s">
-                        {user.gender}
+                        {user.major}
                     </Text>
                 </View>
                 <View style={{ flex: 1 }}>
@@ -192,6 +205,14 @@ function UserDetails({ user }: { user: UserInfo }) {
                     </Text>
                 </View>
             </View>
+            <Spacer direction="column" size={16} />
+
+            <Text textStyle="label" styleSize="l">
+                Gender
+            </Text>
+            <Text textStyle="body" styleSize="s">
+                {user.gender}
+            </Text>
         </View>
     );
 }
@@ -202,8 +223,14 @@ const styles = StyleSheet.create({
     },
     container: {
         backgroundColor: Colors.gray[4],
+        paddingHorizontal: 32,
     },
     infoContainer: {
-        paddingHorizontal: 16,
+        flex: 1,
+    },
+    footer: {
+        backgroundColor: Colors.gray[4],
+        height: 80,
+        padding: 16,
     },
 });
