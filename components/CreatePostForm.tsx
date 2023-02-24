@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useHeaderHeight } from "@react-navigation/elements";
+import React, { useState, useRef } from "react";
 import {
     TouchableWithoutFeedback,
     View,
@@ -10,19 +11,16 @@ import {
     ScrollView,
 } from "react-native";
 import uuid from "react-native-uuid";
-import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
+import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
-import Colors from "../constants/Colors";
 import { auth } from "../firebaseConfig";
-
-// stores options for number picker form inputs
 
 export default function CreatePostForm() {
     const height = useHeaderHeight();
@@ -115,19 +113,19 @@ export default function CreatePostForm() {
             const writeComplete = (await writeUserData(post, user)) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
-
-            //const writeComplete = (await writeUserData(Post)) ?? false;
-            // if(writeComplete){
-            //     // alert("Write to database complete!")
-            // }
         }
     };
 
+    const scrollViewRef = useRef<ScrollView>(null);
+
     return (
-        <ScrollView>
+        <ScrollView ref={scrollViewRef}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.body}>
-                    <Text textStyle="header" styleSize="l" style={styles.label}>
+                    <Text
+                        textStyle="header"
+                        styleSize="l"
+                        style={styles.label} >
                         Create Post
                     </Text>
                     <Text textStyle="label" styleSize="l" style={styles.label}>
@@ -181,14 +179,13 @@ export default function CreatePostForm() {
                         handlePlus={addNumSeats}
                         handleMinus={deleteNumSeats}
                     />
-
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Is there anything else your match needs to know?
                     </Text>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === "ios" ? "padding" : undefined}
                         keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]} />
+                        <TextArea label="Notes" inputState={[notes, setNotes]} onFocus={() => scrollViewRef.current?.scrollTo({ y: 184, animated: true })}/>
                         <Button onPress={onSubmit} color="navy" title="Post" />
                         <Spacer direction="column" size={128} style={{ flex: 1 }} />
                     </KeyboardAvoidingView>

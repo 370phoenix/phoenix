@@ -81,7 +81,6 @@ function MoreInfo({ post }: { post: PostType }) {
         async function fetchRiders() {
             const ids = post.riders ? post.riders : [];
             if(!ids.includes(post.user)) ids.push(post.user);
-            console.log(ids);
             if (riders) return;
             if (!ids) return;
 

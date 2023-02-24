@@ -43,7 +43,7 @@ export default function PostList() {
             {typeof posts !== "string" && posts.length !== 0 && (
                 <FlatList
                     data={posts}
-                    style={{ paddingTop: 16 }}
+                    style={{ paddingTop: 16, paddingBottom: 200 }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
