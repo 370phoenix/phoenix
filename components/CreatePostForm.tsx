@@ -1,5 +1,4 @@
-import { useHeaderHeight } from "@react-navigation/elements";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
     TouchableWithoutFeedback,
     View,
@@ -11,16 +10,19 @@ import {
     ScrollView,
 } from "react-native";
 import uuid from "react-native-uuid";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
-import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
+import Colors from "../constants/Colors";
 import { auth } from "../firebaseConfig";
+
+// stores options for number picker form inputs
 
 export default function CreatePostForm() {
     const height = useHeaderHeight();
@@ -52,11 +54,12 @@ export default function CreatePostForm() {
         setDropoffText(text);
         setDropoff(text);
     };
-    const onChangeStartTime = (event: any, selectedDate?: Date | undefined) => {
-        setStartTime(selectedDate ?? startTime);
+    const onChangeStartTime = (date: Date) => {
+        setStartTime(date);
+        // if (endTime < date) setEndTime(date);
     };
-    const onChangeEndTime = (event: any, selectedDate?: Date | undefined) => {
-        setEndTime(selectedDate ?? endTime);
+    const onChangeEndTime = (date: Date) => {
+        setEndTime(date);
     };
 
     // change handler for round trip switch
@@ -113,19 +116,19 @@ export default function CreatePostForm() {
             const writeComplete = (await writeUserData(post, user)) ?? false;
 
             Alert.alert("Post Completed", "You may close this window");
+
+            //const writeComplete = (await writeUserData(Post)) ?? false;
+            // if(writeComplete){
+            //     // alert("Write to database complete!")
+            // }
         }
     };
 
-    const scrollViewRef = useRef<ScrollView>(null);
-
     return (
-        <ScrollView ref={scrollViewRef}>
+        <ScrollView>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.body}>
-                    <Text
-                        textStyle="header"
-                        styleSize="l"
-                        style={styles.label} >
+                    <Text textStyle="header" styleSize="l" style={styles.label}>
                         Create Post
                     </Text>
                     <Text textStyle="label" styleSize="l" style={styles.label}>
@@ -164,12 +167,23 @@ export default function CreatePostForm() {
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         When do you want a ride?
                     </Text>
-                    <CustomDateTimePicker
-                        start={startTime}
-                        end={endTime}
-                        onChangeStart={onChangeStartTime}
-                        onChangeEnd={onChangeEndTime}
-                    />
+                    <View style={{ flexDirection: "row" }}>
+                        <CustomDateTimePicker
+                            mode="date"
+                            date={startTime}
+                            setDate={onChangeStartTime}
+                        />
+                        <CustomDateTimePicker
+                            mode="time"
+                            date={startTime}
+                            setDate={onChangeStartTime}
+                        />
+                        <CustomDateTimePicker
+                            mode="time"
+                            date={endTime}
+                            setDate={onChangeEndTime}
+                        />
+                    </View>
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         How many free spots in the car?
@@ -179,13 +193,14 @@ export default function CreatePostForm() {
                         handlePlus={addNumSeats}
                         handleMinus={deleteNumSeats}
                     />
+
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Is there anything else your match needs to know?
                     </Text>
                     <KeyboardAvoidingView
                         behavior={Platform.OS === "ios" ? "padding" : undefined}
                         keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]} onFocus={() => scrollViewRef.current?.scrollTo({ y: 184, animated: true })}/>
+                        <TextArea label="Notes" inputState={[notes, setNotes]} />
                         <Button onPress={onSubmit} color="navy" title="Post" />
                         <Spacer direction="column" size={128} style={{ flex: 1 }} />
                     </KeyboardAvoidingView>
