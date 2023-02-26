@@ -16,7 +16,7 @@ export function convertTime(date: number | Date) {
     if (typeof date === "number") tempDate = new Date(date);
     else tempDate = date;
     let minutes: string | number = tempDate.getMinutes();
-    minutes = Math.ceil(minutes / 5) * 5;
+    minutes = Math.floor(minutes / 5) * 5;
     minutes = minutes < 10 ? "0" + minutes :     minutes;
     let hours: string | number = tempDate.getHours();
     hours = hours > 12 ? hours - 12 : hours;

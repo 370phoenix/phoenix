@@ -26,11 +26,9 @@ import { auth } from "../firebaseConfig";
 
 export default function CreatePostForm() {
     const height = useHeaderHeight();
-
-    // date input
+    // location input
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
-    // location input
     const [pickup, setPickup] = useState<Coords | string>("");
     const [pickupText, setPickupText] = useState("");
     const [dropoff, setDropoff] = useState<Coords | string>("");
@@ -53,13 +51,6 @@ export default function CreatePostForm() {
     const onChangeDropoff = (text: string) => {
         setDropoffText(text);
         setDropoff(text);
-    };
-    const onChangeStartTime = (date: Date) => {
-        setStartTime(date);
-        // if (endTime < date) setEndTime(date);
-    };
-    const onChangeEndTime = (date: Date) => {
-        setEndTime(date);
     };
 
     // change handler for round trip switch
@@ -159,31 +150,18 @@ export default function CreatePostForm() {
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         Round trip
                     </Text>
-                    <CustomSwitch
-                        isEnabled={isRoundtrip}
-                        setIsEnabled={setIsRoundtrip}
-                        toggleSwitch={roundtripSwitch}
-                    />
+                    <View style={{ alignItems: "flex-start" }}>
+                        <CustomSwitch
+                            isEnabled={isRoundtrip}
+                            setIsEnabled={setIsRoundtrip}
+                            toggleSwitch={roundtripSwitch}
+                        />
+                    </View>
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         When do you want a ride?
                     </Text>
-                    <View style={{ flexDirection: "row" }}>
-                        <CustomDateTimePicker
-                            mode="date"
-                            date={startTime}
-                            setDate={onChangeStartTime}
-                        />
-                        <CustomDateTimePicker
-                            mode="time"
-                            date={startTime}
-                            setDate={onChangeStartTime}
-                        />
-                        <CustomDateTimePicker
-                            mode="time"
-                            date={endTime}
-                            setDate={onChangeEndTime}
-                        />
-                    </View>
+                    <CustomDatePicker start={startTime} setStartTime={setStartTime} end={endTime} setEndTime={setEndTime}/>
+
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         How many free spots in the car?
@@ -207,6 +185,98 @@ export default function CreatePostForm() {
                 </View>
             </TouchableWithoutFeedback>
         </ScrollView>
+    );
+}
+
+function CustomDatePicker({
+    start,
+    setStartTime,
+    end,
+    setEndTime,
+}: {
+    start: Date;
+    setStartTime: any;
+    end: Date;
+    setEndTime: any;
+}) {
+    const [isStartPickerVisible, setStartPickerVisibility] = useState(false);
+    const [isEndPickerVisible, setEndPickerVisibility] = useState(false);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+    const toggleDatePicker = () => {
+        setDatePickerVisibility(!isDatePickerVisible);
+    };
+    const toggleStartPicker = () => {
+        setStartPickerVisibility(!isStartPickerVisible);
+    };
+    const toggleEndPicker = () => {
+        setEndPickerVisibility(!isEndPickerVisible);
+    };
+
+    const onChangeDate = (date: Date) => {
+        setStartTime(date);
+        toggleDatePicker();
+    };
+    const onChangeStartTime = (date: Date) => {
+        setStartTime(date);
+        toggleStartPicker();
+    };
+    const onChangeEndTime = (date: Date) => {
+        setEndTime(date);
+        toggleEndPicker();
+    };
+    return (
+        <View>
+            {Platform.OS !== "ios" && (
+                <>
+                    <CustomDateTimePicker
+                        mode="date"
+                        date={start}
+                        setDate={onChangeDate}
+                        visible={isDatePickerVisible}
+                        setVisible={toggleDatePicker}
+                    />
+                    <CustomDateTimePicker
+                        mode="time"
+                        date={start}
+                        setDate={onChangeStartTime}
+                        visible={isStartPickerVisible}
+                        setVisible={toggleStartPicker}
+                    />
+                    <CustomDateTimePicker
+                        mode="time"
+                        date={end}
+                        setDate={onChangeEndTime}
+                        visible={isEndPickerVisible}
+                        setVisible={toggleEndPicker}
+                    />
+                </>
+            )}
+            {Platform.OS === "ios" && (
+                <>
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        Between
+                    </Text>
+                    <CustomDateTimePicker
+                        mode="datetime"
+                        date={start}
+                        setDate={onChangeStartTime}
+                        visible={isStartPickerVisible}
+                        setVisible={toggleStartPicker}
+                    />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        And
+                    </Text>
+                    <CustomDateTimePicker
+                        mode="datetime"
+                        date={end}
+                        setDate={onChangeEndTime}
+                        visible={isEndPickerVisible}
+                        setVisible={toggleEndPicker}
+                    />
+                </>
+            )}
+        </View>
     );
 }
 
