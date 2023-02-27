@@ -43,8 +43,6 @@ describe("PostCard ", () => {
             />
         ).toJSON();
 
-        // console.log(postCard);
-
         expect(postCard).not.toBeNull(); //go back and find the null test case
     });
 });
