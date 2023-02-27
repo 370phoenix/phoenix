@@ -21,6 +21,8 @@ import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
 import { auth } from "../firebaseConfig";
+import { Car } from "../assets/icons/Car";
+import { Dust } from "../assets/icons/Dust";
 
 // stores options for number picker form inputs
 
@@ -111,6 +113,30 @@ export default function CreatePostForm() {
         }
     };
 
+    const SuccessView = (
+        <>
+            <View
+                style={{
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    height: "90%",
+                    paddingHorizontal: 40
+                }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Dust color={Colors.purple.p} />
+                    <Spacer direction="row" size={8} />
+                    <Car color={Colors.purple.p} />
+                </View>
+                <Spacer direction="column" size={64} />
+                <Text textStyle="header" styleSize="m" style={{ color: Colors.purple.p }}>
+                    SUCCESSFULLY POSTED!
+                </Text>
+            </View>
+            <View style={{backgroundColor: Colors.gray[4], height: "10%"}}/>
+        </>
+    );
+
     // group contains location and round trip info
     const TripDetails = (
         <>
@@ -153,44 +179,45 @@ export default function CreatePostForm() {
     );
 
     return (
-        <ScrollView>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.body}>
-                    <Text textStyle="header" styleSize="l" style={styles.label}>
-                        Create Post
-                    </Text>
-                    {TripDetails}
+        // <ScrollView>
+        //     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        //         <View style={styles.body}>
+        //             <Text textStyle="header" styleSize="l" style={styles.label}>
+        //                 Create Post
+        //             </Text>
+        //             {TripDetails}
 
-                    <DateTimeGroup
-                        start={startTime}
-                        onChangeStart={setStartTime}
-                        end={endTime}
-                        onChangeEnd={setEndTime}
-                    />
-                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
+        //             <DateTimeGroup
+        //                 start={startTime}
+        //                 onChangeStart={setStartTime}
+        //                 end={endTime}
+        //                 onChangeEnd={setEndTime}
+        //             />
+        //             {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
 
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        How many free spots in the car?
-                    </Text>
-                    <NumberPicker
-                        count={numSeats}
-                        handlePlus={addNumSeats}
-                        handleMinus={deleteNumSeats}
-                    />
+        //             <Text textStyle="label" styleSize="l" style={styles.label}>
+        //                 How many free spots in the car?
+        //             </Text>
+        //             <NumberPicker
+        //                 count={numSeats}
+        //                 handlePlus={addNumSeats}
+        //                 handleMinus={deleteNumSeats}
+        //             />
 
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        Is there anything else your match needs to know?
-                    </Text>
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : undefined}
-                        keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]} />
-                        <Button onPress={onSubmit} color="navy" title="Post" />
-                        <Spacer direction="column" size={128} style={{ flex: 1 }} />
-                    </KeyboardAvoidingView>
-                </View>
-            </TouchableWithoutFeedback>
-        </ScrollView>
+        //             <Text textStyle="label" styleSize="l" style={styles.label}>
+        //                 Is there anything else your match needs to know?
+        //             </Text>
+        //             <KeyboardAvoidingView
+        //                 behavior={Platform.OS === "ios" ? "padding" : undefined}
+        //                 keyboardVerticalOffset={height}>
+        //                 <TextArea label="Notes" inputState={[notes, setNotes]} />
+        //                 <Button onPress={onSubmit} color="navy" title="Post" />
+        //                 <Spacer direction="column" size={128} style={{ flex: 1 }} />
+        //             </KeyboardAvoidingView>
+        //         </View>
+        //     </TouchableWithoutFeedback>
+        // </ScrollView>
+        <>{SuccessView}</>
     );
 }
 
