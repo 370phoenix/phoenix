@@ -160,7 +160,7 @@ type Clean<T> = {
     [K in keyof T]?: any;
 };
 
-function cleanUndefined<T extends Object>(obj: T): T {
+function cleanUndefined<T extends object>(obj: T): T {
     let clean: Clean<T> = {};
     for (const k in obj) {
         if (obj[k]) clean[k] = obj[k];
