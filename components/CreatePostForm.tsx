@@ -12,7 +12,7 @@ import {
 import uuid from "react-native-uuid";
 import { useHeaderHeight } from "@react-navigation/elements";
 
-import CustomDateTimePicker from "./CustomDateTimePicker";
+import { CustomDateTimePicker } from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
@@ -104,14 +104,9 @@ export default function CreatePostForm() {
             console.log(post);
 
             //Verify completion
-            const writeComplete = (await writeUserData(post, user)) ?? false;
+            await writeUserData(post, user);
 
             Alert.alert("Post Completed", "You may close this window");
-
-            //const writeComplete = (await writeUserData(Post)) ?? false;
-            // if(writeComplete){
-            //     // alert("Write to database complete!")
-            // }
         }
     };
 
@@ -160,7 +155,12 @@ export default function CreatePostForm() {
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         When do you want a ride?
                     </Text>
-                    <CustomDatePicker start={startTime} setStartTime={setStartTime} end={endTime} setEndTime={setEndTime}/>
+                    <DateTimeGroup
+                        start={startTime}
+                        onChangeStart={setStartTime}
+                        end={endTime}
+                        onChangeEnd={setEndTime}
+                    />
 
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
                     <Text textStyle="label" styleSize="l" style={styles.label}>
@@ -188,68 +188,30 @@ export default function CreatePostForm() {
     );
 }
 
-function CustomDatePicker({
+const DateTimeGroup = ({
     start,
-    setStartTime,
+    onChangeStart,
     end,
-    setEndTime,
+    onChangeEnd,
 }: {
     start: Date;
-    setStartTime: any;
+    onChangeStart: any;
     end: Date;
-    setEndTime: any;
-}) {
-    const [isStartPickerVisible, setStartPickerVisibility] = useState(false);
-    const [isEndPickerVisible, setEndPickerVisibility] = useState(false);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-    const toggleDatePicker = () => {
-        setDatePickerVisibility(!isDatePickerVisible);
-    };
-    const toggleStartPicker = () => {
-        setStartPickerVisibility(!isStartPickerVisible);
-    };
-    const toggleEndPicker = () => {
-        setEndPickerVisibility(!isEndPickerVisible);
-    };
-
-    const onChangeDate = (date: Date) => {
-        setStartTime(date);
-        toggleDatePicker();
-    };
-    const onChangeStartTime = (date: Date) => {
-        setStartTime(date);
-        toggleStartPicker();
-    };
-    const onChangeEndTime = (date: Date) => {
-        setEndTime(date);
-        toggleEndPicker();
-    };
+    onChangeEnd: any;
+}) => {
     return (
         <View>
             {Platform.OS !== "ios" && (
                 <>
-                    <CustomDateTimePicker
-                        mode="date"
-                        date={start}
-                        setDate={onChangeDate}
-                        visible={isDatePickerVisible}
-                        setVisible={toggleDatePicker}
-                    />
-                    <CustomDateTimePicker
-                        mode="time"
-                        date={start}
-                        setDate={onChangeStartTime}
-                        visible={isStartPickerVisible}
-                        setVisible={toggleStartPicker}
-                    />
-                    <CustomDateTimePicker
-                        mode="time"
-                        date={end}
-                        setDate={onChangeEndTime}
-                        visible={isEndPickerVisible}
-                        setVisible={toggleEndPicker}
-                    />
+                    <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        Between
+                    </Text>
+                    <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        And
+                    </Text>
+                    <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
                 </>
             )}
             {Platform.OS === "ios" && (
@@ -257,28 +219,16 @@ function CustomDatePicker({
                     <Text textStyle="label" styleSize="m" style={styles.label}>
                         Between
                     </Text>
-                    <CustomDateTimePicker
-                        mode="datetime"
-                        date={start}
-                        setDate={onChangeStartTime}
-                        visible={isStartPickerVisible}
-                        setVisible={toggleStartPicker}
-                    />
+                    <CustomDateTimePicker mode="datetime" date={start} onConfirm={onChangeStart} />
                     <Text textStyle="label" styleSize="m" style={styles.label}>
                         And
                     </Text>
-                    <CustomDateTimePicker
-                        mode="datetime"
-                        date={end}
-                        setDate={onChangeEndTime}
-                        visible={isEndPickerVisible}
-                        setVisible={toggleEndPicker}
-                    />
+                    <CustomDateTimePicker mode="datetime" date={end} onConfirm={onChangeEnd} />
                 </>
             )}
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     body: {
