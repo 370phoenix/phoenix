@@ -24,7 +24,6 @@ export default function CreateProfileScreen({ authDispatch }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
     const onSubmit = async () => {
-        debugger;
         const user = authState.user;
 
         if (user && user.phoneNumber) {
