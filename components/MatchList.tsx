@@ -89,8 +89,21 @@ export default function MatchList({ user }: Props) {
                     data={matches}
                     style={{ paddingTop: 16 }}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) =>
-                        <MatchCard post={item[1]} />
+                    renderItem={({ item }) => {
+                        return <MatchCard postID={item} userInfo={userInfo} />;
+                    }
+                    }
+                />
+                <Text textStyle="title" styleSize="l" style={styles.title}>
+                    Pending
+                </Text>
+                <FlatList
+                    data={pending}
+                    style={{ paddingTop: 16 }}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => {
+                        return <MatchCard postID={item} userInfo={userInfo} />;
+                    }
                     }
                 />
             </View>

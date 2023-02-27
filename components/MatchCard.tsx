@@ -12,106 +12,136 @@ import { handleAcceptReject, writePostData } from "../firebase/makePosts";
 import { fetchPost } from "../firebase/fetchPosts";
 import { fetchSomePosts } from "../firebase/posts";
 import { convertLocation } from "../firebase/ConvertPostTypes";
+import RoundTrip from "../assets/icons/RoundTrip";
+import { Right } from "../assets/icons/Arrow";
+import { Full } from "../assets/icons/User";
 
 export type Props = {
     postID: string;
-    post: PostType;
+    userInfo: UserInfo | null
 };
 
-export default function MatchCard({ postID }: Props) {
+export default function MatchCard({ postID, userInfo }: Props) {
     //const name = userID.username;
     //const [matches, setMatches] = useState([]);
-    const [pickup, setPickup] = useState<string | Coords>("");
-    const [dropoff, setDropoff] = useState<string | Coords>("");
+    const [pickup, setPickup] = useState<string | null>(null);
+    const [dropoff, setDropoff] = useState<string | null>(null);
     const [roundTrip, setTrip] = useState<boolean | null>(null);
     const [totalSpots, setTotalSpots] = useState<number | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    //const pickup = post.pickup;
+    const [filledSpots, setFilledSpots] = useState<number | null>(null);
 
     useEffect(() => {
         loadInfo();
     }, [postID]);
 
     const loadInfo = async () => {
-        const res = await fetchSomePosts([postID]);
-        if (res.type !== MessageType.success) setMessage(res.message);
-        else {
-            const postInfo = res.data;
-            postInfo?.forEach((post) => {
-                if (
-                    !post.pickup ||
-                    !post.dropoff ||
-                    !post.totalSpots ||
-                    !post.roundTrip
-                ) {
-                    setMessage("Couldn't find post information.");
-                    return;
-                }
-                setPickup(post.pickup);
-                setDropoff(post.dropoff);
-                setTrip(post.roundTrip);
-                setTotalSpots(post.totalSpots);
+        //debugger;
+        const res = await fetchPost(postID);
+        if (res.type !== MessageType.success) {
+            if (res.message == "Error: post missing or not found.") {
+                // remove this ID from user info Posts or Matches (depending on where it is)
             }
-            )
+            setMessage(res.message);
+        }
+        else if (!res.data) setMessage("No post data returned.")
+        else {
+            const post = res.data
+            setPickup(convertLocation(post.pickup))
+            setDropoff(convertLocation(post.dropoff))
+            setTrip(post.roundTrip);
+            setTotalSpots(post.totalSpots);
+            if (post.riders == null) {
+                setMessage("No rider data")
+            }
+            else {
+                setFilledSpots(post.riders.length);
+            }
         };
-
-
-
-        return (
-            <Pressable
-                style={({ pressed }) => [
-                    styles.cardContainer,
-                    {
-                        backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
-                    },
-                ]}>
-                <View style={styles.textPart}>
-                    <View style={styles.headerContainer}>
-                        <Text textStyle="header" styleSize="m" style={styles.name}>
-                            {pickup}
-                        </Text>
-                        <Text textStyle="label" style={styles.subtext}>
-                            {dropoff}
-                        </Text>
-                    </View>
-
-                    <Text textStyle="body" styleSize="m">
-                        {roundTrip} {totalSpots}
-                    </Text>
-                </View>
-            </Pressable>
-        );
     }
 
-    const styles = StyleSheet.create({
-        cardContainer: {
-            marginBottom: 16,
-            paddingLeft: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            borderBottomWidth: 1,
-            borderTopWidth: 1,
-        },
-        body: { flex: 1 },
-        riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
-        name: {
-            color: Colors.purple.p,
-            marginRight: 8,
-        },
-        subtext: {
-            color: Colors.gray[2],
-        },
-        headerContainer: {
-            flexDirection: "row",
-            alignItems: "baseline",
-        },
-        button: {
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 16,
-            borderLeftWidth: 1,
-            height: "100%",
-        },
-        textPart: { flex: 1, paddingVertical: 16 },
-    });
+    return (
+        <Pressable
+            style={({ pressed }) => [
+                styles.cardContainer,
+                {
+                    backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
+                },
+            ]}>
+            <View style={styles.textPart}>
+                <View style={styles.headerContainer}>
+                    <Text textStyle="label" styleSize="l" style={styles.name}>
+                        {pickup}
+                    </Text>
+                </View>
+                <View style={styles.bodyContainer} >
+                    {roundTrip ? (
+                        <RoundTrip color={Colors.purple.p} height={20} />
+                    ) : (
+                        <Right color={Colors.purple.p} height={20} />
+                    )}
+                    <Text textStyle="label" styleSize="l" style={styles.name}>
+                        {dropoff}
+                    </Text>
 
+                </View>
+
+
+                {message && <Text textStyle="label" style={styles.error}>{message}</Text>}
+            </View>
+            <View style={styles.riderIcon}>
+                <Full color={Colors.purple.p} height={30} />
+                <Text>
+                    {filledSpots} / {totalSpots}
+                </Text>
+            </View>
+        </Pressable>
+    );
+}
+
+
+const styles = StyleSheet.create({
+    cardContainer: {
+        marginBottom: 16,
+        paddingLeft: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderTopWidth: 1,
+    },
+    body: { flex: 1 },
+    riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
+    name: {
+        color: Colors.purple.p,
+        marginRight: 8,
+    },
+    subtext: {
+        color: Colors.gray[2],
+    },
+    headerContainer: {
+        flexDirection: "row",
+        alignItems: "baseline",
+    },
+    bodyContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+    },
+    button: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 16,
+        borderLeftWidth: 1,
+        height: "100%",
+    },
+    riderIcon: {
+        flex: 1,
+        alignItems: "flex-end",
+        paddingRight: 16,
+        justifyContent: "center",
+    },
+    textPart: { flex: 1, paddingVertical: 16 },
+    error: {
+        color: Colors.red.p
+    }
+});
