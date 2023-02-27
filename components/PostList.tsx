@@ -34,7 +34,7 @@ export default function PostList() {
     }, [posts, isLoading]);
 
     return (
-        <View style={{ marginTop: 24 }}>
+        <View style={{ marginTop: 20 }}>
             {typeof posts === "string" && (
                 <Text style={{ color: Colors.red.p }} textStyle="label" styleSize="l">
                     Failed to retrieve posts

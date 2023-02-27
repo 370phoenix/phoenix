@@ -4,7 +4,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { View, Button } from "./Themed";
 import { convertDate, convertTime } from "../firebase/ConvertPostTypes";
 
-export const CustomDateTimePicker = ({
+const CustomDateTimePicker = ({
     mode,
     date,
     onConfirm,
@@ -46,3 +46,5 @@ export const CustomDateTimePicker = ({
         </View>
     );
 };
+
+export default CustomDateTimePicker;

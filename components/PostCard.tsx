@@ -27,7 +27,7 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PostDetails", { post: post })}
+            onPress={() => navigation.navigate("PostDetails", { post })}
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -77,9 +77,8 @@ function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
     const total = post.totalSpots;
     const filled = (post.riders ? post.riders.length : 0) + 1;
     const pending = post.pending ? post.pending.length : 0;
-    let count = 0;
     const riders = Array<number>(total);
-    let rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
+    const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
 
     riders.fill(0);
     riders.fill(2, 0, filled);
