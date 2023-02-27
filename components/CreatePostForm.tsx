@@ -1,3 +1,4 @@
+import { useHeaderHeight } from "@react-navigation/elements";
 import React, { useState } from "react";
 import {
     TouchableWithoutFeedback,
@@ -10,16 +11,15 @@ import {
     ScrollView,
 } from "react-native";
 import uuid from "react-native-uuid";
-import { useHeaderHeight } from "@react-navigation/elements";
 
 import { CustomDateTimePicker } from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
+import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
-import Colors from "../constants/Colors";
 import { auth } from "../firebaseConfig";
 
 // stores options for number picker form inputs

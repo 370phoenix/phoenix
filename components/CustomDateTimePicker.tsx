@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Platform } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import { View, Button } from "./Themed";
@@ -38,6 +37,7 @@ export const CustomDateTimePicker = ({
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode={mode}
+                date={date}
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
                 minimumDate={new Date()}
