@@ -1,5 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     TouchableWithoutFeedback,
     View,
@@ -9,6 +9,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Animated,
+    Easing,
 } from "react-native";
 import uuid from "react-native-uuid";
 
@@ -113,29 +115,54 @@ export default function CreatePostForm() {
         }
     };
 
-    const SuccessView = (
-        <>
-            <View
-                style={{
-                    justifyContent: "center",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    height: "90%",
-                    paddingHorizontal: 40
-                }}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Dust color={Colors.purple.p} />
-                    <Spacer direction="row" size={8} />
-                    <Car color={Colors.purple.p} />
+    const SuccessView = () => {
+        const animatedValue = new Animated.Value(0);
+        const easing = Easing.elastic(1);
+        useEffect(() => {
+            Animated.timing(animatedValue, {
+                toValue: 1,
+                easing,
+                duration: 1000,
+                useNativeDriver: true,
+            }).start();
+        }, []);
+
+        return (
+            <>
+                <View
+                    style={{
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        height: "90%",
+                        paddingHorizontal: 40,
+                    }}>
+                    <Animated.View
+                        style={{
+                            transform: [
+                                {
+                                    translateX: animatedValue.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [-600, 0],
+                                    }),
+                                },
+                            ],
+                        }}>
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Dust color={Colors.purple.p} />
+                            <Spacer direction="row" size={8} />
+                            <Car color={Colors.purple.p} />
+                        </View>
+                    </Animated.View>
+                    <Spacer direction="column" size={64} />
+                    <Text textStyle="header" styleSize="m" style={{ color: Colors.purple.p }}>
+                        SUCCESSFULLY POSTED!
+                    </Text>
                 </View>
-                <Spacer direction="column" size={64} />
-                <Text textStyle="header" styleSize="m" style={{ color: Colors.purple.p }}>
-                    SUCCESSFULLY POSTED!
-                </Text>
-            </View>
-            <View style={{backgroundColor: Colors.gray[4], height: "10%"}}/>
-        </>
-    );
+                <View style={{ backgroundColor: Colors.gray[4], height: "10%" }} />
+            </>
+        );
+    };
 
     // group contains location and round trip info
     const TripDetails = (
@@ -217,7 +244,7 @@ export default function CreatePostForm() {
         //         </View>
         //     </TouchableWithoutFeedback>
         // </ScrollView>
-        <>{SuccessView}</>
+        <SuccessView />
     );
 }
 
