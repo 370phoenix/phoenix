@@ -3,9 +3,9 @@ import { FlatList, RefreshControl } from "react-native";
 
 import PostCard from "./PostCard";
 import { View, Text } from "./Themed";
-import { fetchPosts } from "../firebase/fetchPosts";
 import Colors from "../constants/Colors";
 import { PostType } from "../constants/DataTypes";
+import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ export default function PostList() {
             {typeof posts !== "string" && posts.length !== 0 && (
                 <FlatList
                     data={posts}
-                    style={{ paddingTop: 16 }}
+                    style={{ paddingTop: 16, paddingBottom: 200 }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }

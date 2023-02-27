@@ -27,7 +27,7 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PostDetails", { post: post })}
+            onPress={() => navigation.navigate("PostDetails", { post })}
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -75,27 +75,26 @@ type BadgeProps = {
 };
 function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
     const total = post.totalSpots;
-    const filled =
-        (post.riders ? post.riders.length : 0) + (post.pending ? post.pending.length : 0) + 1;
-    let rows = new Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
+    const filled = (post.riders ? post.riders.length : 0) + 1;
+    const pending = post.pending ? post.pending.length : 0;
+    const riders = Array<number>(total);
+    const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
+
+    riders.fill(0);
+    riders.fill(2, 0, filled);
+    riders.fill(1, filled, filled + pending);
+
     if (!isProfile) {
-        rows[0] = new Array(total > 4 ? 4 : total);
-        rows[0].fill(0);
-
-        if (filled >= 4) rows[0].fill(1);
-        else rows[0].fill(1, 0, filled);
-
-        if (rows.length === 2) {
-            const temp = rows[0];
-            rows[0] = new Array(total - 4);
-            rows[0].fill(0);
-            if (filled - 4 > 0) rows[0].fill(1, 0, filled - 4);
-            rows[1] = temp;
+        if (rows.length > 1) {
+            const first = riders.slice(0, 4);
+            const last = riders.slice(4, riders.length);
+            rows[0] = last;
+            rows[1] = first;
+        } else {
+            rows[0] = riders;
         }
     } else {
-        rows[0] = new Array(total);
-        rows[0].fill(0);
-        rows[0].fill(1, 0, filled);
+        rows[0] = riders;
     }
 
     const handleDelete = () => {
@@ -121,8 +120,11 @@ function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
                     key={`row-${index}`}>
                     {row.map((rider, index) => (
                         <View style={styles.riderIndicator} key={Math.random()}>
-                            {rider === 1 ? (
-                                <Full color={Colors.purple.p} height={20} />
+                            {rider > 0 ? (
+                                <Full
+                                    color={rider === 1 ? Colors.purple.m : Colors.purple.p}
+                                    height={20}
+                                />
                             ) : (
                                 <Outline color={Colors.purple.p} height={20} />
                             )}

@@ -1,9 +1,9 @@
 import { User } from "firebase/auth/react-native";
 import { getDatabase, ref, set } from "firebase/database";
 
+import { getUserOnce, MessageType, writeUser } from "./auth";
 import { PostID, PostType } from "../constants/DataTypes";
 import { fire } from "../firebaseConfig";
-import { getUserOnce, MessageType, writeUser } from "./auth";
 
 export default async function writeUserData(
     post: PostType,
@@ -20,10 +20,10 @@ export default async function writeUserData(
         const r1 = await getUserOnce(user.uid);
         if (r1.type !== MessageType.success) throw Error(`Error fetching user data: ${r1.message}`);
 
-        let userInfo = r1.data;
+        const userInfo = r1.data;
         if (!userInfo) throw new Error("Could not find user info.");
 
-        const posts: Array<PostID> = userInfo.posts ? userInfo.posts : [];
+        const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(post.postID);
         userInfo.posts = posts;
         const r2 = await writeUser({ userId: user.uid, userInfo });
