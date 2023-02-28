@@ -1,35 +1,27 @@
-import { useHeaderHeight } from "@react-navigation/elements";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     TouchableWithoutFeedback,
     View,
     Keyboard,
     StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
     ScrollView,
-    Animated,
-    Easing,
 } from "react-native";
 import uuid from "react-native-uuid";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
+import SuccessfulPost from "./SuccessfulPost";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import writeUserData from "../firebase/makePosts";
 import { auth } from "../firebaseConfig";
-import { Car } from "../assets/icons/Car";
-import { Dust } from "../assets/icons/Dust";
 
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const height = useHeaderHeight();
 
     // date time state
     const [startTime, setStartTime] = useState(new Date());
@@ -73,7 +65,7 @@ export default function CreatePostForm() {
     const [message2, setMessage2] = React.useState<string | null>(null);
     const [message3, setMessage3] = React.useState<string | null>(null);
 
-    let writeComplete: boolean | string = false;
+    const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
@@ -111,70 +103,15 @@ export default function CreatePostForm() {
             console.log(post);
 
             //Verify completion
-            writeComplete = await writeUserData(post, user);
-
-            Alert.alert("Post Completed", "You may close this window");
+            setWriteComplete(await writeUserData(post, user));
         }
     };
 
-    const SuccessView = () => {
-        const animatedValue = new Animated.Value(0);
-        const easing = Easing.elastic(1);
-        useEffect(() => {
-            Animated.timing(animatedValue, {
-                toValue: 1,
-                easing,
-                duration: 1000,
-                useNativeDriver: true,
-            }).start();
-        }, []);
-
-        return (
-            <>
-                <View
-                    style={{
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        height: "90%",
-                        paddingHorizontal: 40,
-                    }}>
-                    <Animated.View
-                        style={{
-                            transform: [
-                                {
-                                    translateX: animatedValue.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [-600, 0],
-                                    }),
-                                },
-                            ],
-                        }}>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Dust color={Colors.purple.p} />
-                            <Spacer direction="row" size={8} />
-                            <Car color={Colors.purple.p} />
-                        </View>
-                    </Animated.View>
-                    <Spacer direction="column" size={64} />
-                    <Text textStyle="header" styleSize="m" style={{ color: Colors.purple.p }}>
-                        SUCCESSFULLY POSTED!
-                    </Text>
-                </View>
-                <View style={{ backgroundColor: Colors.gray[4], height: "10%" }} />
-            </>
-        );
-    };
 
     // group contains location and round trip info
     const TripDetails = (
         <>
-            <LocationPicker
-                name="From"
-                setLocation={setPickup}
-                inputText={pickupText}
-                onChangeText={onChangePickup}
-            />
+            <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
             {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
             <View style={{ alignItems: "flex-start" }}>
                 <LocationButton
@@ -183,12 +120,7 @@ export default function CreatePostForm() {
                     onChangeText={onChangePickup}
                 />
             </View>
-            <LocationPicker
-                name="To"
-                setLocation={setDropoff}
-                inputText={dropoffText}
-                onChangeText={onChangeDropoff}
-            />
+            <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
             {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
                 <Text textStyle="lineTitle">ROUND TRIP?</Text>
@@ -198,56 +130,66 @@ export default function CreatePostForm() {
         </>
     );
 
-    return (
-        <ScrollView>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.body}>
-                    <Spacer direction="column" size={24} />
-                    <Text textStyle="header" styleSize="l">
-                        Create Post
-                    </Text>
-                    <Spacer direction="column" size={16} />
-                    {TripDetails}
-                    <Spacer direction="column" size={16} />
-                    <DateTimeGroup
-                        start={startTime}
-                        onChangeStart={setStartTime}
-                        end={endTime}
-                        onChangeEnd={setEndTime}
-                    />
-                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
+    const Form = (<ScrollView>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.body}>
+                <Spacer direction="column" size={24} />
+                <Text textStyle="header" styleSize="l">
+                    Create Post
+                </Text>
+                <Spacer direction="column" size={16} />
+                {TripDetails}
+                <Spacer direction="column" size={16} />
+                <DateTimeGroup
+                    start={startTime}
+                    onChangeStart={setStartTime}
+                    end={endTime}
+                    onChangeEnd={setEndTime}
+                />
+                {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
 
-                    <Spacer direction="column" size={16} />
-                    <Text textStyle="label" styleSize="l">
-                        Notes for riders?
-                    </Text>
-                    <Spacer direction="column" size={8} />
-                    <TextArea label="" inputState={[notes, setNotes]} />
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}>
-                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
-                        <NumberPicker
-                            count={numSeats}
-                            handlePlus={addNumSeats}
-                            handleMinus={deleteNumSeats}
-                        />
-                    </View>
-                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
-                    <Button
-                        onPress={onSubmit}
-                        color="navy"
-                        title="Post"
-                        style={{ justifyContent: "flex-end" }}
+                <Spacer direction="column" size={16} />
+                {/* <Text textStyle="label" styleSize="l">
+            Notes for riders?
+        </Text> */}
+                <Spacer direction="column" size={8} />
+                <TextArea
+                    label="Notes"
+                    inputState={[notes, setNotes]}
+                    placeholder="Type here..."
+                />
+                <Spacer direction="column" size={16} />
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}>
+                    <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                    <NumberPicker
+                        count={numSeats}
+                        handlePlus={addNumSeats}
+                        handleMinus={deleteNumSeats}
                     />
-                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
-            </TouchableWithoutFeedback>
-        </ScrollView>
+                <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                <Spacer direction="column" size={128} style={{ flex: 1 }} />
+                <Button
+                    onPress={onSubmit}
+                    color="navy"
+                    title="Post"
+                    style={{ justifyContent: "flex-end" }}
+                />
+                <Spacer direction="column" size={128} style={{ flex: 1 }} />
+            </View>
+        </TouchableWithoutFeedback>
+    </ScrollView>);
+
+    return (
+        <>
+            {writeComplete && <SuccessfulPost />}
+            {!writeComplete && Form}
+        </>
     );
 }
 

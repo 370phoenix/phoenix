@@ -239,7 +239,7 @@ export function TextField({
     const fontStyles = Type[family][size];
     const [text, setText] = inputState;
 
-    const { container: contianerStyle, input: inputStyle, label: labelStyle } = textFieldStyles;
+    const { container: containerStyle, input: inputStyle, label: labelStyle } = textFieldStyles;
     let color;
 
     if (validationState == ValidationState.error)
@@ -251,7 +251,7 @@ export function TextField({
     else color = !light ? Colors.gray["1"] : Colors.gray["5"];
 
     return (
-        <View style={[style, contianerStyle]}>
+        <View style={[style, containerStyle]}>
             <TextInput
                 value={text}
                 onChangeText={setText}
@@ -325,8 +325,8 @@ export function TextArea({
                 value={text}
                 onChangeText={setText}
                 allowFontScaling={false}
-                multiline={true}
-                numberOfLines={numberOfLines}
+                // multiline
+                // numberOfLines={numberOfLines}
                 style={[fontStyles, inputStyle, { borderColor: color, color: color }]}
                 {...otherProps}
             />
