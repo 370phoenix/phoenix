@@ -5,11 +5,9 @@ import Colors from "../constants/Colors";
 
 const CustomSwitch = ({
     isEnabled,
-    setIsEnabled,
     toggleSwitch,
 }: {
     isEnabled: boolean;
-    setIsEnabled: any;
     toggleSwitch: any;
 }) => {
     return (

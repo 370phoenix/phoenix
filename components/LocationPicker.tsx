@@ -23,7 +23,7 @@ export default function LocationPicker({
                 style={styles.input}
                 onChangeText={onChangeText}
                 value={inputText}
-                placeholder={`${name} location`}
+                placeholder={`${name}`}
                 placeholderTextColor={Colors.gray.b}
             />
         </View>
@@ -66,6 +66,6 @@ export function LocationButton({
 const styles = StyleSheet.create({
     input: {
         borderBottomWidth: 1,
-        padding: 8,
+        paddingVertical: 8,
     },
 });
