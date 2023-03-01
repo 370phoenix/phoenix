@@ -24,6 +24,7 @@
         "expo-asset": "~8.9.0",
         "expo-build-properties": "~0.5.1",
         "expo-constants": "~14.2.1",
+        "expo-firebase-core": "^6.0.0",
         "expo-firebase-recaptcha": "~2.3.1",
         "expo-font": "~11.1.1",
         "expo-linking": "~4.0.1",
