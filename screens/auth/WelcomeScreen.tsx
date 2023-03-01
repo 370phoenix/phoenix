@@ -11,7 +11,10 @@ export default function WelcomeScreen({ navigation }: Props) {
     return (
         <View style={styles.container}>
             <StatusBar style="light" />
-            <Image style={styles.logo} source={require("../assets/images/logo-horizontal.png")} />
+            <Image
+                style={styles.logo}
+                source={require("../../assets/images/logo-horizontal.png")}
+            />
             <Text textStyle="header" styleSize="s" style={styles.headline}>
                 Create account or sign in
             </Text>

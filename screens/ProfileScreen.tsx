@@ -17,19 +17,21 @@ export default function ProfileScreen({ navigation }: props) {
     const [message, setMessage] = useState("Loading user info...");
 
     useEffect(() => {
-        const setUpdates = async () => {
-            if (user) {
-                const res = await getUserUpdates(user, (data: UserInfo) => {
-                    setUserInfo(data);
-                });
+        if (user) {
+            const res = getUserUpdates(user, (data: UserInfo) => {
+                setUserInfo(data);
+            });
 
-                if (res.type === MessageType.error) setMessage(res.message);
-            } else {
-                setMessage("No user found");
+            if (res.type === MessageType.error) {
+                setMessage(res.message);
+                return;
             }
-        };
 
-        setUpdates();
+            const unsubscribe = res.data;
+            return () => unsubscribe();
+        } else {
+            setMessage("No user found");
+        }
     }, []);
 
     return (

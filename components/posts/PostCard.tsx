@@ -1,12 +1,13 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getAuth } from "firebase/auth/react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+
 import { Right } from "../../assets/icons/Chevron";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
 import { UserID, PostType } from "../../constants/DataTypes";
+import Colors from "../../constants/Colors";
 import { convertLocation, convertDate, convertTime } from "../../utils/convertPostTypes";
 import { deletePost } from "../../utils/posts";
 import { Spacer, Text, View } from "../shared/Themed";

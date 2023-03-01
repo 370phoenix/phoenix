@@ -181,10 +181,10 @@ export async function writeUser({
     }
 }
 
-export async function getUserUpdates(
+export function getUserUpdates(
     user: User,
     onUpdate: (data: UserInfo) => void
-): Promise<SuccessMessage<Unsubscribe> | ErrorMessage> {
+): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
         const userRef = ref(db, "users/" + user.uid);
         const unsub = onValue(userRef, (snapshot) => {

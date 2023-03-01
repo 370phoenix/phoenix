@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth/react-native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import Colors from "../../constants/Colors";
 import { PostType, PostID } from "../../constants/DataTypes";
 import { MessageType, UserInfo } from "../../utils/auth";
 import { fetchSomePosts } from "../../utils/posts";

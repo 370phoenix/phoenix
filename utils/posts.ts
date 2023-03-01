@@ -85,9 +85,9 @@ export async function fetchSomePosts(
     }
 }
 
-export async function getAllPostUpdates(
+export function getAllPostUpdates(
     onUpdate: (data: PostType[]) => void
-): Promise<SuccessMessage<Unsubscribe> | ErrorMessage> {
+): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
         const db = getDatabase();
         const postsRef = ref(db, "posts");
