@@ -5,7 +5,7 @@ import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
 import CreateButton from "../assets/icons/CreateButton";
 import SteeringWheel from "../assets/icons/SteeringWheel";
 import { Full } from "../assets/icons/User";
-import { View, Text } from "../components/Themed";
+import { View, Text } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 
 export default function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {

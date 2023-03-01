@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 
 import PostList from "../components/PostList";
-import { View } from "../components/Themed";
+import { View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
 

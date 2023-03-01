@@ -5,9 +5,9 @@ import PostList from "../components/PostList";
 import ProfilePostList from "../components/ProfilePostList";
 import ProfileView from "../components/ProfileView";
 
-import { Spacer, View } from "../components/Themed";
+import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
-import { AuthContext, getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
+import { AuthContext, getUserUpdates, MessageType, UserInfo } from "../utils/auth";
 import { RootTabParamList } from "../types";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;

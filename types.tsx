@@ -6,7 +6,7 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AuthAction, AuthState, UserInfo } from "./firebase/auth";
+import { AuthAction, AuthState, UserInfo } from "./utils/auth";
 import { PostID, PostType } from "./constants/DataTypes";
 
 declare global {

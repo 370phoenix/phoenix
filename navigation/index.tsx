@@ -11,30 +11,30 @@ import {
     AuthState,
     getUserOnce,
     MessageType,
-} from "../firebase/auth";
-import WelcomeScreen from "../screens/WelcomeScreen";
-import SignInScreen from "../screens/SignInScreen";
+} from "../utils/auth";
+import WelcomeScreen from "../screens/auth/WelcomeScreen";
+import SignInScreen from "../screens/auth/SignInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import ViewPostsScreen from "../screens/PostFeedScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { onAuthStateChanged } from "firebase/auth/react-native";
-import { Button } from "../components/Themed";
+import { Button } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
 import Header from "./Header";
 import Matches from "../assets/icons/Matches";
-import MatchesScreen from "../screens/MatchesScreen";
+import MatchesScreen from "../screens/matches/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
 import TabBar from "./TabBar";
-import CreateProfileScreen from "../screens/CreateProfileScreen";
-import ChangeInfoScreen from "../screens/ChangeInfoScreen";
-import CreatePostScreen from "../screens/CreatePostScreen";
-import PostDetailsScreen from "../screens/PostDetailsScreen";
-import ModalHeader from "../components/ModalHeader";
+import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
+import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
+import CreatePostScreen from "../screens/modals/CreatePostScreen";
+import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
+import ModalHeader from "../components/shared/ModalHeader";
 import { auth } from "../firebaseConfig";
-import MatchDetailsScreen from "../screens/MatchDetailsScreen";
+import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
 
 export default function Navigation() {
     return (
