@@ -157,12 +157,24 @@ interface WriteUserParams {
     userInfo: UserInfo;
 }
 
+type Clean<T> = {
+    [K in keyof T]?: any;
+};
+
+function cleanUndefined<T extends object>(obj: T): T {
+    let clean: Clean<T> = {};
+    for (const k in obj) {
+        if (obj[k]) clean[k] = obj[k];
+    }
+    return clean as T;
+}
+
 export async function writeUser({
     userId,
     userInfo,
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        await set(ref(db, "users/" + userId), userInfo);
+        await set(ref(db, "users/" + userId), cleanUndefined(userInfo));
         return { type: MessageType.success };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };

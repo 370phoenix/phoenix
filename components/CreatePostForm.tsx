@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useState } from "react";
 import {
     TouchableWithoutFeedback,
     View,
@@ -10,15 +11,14 @@ import {
     ScrollView,
 } from "react-native";
 import uuid from "react-native-uuid";
-import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import CustomSwitch from "./CustomSwitch";
 import NumberPicker from "./NumberPicker";
 import { Button, Text, Spacer, TextArea } from "./Themed";
 import LocationPicker, { LocationButton } from "../components/LocationPicker";
-import { PostType, Coords } from "../constants/DataTypes";
 import Colors from "../constants/Colors";
+import { PostType, Coords } from "../constants/DataTypes";
 import { auth } from "../firebaseConfig";
 import { createPost } from "../firebase/makePosts";
 
@@ -27,18 +27,20 @@ import { createPost } from "../firebase/makePosts";
 export default function CreatePostForm() {
     const height = useHeaderHeight();
 
-    // date input
+    // date time state
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
-    // location input
+    // location state
     const [pickup, setPickup] = useState<Coords | string>("");
     const [pickupText, setPickupText] = useState("");
     const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
+
     const [isRoundtrip, setIsRoundtrip] = useState(true);
     const [numSeats, setNumSeats] = useState(1);
-    const [notes, setNotes] = React.useState("");
+    const [notes, setNotes] = useState("");
 
+    // contains constraints for modifying seats
     const addNumSeats = () => {
         if (numSeats < 6) setNumSeats(numSeats + 1);
     };
@@ -54,12 +56,6 @@ export default function CreatePostForm() {
         setDropoffText(text);
         setDropoff(text);
     };
-    const onChangeStartTime = (event: any, selectedDate?: Date | undefined) => {
-        setStartTime(selectedDate ?? startTime);
-    };
-    const onChangeEndTime = (event: any, selectedDate?: Date | undefined) => {
-        setEndTime(selectedDate ?? endTime);
-    };
 
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
@@ -69,9 +65,9 @@ export default function CreatePostForm() {
     const userID = user ? user.uid : "No user found";
 
     //error message
-    const [message1, setMessage1] = React.useState<string | null>(null);
-    const [message2, setMessage2] = React.useState<string | null>(null);
-    const [message3, setMessage3] = React.useState<string | null>(null);
+    const [message1, setMessage1] = useState<string | null>(null);
+    const [message2, setMessage2] = useState<string | null>(null);
+    const [message3, setMessage3] = useState<string | null>(null);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
@@ -80,17 +76,14 @@ export default function CreatePostForm() {
 
         if (startTime.getTime() === endTime.getTime()) {
             isValid = false;
-            console.log("not valid date, no submit");
             setMessage1("Error: Invalid time window");
         }
         if (pickupText === "") {
             isValid = false;
-            console.log("not valid pickup, no submit");
             setMessage2("Error: Invalid pickup location");
         }
         if (dropoffText === "") {
             isValid = false;
-            console.log("not valid drop, no submit");
             setMessage3("Error: Invalid dropoff location");
         }
 
@@ -109,14 +102,54 @@ export default function CreatePostForm() {
                 riders: [],
                 pending: [],
             };
-            console.log(post);
 
             //Verify completion
-            const writeComplete = (await createPost(post, user)) ?? false;
+            await createPost(post, user);
 
             Alert.alert("Post Completed", "You may close this window");
         }
     };
+
+    // group contains location and round trip info
+    const TripDetails = (
+        <>
+            <Text textStyle="label" styleSize="l" style={styles.label}>
+                From
+            </Text>
+            <LocationPicker
+                name="pickup"
+                setLocation={setPickup}
+                inputText={pickupText}
+                onChangeText={onChangePickup}
+            />
+            {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
+            <LocationButton
+                setLocation={setPickup}
+                inputText={pickupText}
+                onChangeText={onChangePickup}
+            />
+            <Text textStyle="label" styleSize="l" style={styles.label}>
+                To
+            </Text>
+            <LocationPicker
+                name="dropoff"
+                setLocation={setDropoff}
+                inputText={dropoffText}
+                onChangeText={onChangeDropoff}
+            />
+            {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
+            <Text textStyle="label" styleSize="l" style={styles.label}>
+                Round trip
+            </Text>
+            <View style={{ alignItems: "flex-start" }}>
+                <CustomSwitch
+                    isEnabled={isRoundtrip}
+                    setIsEnabled={setIsRoundtrip}
+                    toggleSwitch={roundtripSwitch}
+                />
+            </View>
+        </>
+    );
 
     return (
         <ScrollView>
@@ -125,49 +158,16 @@ export default function CreatePostForm() {
                     <Text textStyle="header" styleSize="l" style={styles.label}>
                         Create Post
                     </Text>
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        From
-                    </Text>
-                    <LocationPicker
-                        name="pickup"
-                        setLocation={setPickup}
-                        inputText={pickupText}
-                        onChangeText={onChangePickup}
-                    />
-                    {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
-                    <LocationButton
-                        setLocation={setPickup}
-                        inputText={pickupText}
-                        onChangeText={onChangePickup}
-                    />
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        To
-                    </Text>
-                    <LocationPicker
-                        name="dropoff"
-                        setLocation={setDropoff}
-                        inputText={dropoffText}
-                        onChangeText={onChangeDropoff}
-                    />
-                    {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        Round trip
-                    </Text>
-                    <CustomSwitch
-                        isEnabled={isRoundtrip}
-                        setIsEnabled={setIsRoundtrip}
-                        toggleSwitch={roundtripSwitch}
-                    />
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        When do you want a ride?
-                    </Text>
-                    <CustomDateTimePicker
+                    {TripDetails}
+
+                    <DateTimeGroup
                         start={startTime}
+                        onChangeStart={setStartTime}
                         end={endTime}
-                        onChangeStart={onChangeStartTime}
-                        onChangeEnd={onChangeEndTime}
+                        onChangeEnd={setEndTime}
                     />
                     {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
+
                     <Text textStyle="label" styleSize="l" style={styles.label}>
                         How many free spots in the car?
                     </Text>
@@ -192,6 +192,51 @@ export default function CreatePostForm() {
         </ScrollView>
     );
 }
+
+const DateTimeGroup = ({
+    start,
+    onChangeStart,
+    end,
+    onChangeEnd,
+}: {
+    start: Date;
+    onChangeStart: any;
+    end: Date;
+    onChangeEnd: any;
+}) => {
+    return (
+        <View>
+            <Text textStyle="label" styleSize="l" style={styles.label}>
+                When do you want a ride?
+            </Text>
+            {Platform.OS !== "ios" && (
+                <>
+                    <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        Between
+                    </Text>
+                    <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        And
+                    </Text>
+                    <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
+                </>
+            )}
+            {Platform.OS === "ios" && (
+                <>
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        Between
+                    </Text>
+                    <CustomDateTimePicker mode="datetime" date={start} onConfirm={onChangeStart} />
+                    <Text textStyle="label" styleSize="m" style={styles.label}>
+                        And
+                    </Text>
+                    <CustomDateTimePicker mode="datetime" date={end} onConfirm={onChangeEnd} />
+                </>
+            )}
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     body: {
