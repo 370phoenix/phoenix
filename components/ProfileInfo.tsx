@@ -4,11 +4,10 @@ import { UserInfo } from "../firebase/auth";
 
 type Props = {
     userInfo: UserInfo;
-    itemKey: string;
 };
-export default function ProfileInfo({ userInfo, itemKey }: Props) {
+export default function ProfileInfo({ userInfo }: Props) {
     return (
-        <View key={itemKey} style={styles.container}>
+        <View style={styles.container}>
             <Text textStyle="header" styleSize="m">
                 {userInfo.username}
             </Text>
@@ -61,6 +60,7 @@ function convertPhone(number: string) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        marginBottom: 16,
     },
     grad: {
         flex: 1,

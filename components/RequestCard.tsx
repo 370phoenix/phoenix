@@ -80,7 +80,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
-                    backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
+                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
                 },
             ]}>
             <View style={styles.textPart}>
@@ -100,7 +100,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
             <AcceptDenyButton
                 isAccept={false}
                 handleAction={() => {
-                    handleButton(true);
+                    handleButton(false);
                 }}
             />
             <AcceptDenyButton isAccept={true} handleAction={() => handleButton(true)} />
@@ -134,11 +134,9 @@ function AcceptDenyButton({ isAccept, handleAction }: ADProps) {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        marginBottom: 16,
         paddingLeft: 16,
         flexDirection: "row",
         alignItems: "center",
-        borderBottomWidth: 1,
         borderTopWidth: 1,
     },
     body: { flex: 1 },

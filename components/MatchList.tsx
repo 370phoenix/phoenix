@@ -69,6 +69,7 @@ export default function MatchList({ user }: Props) {
                     Requests
                 </Text>
                 <FlatList
+                    scrollEnabled={false}
                     data={requests}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
@@ -85,6 +86,7 @@ export default function MatchList({ user }: Props) {
                     Matches
                 </Text>
                 <FlatList
+                    scrollEnabled={false}
                     data={matches}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
@@ -96,6 +98,7 @@ export default function MatchList({ user }: Props) {
                     Pending
                 </Text>
                 <FlatList
+                    scrollEnabled={false}
                     data={pending}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}

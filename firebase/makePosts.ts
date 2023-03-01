@@ -70,50 +70,45 @@ export async function handleAcceptReject({
     try {
         if (!userInfo) throw new Error("Missing User Info.");
 
-        // update requesting user (userID). Delete from pending and (optionally) add to matches.
+        // Get Requester Info
         const r1 = await getUserOnce(requesterID);
         if (r1.type !== MessageType.success) throw new Error(r1.message);
-        if (!r1.data) throw new Error("Missing User Data.");
-        let requesterInfo = r1.data;
+        const requesterInfo = r1.data;
 
-        debugger;
-        const i = requesterInfo.pending?.indexOf(postID);
-        if (i && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
-        if (isAccept) {
-            if (requesterInfo.matches) requesterInfo.matches.push(postID);
-            else {
-                const newMatches = [];
-                newMatches.push(postID);
-                requesterInfo.matches = newMatches;
-            }
+        // Get post from DB
+        const r3 = await fetchPost(postID);
+        if (r3.type === MessageType.error) throw new Error(r3.message);
+        const post = r3.data;
+
+        // Update Requester Info
+        // Remove from requester pending for accept or deny
+        if (requesterInfo.pending) {
+            const i = requesterInfo.pending.indexOf(postID);
+            if (i != -1 && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
         }
-
+        // Add to matches for accept
+        if (isAccept)
+            requesterInfo.matches = requesterInfo.matches
+                ? [...requesterInfo.matches, postID]
+                : [postID];
         const r2 = await writeUser({ userId: requesterID, userInfo: requesterInfo });
         if (r2.type === MessageType.error) throw new Error(r2.message);
 
-        // Update post in DB. Remove requester from pending and optionally add to riders
-        const r3 = await fetchPost(postID);
-        if (r3.type === MessageType.error) throw new Error(r3.message);
-        if (!r3.data) throw new Error("Missing Post Data.");
-
-        const post = r3.data;
-        const j = post.pending?.indexOf(requesterID);
-        if (j && post.pending) post.pending.splice(j, 1);
-        if (isAccept) {
-            if (post.riders) post.riders.push(requesterID);
-            else {
-                const newRiders = [];
-                newRiders.push(requesterID);
-                post.riders = newRiders;
-            }
+        // Update Post Info
+        // Remove from post pending for accept or deny
+        if (post.pending) {
+            const j = post.pending.indexOf(requesterID);
+            if (j != -1 && post.pending) post.pending.splice(j, 1);
         }
+        // Add to post riders if accept
+        if (isAccept) post.riders = post.riders ? [...post.riders, requesterID] : [requesterID];
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
 
-        // update original user. Remove from user requests.
-        const k = userInfo.requests.indexOf([requesterID, postID]);
-        userInfo.requests.splice(k, 1);
-
+        // Update Poster Info
+        // Remove from requests for accept or deny
+        const k = findIndex(userInfo.requests, [requesterID, postID]);
+        if (k !== -1) userInfo.requests.splice(k, 1);
         const r5 = await writeUser({ userId: posterID, userInfo });
         if (r5.type === MessageType.error) throw new Error(r5.message);
 
@@ -122,6 +117,14 @@ export async function handleAcceptReject({
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
 }
+
+const findIndex = (requests: [UserID, PostID][], request: [UserID, PostID]) => {
+    for (let i = 0; i < requests.length; i++) {
+        const req = requests[i];
+        if (req[0] == request[0] && req[1] == request[1]) return i;
+    }
+    return -1;
+};
 
 export async function matchPost(
     userID: UserID,
