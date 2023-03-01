@@ -16,7 +16,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchesModal({ route }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
-    const post = route.params?.post
+    const post = route.params?.post;
 
     return (
         <ScrollView directionalLockEnabled style={styles.container}>
@@ -37,7 +37,7 @@ function MoreInfo({ post }: { post: PostType }) {
 
     useEffect(() => {
         const loadUsers = async () => {
-            const objects = []
+            const objects = [];
             if (post.riders) {
                 for (const rider of post.riders) {
                     const res = await getUserOnce(rider);
@@ -49,10 +49,10 @@ function MoreInfo({ post }: { post: PostType }) {
             }
 
             setProfiles(objects);
-        }
+        };
 
         loadUsers();
-    }, [post])
+    }, [post]);
 
     return (
         <View style={styles.infoContainer}>
@@ -72,7 +72,11 @@ function MoreInfo({ post }: { post: PostType }) {
             <Spacer direction="column" size={40} />
             <Text textStyle="header">Rider Profiles</Text>
             <Spacer direction="column" size={16} />
-            {post.riders && profiles && profiles.map((profile, index) => <ProfileInfo userInfo={profile} key={String(Math.random())} />)}
+            {post.riders &&
+                profiles &&
+                profiles.map((profile, index) => (
+                    <ProfileInfo userInfo={profile} key={String(Math.random())} />
+                ))}
             <Spacer direction="column" size={40} />
             <Button
                 title={matched ? "Unmatch" : "Rematch"}
@@ -84,29 +88,11 @@ function MoreInfo({ post }: { post: PostType }) {
     );
 }
 
-
-
 const styles = StyleSheet.create({
-    modalView: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        backgroundColor: Colors.gray.w,
-        padding: 32,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    background: {
-        width: "100%",
-        height: 96,
-    },
     container: {
         backgroundColor: Colors.gray[4],
+        marginTop: -20,
+        paddingTop: 20,
     },
     infoContainer: {
         paddingTop: 32,

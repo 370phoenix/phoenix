@@ -25,7 +25,7 @@ export default function MatchesScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.gray.w,
+        backgroundColor: Colors.gray[4],
         marginTop: -20,
     },
     title: {

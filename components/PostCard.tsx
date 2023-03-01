@@ -11,6 +11,7 @@ import RoundTrip from "../assets/icons/RoundTrip";
 import Trash from "../assets/icons/Trash";
 import { deletePost } from "../firebase/posts";
 import { UserInfo } from "../firebase/auth";
+import { getAuth } from "firebase/auth/react-native";
 
 type Props = {
     isProfile?: boolean;
@@ -24,6 +25,11 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const fDate = convertDate(post.startTime);
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
+
+    const currentUser = getAuth().currentUser;
+
+    // Don't show your own posts in the feed
+    if (!isProfile && post.user === currentUser?.uid) return <></>;
 
     return (
         <Pressable

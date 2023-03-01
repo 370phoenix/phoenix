@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
-import { FlatList, RefreshControl, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 
 import RequestCard from "./RequestCard";
 import MatchCard from "./MatchCard";
 import { View, Text } from "./Themed";
 import Colors from "../constants/Colors";
 import { PostID, UserID } from "../constants/DataTypes";
-import { getUserOnce, getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
+import { getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
 import { User } from "firebase/auth/react-native";
-import { fetchPost } from "../firebase/fetchPosts";
 
 type Props = {
     user: User;
-    PostID: string;
 };
 export default function MatchList({ user }: Props) {
     const [isLoading, setLoading] = useState(true);
@@ -35,8 +33,6 @@ export default function MatchList({ user }: Props) {
     useEffect(() => {
         updateArrrays();
     }, [userInfo]);
-
-    useEffect(() => { });
 
     const updateArrrays = () => {
         if (!userInfo) return;
@@ -90,24 +86,22 @@ export default function MatchList({ user }: Props) {
                 </Text>
                 <FlatList
                     data={matches}
-                    style={{ paddingTop: 16 }}
+                    style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
                         return <MatchCard postID={item} userInfo={userInfo} />;
-                    }
-                    }
+                    }}
                 />
                 <Text textStyle="title" styleSize="l" style={styles.title}>
                     Pending
                 </Text>
                 <FlatList
                     data={pending}
-                    style={{ paddingTop: 16 }}
+                    style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
                         return <MatchCard postID={item} userInfo={userInfo} />;
-                    }
-                    }
+                    }}
                 />
             </View>
         );

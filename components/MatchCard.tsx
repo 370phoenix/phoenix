@@ -19,7 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 
 export type Props = {
     postID: string;
-    userInfo: UserInfo | null
+    userInfo: UserInfo | null;
 };
 
 export default function MatchCard({ postID }: Props) {
@@ -40,25 +40,22 @@ export default function MatchCard({ postID }: Props) {
                 // remove this ID from user info Posts or Matches (depending on where it is)
             }
             setMessage(res.message);
-        }
-        else if (!res.data) setMessage("No post data returned.")
+        } else if (!res.data) setMessage("No post data returned.");
         else {
             setPost(res.data);
-        };
-    }
+        }
+    };
 
-    if (!post) return <View />
+    if (!post) return <View />;
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("MatchDetails", { post: post })} //pass the post info 
+            onPress={() => navigation.navigate("MatchDetails", { post: post })} //pass the post info
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
                     backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
                 },
-
-
             ]}>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
@@ -66,7 +63,7 @@ export default function MatchCard({ postID }: Props) {
                         {convertLocation(post.pickup)}
                     </Text>
                 </View>
-                <View style={styles.bodyContainer} >
+                <View style={styles.bodyContainer}>
                     {post.roundTrip ? (
                         <RoundTrip color={Colors.purple.p} height={20} />
                     ) : (
@@ -75,11 +72,13 @@ export default function MatchCard({ postID }: Props) {
                     <Text textStyle="label" styleSize="l" style={styles.name}>
                         {convertLocation(post.dropoff)}
                     </Text>
-
                 </View>
 
-
-                {message && <Text textStyle="label" style={styles.error}>{message}</Text>}
+                {message && (
+                    <Text textStyle="label" style={styles.error}>
+                        {message}
+                    </Text>
+                )}
             </View>
             <View style={styles.riderIcon}>
                 <Full color={Colors.purple.p} height={30} />
@@ -87,18 +86,15 @@ export default function MatchCard({ postID }: Props) {
                     {post.riders ? post.riders.length + 1 : 1} / {post.totalSpots}
                 </Text>
             </View>
-        </Pressable >
+        </Pressable>
     );
 }
 
-
 const styles = StyleSheet.create({
     cardContainer: {
-        marginBottom: 16,
         paddingLeft: 16,
         flexDirection: "row",
         alignItems: "center",
-        borderBottomWidth: 1,
         borderTopWidth: 1,
     },
     body: { flex: 1 },
@@ -134,6 +130,6 @@ const styles = StyleSheet.create({
     },
     textPart: { flex: 1, paddingVertical: 16 },
     error: {
-        color: Colors.red.p
-    }
+        color: Colors.red.p,
+    },
 });
