@@ -39,6 +39,7 @@ import CreatePostScreen from "../screens/CreatePostScreen";
 import PostDetailsScreen from "../screens/PostDetailsScreen";
 import ModalHeader from "../components/ModalHeader";
 import { auth } from "../firebaseConfig";
+import MatchDetailsScreen from "../screens/MatchDetailsScreen";
 
 export default function Navigation() {
     return (
@@ -136,6 +137,21 @@ function RootNavigator() {
                                     ),
                                 })}
                             />
+                            <Stack.Screen name="MatchDetails" component={MatchDetailsScreen} options={({ navigation }) => ({
+                                title: "Match Details",
+                                headerLeft: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                )
+                            })} />
+
                             <Stack.Group
                                 screenOptions={{
                                     presentation: "modal",

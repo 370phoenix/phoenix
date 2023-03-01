@@ -8,9 +8,11 @@ import Colors from "../constants/Colors";
 import { PostID, UserID } from "../constants/DataTypes";
 import { getUserOnce, getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
 import { User } from "firebase/auth/react-native";
+import { fetchPost } from "../firebase/fetchPosts";
 
 type Props = {
     user: User;
+    PostID: string;
 };
 export default function MatchList({ user }: Props) {
     const [isLoading, setLoading] = useState(true);
@@ -19,6 +21,7 @@ export default function MatchList({ user }: Props) {
     const [matches, setMatches] = useState<PostID[] | null>(null);
     const [pending, setPending] = useState<PostID[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [userID, setUserID] = useState<string | null>(null);
 
     useEffect(() => {
         loadUserInfo()

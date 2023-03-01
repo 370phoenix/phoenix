@@ -15,21 +15,18 @@ import { convertLocation } from "../firebase/ConvertPostTypes";
 import RoundTrip from "../assets/icons/RoundTrip";
 import { Right } from "../assets/icons/Arrow";
 import { Full } from "../assets/icons/User";
+import { useNavigation } from "@react-navigation/native";
 
 export type Props = {
     postID: string;
     userInfo: UserInfo | null
 };
 
-export default function MatchCard({ postID, userInfo }: Props) {
-    //const name = userID.username;
-    //const [matches, setMatches] = useState([]);
-    const [pickup, setPickup] = useState<string | null>(null);
-    const [dropoff, setDropoff] = useState<string | null>(null);
-    const [roundTrip, setTrip] = useState<boolean | null>(null);
-    const [totalSpots, setTotalSpots] = useState<number | null>(null);
+export default function MatchCard({ postID }: Props) {
+    const navigation = useNavigation();
+
+    const [post, setPost] = useState<PostType | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const [filledSpots, setFilledSpots] = useState<number | null>(null);
 
     useEffect(() => {
         loadInfo();
@@ -46,42 +43,37 @@ export default function MatchCard({ postID, userInfo }: Props) {
         }
         else if (!res.data) setMessage("No post data returned.")
         else {
-            const post = res.data
-            setPickup(convertLocation(post.pickup))
-            setDropoff(convertLocation(post.dropoff))
-            setTrip(post.roundTrip);
-            setTotalSpots(post.totalSpots);
-            if (post.riders == null) {
-                setMessage("No rider data")
-            }
-            else {
-                setFilledSpots(post.riders.length);
-            }
+            setPost(res.data);
         };
     }
 
+    if (!post) return <View />
+
     return (
         <Pressable
+            onPress={() => navigation.navigate("MatchDetails", { post: post })} //pass the post info 
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
                     backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
                 },
+
+
             ]}>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
                     <Text textStyle="label" styleSize="l" style={styles.name}>
-                        {pickup}
+                        {convertLocation(post.pickup)}
                     </Text>
                 </View>
                 <View style={styles.bodyContainer} >
-                    {roundTrip ? (
+                    {post.roundTrip ? (
                         <RoundTrip color={Colors.purple.p} height={20} />
                     ) : (
                         <Right color={Colors.purple.p} height={20} />
                     )}
                     <Text textStyle="label" styleSize="l" style={styles.name}>
-                        {dropoff}
+                        {convertLocation(post.dropoff)}
                     </Text>
 
                 </View>
@@ -92,10 +84,10 @@ export default function MatchCard({ postID, userInfo }: Props) {
             <View style={styles.riderIcon}>
                 <Full color={Colors.purple.p} height={30} />
                 <Text>
-                    {filledSpots} / {totalSpots}
+                    {post.riders ? post.riders.length + 1 : 1} / {post.totalSpots}
                 </Text>
             </View>
-        </Pressable>
+        </Pressable >
     );
 }
 
