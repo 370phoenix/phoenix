@@ -1,9 +1,8 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useContext, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import PostList from "../components/PostList";
-import ProfilePostList from "../components/ProfilePostList";
-import ProfileView from "../components/ProfileView";
+import ProfilePostList from "../components/profile/ProfilePostList";
+import ProfileView from "../components/profile/ProfileView";
 
 import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";

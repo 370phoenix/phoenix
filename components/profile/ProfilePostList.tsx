@@ -1,12 +1,12 @@
 import { getAuth } from "firebase/auth/react-native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
-import { PostID, PostType } from "../constants/DataTypes";
-import { MessageType, UserInfo } from "../utils/auth";
-import { fetchSomePosts } from "../utils/posts";
-import PostCard from "./PostCard";
-import { View, Text } from "./shared/Themed";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { PostType, PostID } from "../../constants/DataTypes";
+import { MessageType, UserInfo } from "../../utils/auth";
+import { fetchSomePosts } from "../../utils/posts";
+import PostCard from "../posts/PostCard";
+import { View, Text } from "../shared/Themed";
 
 type Props = {
     userInfo: UserInfo | null;

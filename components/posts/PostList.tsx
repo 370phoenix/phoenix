@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
+import Colors from "../../constants/Colors";
+import { PostType } from "../../constants/DataTypes";
+import { MessageType } from "../../utils/auth";
+import { fetchAllPosts } from "../../utils/posts";
+import { View, Text } from "../shared/Themed";
 
 import PostCard from "./PostCard";
-import { View, Text } from "./shared/Themed";
-import Colors from "../constants/Colors";
-import { PostType } from "../constants/DataTypes";
-import { fetchAllPosts } from "../utils/posts";
-import { MessageType } from "../utils/auth";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);

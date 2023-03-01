@@ -1,17 +1,16 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
-
-import { View, Text, Spacer } from "./shared/Themed";
-import Colors from "../constants/Colors";
-import { PostType, UserID } from "../constants/DataTypes";
-import { convertDate, convertLocation, convertTime } from "../utils/convertPostTypes";
 import { useNavigation } from "@react-navigation/native";
-import { Right } from "../assets/icons/Arrow";
-import { Full, Outline } from "../assets/icons/User";
-import RoundTrip from "../assets/icons/RoundTrip";
-import Trash from "../assets/icons/Trash";
-import { deletePost } from "../utils/posts";
-import { UserInfo } from "../utils/auth";
 import { getAuth } from "firebase/auth/react-native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Right } from "../../assets/icons/Chevron";
+import RoundTrip from "../../assets/icons/RoundTrip";
+import Trash from "../../assets/icons/Trash";
+import { Full, Outline } from "../../assets/icons/User";
+import { UserID, PostType } from "../../constants/DataTypes";
+import { convertLocation, convertDate, convertTime } from "../../utils/convertPostTypes";
+import { deletePost } from "../../utils/posts";
+import { Spacer, Text, View } from "../shared/Themed";
+import { UserInfo } from "../../utils/auth";
 
 type Props = {
     isProfile?: boolean;

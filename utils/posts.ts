@@ -1,5 +1,5 @@
 import { User } from "firebase/auth/react-native";
-import { child, get, getDatabase, ref, remove, set } from "firebase/database";
+import { child, get, getDatabase, onValue, ref, remove, set, Unsubscribe } from "firebase/database";
 import { PostID, PostType, UserID } from "../constants/DataTypes";
 import {
     ErrorMessage,
@@ -80,6 +80,24 @@ export async function fetchSomePosts(
         }
 
         return { type: MessageType.success, data: posts };
+    } catch (e: any) {
+        return { type: MessageType.error, message: e.message };
+    }
+}
+
+export async function getAllPostUpdates(
+    onUpdate: (data: PostType[]) => void
+): Promise<SuccessMessage<Unsubscribe> | ErrorMessage> {
+    try {
+        const db = getDatabase();
+        const postsRef = ref(db, "posts");
+        const unsub = onValue(postsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data: PostType[] = Object.values(snapshot.val());
+                onUpdate(data);
+            }
+        });
+        return { type: MessageType.success, data: unsub };
     } catch (e: any) {
         return { type: MessageType.error, message: e.message };
     }

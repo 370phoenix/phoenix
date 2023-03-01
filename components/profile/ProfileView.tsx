@@ -1,9 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import { User } from "firebase/auth/react-native";
 import { StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
-import { UserInfo } from "../utils/auth";
-import { View, Text, Spacer, Button } from "./shared/Themed";
+import Colors from "../../constants/Colors";
+import { UserInfo } from "../../utils/auth";
+import { View, Text, Spacer, Button } from "../shared/Themed";
 
 type Props = {
     user: User | null | undefined;
