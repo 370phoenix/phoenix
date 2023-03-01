@@ -105,7 +105,7 @@ export default function CreatePostForm() {
         <>
             <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
             {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
-            <View style={{ alignItems: "flex-start" }}>
+            <View>
                 <LocationButton
                     setLocation={setPickup}
                     inputText={pickupText}
