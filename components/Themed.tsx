@@ -8,6 +8,7 @@ import {
     Platform,
     Switch,
     GestureResponderEvent,
+    PressableProps,
 } from "react-native";
 
 import Colors, { BaseColor, BaseColorIndicators } from "../constants/Colors";
@@ -74,7 +75,7 @@ type ButtonOnly = {
     color: "purple" | "navy" | "gold" | "gray" | "red" | "green";
     onPress: (event?: GestureResponderEvent) => void;
 };
-export type ButtonProps = DefaultView["props"] & ButtonOnly;
+export type ButtonProps = PressableProps & ButtonOnly;
 
 // title: text displayed in button
 // light: No background, color text if true. reverse if false.
@@ -90,7 +91,7 @@ export function Button({
     fontSize,
     title,
     onPress,
-    ..._
+    ...otherProps
 }: ButtonProps) {
     const [tempStyles, setTempStyles] = useState({});
     const containerStyles: any = {};
@@ -163,9 +164,15 @@ export function Button({
     };
 
     const iconSize = short && text !== "" ? 10 : 20;
+    const spacerSize = short && text !== "" ? 0 : 8;
 
     return (
-        <Pressable onPress={onPress} style={style} onPressIn={onPressIn} onPressOut={onPressOut}>
+        <Pressable
+            onPress={onPress}
+            style={style}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
+            {...otherProps}>
             <View style={[buttonStyles.button, containerStyles, tempStyles]}>
                 {leftIcon && (
                     <>
@@ -175,7 +182,7 @@ export function Button({
                             height: iconSize,
                             width: iconSize,
                         })}
-                        <Spacer direction="row" size={8} />
+                        <Spacer direction="row" size={spacerSize} />
                     </>
                 )}
                 <Text
@@ -186,7 +193,7 @@ export function Button({
                 </Text>
                 {rightIcon && (
                     <>
-                        <Spacer direction="row" size={8} />
+                        <Spacer direction="row" size={spacerSize} />
                         {rightIcon({
                             color: textColor,
                             preserveAspectRatio: "xMidYMid meet",

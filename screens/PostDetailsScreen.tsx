@@ -1,41 +1,56 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, Alert } from "react-native";
 
 import { Right } from "../assets/icons/Arrow";
 import RoundTrip from "../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
-import { PostID, PostType } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
 import { MessageType, UserInfo, getUserOnce } from "../firebase/auth";
-import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { getAuth } from "firebase/auth/react-native";
+import { matchPost } from "../firebase/makePosts";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
-    const [matched, setMatched] = useState(false);
-    const onChangeMatched = () => setMatched(!matched);
+    if (!route.params) return;
+    const paramPost = route.params.post;
 
     const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const currentUser = getAuth().currentUser?.uid;
+
+    const handleMatch = () => {
+        Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
+            {
+                text: "Cancel",
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (!currentUser) return;
+                    if (!post) return;
+
+                    const res = await matchPost(currentUser, post);
+                    if (res.type === MessageType.error) setMessage(res.message);
+                },
+            },
+        ]);
+    };
 
     useEffect(() => {
-        const getPostInfo = async (postID: PostID) => {
-            const res = await fetchPost(postID);
-            if (res.type === MessageType.error) setMessage(res.message);
-            else setPost(res.data);
-        };
+        // DON'T DELETE: Will be used later for deep linking
+        // const getPostInfo = async (postID: PostID) => {
+        //     const res = await fetchPost(postID);
+        //     if (res.type === MessageType.error) setMessage(res.message);
+        //     else setPost(res.data);
+        // };
 
-        if (!route.params) return;
-        const paramPost = route.params.post;
-        if (paramPost instanceof Object && "postID" in paramPost) {
-            setPost(paramPost);
-        } else {
-            getPostInfo(paramPost);
-        }
-    }, [route.params]);
+        if (paramPost) setPost(paramPost);
+    }, []);
 
     return (
         <View style={styles.infoContainer}>
@@ -54,11 +69,7 @@ export default function DetailsModal({ route }: Props) {
                     height: useHeaderHeight() + 16,
                     padding: 16,
                 }}>
-                <Button
-                    title={matched ? "Cancel Match" : "Match!"}
-                    onPress={onChangeMatched}
-                    color="purple"
-                />
+                <Button title="Match!" onPress={handleMatch} color="purple" />
                 <Spacer direction="column" size={24} />
             </View>
         </View>
@@ -80,7 +91,7 @@ function MoreInfo({ post }: { post: PostType }) {
     useEffect(() => {
         async function fetchRiders() {
             const ids = post.riders ? post.riders : [];
-            if(!ids.includes(post.user)) ids.push(post.user);
+            if (!ids.includes(post.user)) ids.push(post.user);
             if (riders) return;
             if (!ids) return;
 

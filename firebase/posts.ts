@@ -45,7 +45,7 @@ export async function deletePost(
         });
         if (res.type === MessageType.error) throw Error(res.message);
 
-        return { type: MessageType.success };
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         console.log(`Error in delete post: ${e.message}`);
         return { type: MessageType.error, message: e.message };

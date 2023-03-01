@@ -13,7 +13,6 @@ type Props = {
 };
 export default function ProfilePostList({ userInfo }: Props) {
     const [posts, setPosts] = useState<PostType[] | null>(null);
-    const [loaded, setLoaded] = useState<PostID[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
     const auth = getAuth();
@@ -25,21 +24,16 @@ export default function ProfilePostList({ userInfo }: Props) {
         const userPosts = userInfo.posts;
 
         const removeUserPosts = () => {
-            if (!posts || !loaded) return;
+            if (!posts) return;
             if (!userPosts || userPosts.length === 0) {
                 setPosts(null);
-                setLoaded(null);
             } else if (userPosts) {
                 for (const post of posts) {
                     if (!userPosts.includes(post.postID)) {
                         const i = posts.indexOf(post);
-                        const j = loaded.indexOf(post.postID);
                         const newPosts = posts;
-                        const newLoaded = loaded;
                         newPosts.splice(i, 1);
-                        newLoaded.splice(j, 1);
                         setPosts(newPosts);
-                        setLoaded(newLoaded);
                     }
                 }
             }
@@ -48,9 +42,16 @@ export default function ProfilePostList({ userInfo }: Props) {
         const loadUserPosts = async () => {
             if (!userPosts) return;
             let toLoad: PostID[] = [];
-            if (loaded) {
+            if (posts) {
                 for (const id of userPosts) {
-                    if (!loaded.includes(id)) toLoad.push(id);
+                    let flag = false;
+                    for (const post of posts) {
+                        if (post.postID === id) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (!flag) toLoad.push(id);
                 }
             } else toLoad = userPosts;
 
@@ -69,11 +70,6 @@ export default function ProfilePostList({ userInfo }: Props) {
             } else newPosts = res.data;
             newPosts.sort((a, b) => a.startTime - b.startTime);
             setPosts(newPosts);
-
-            if (loaded) {
-                const newLoaded = loaded.concat(toLoad);
-                setLoaded(newLoaded);
-            } else setLoaded(toLoad);
         };
 
         removeUserPosts();

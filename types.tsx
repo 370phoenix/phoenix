@@ -11,7 +11,7 @@ import { PostID, PostType } from "./constants/DataTypes";
 
 declare global {
     namespace ReactNavigation {
-        interface RootParamList extends RootStackParamList { }
+        interface RootParamList extends RootStackParamList {}
     }
 }
 
@@ -30,10 +30,10 @@ export type RootStackParamList = {
 
 export type MatchDetailsParamList = {
     post: PostType;
-}
+};
 
 export type PostDetailsParamList = {
-    post: PostID | PostType;
+    post: PostType;
 };
 
 export type ChangeInfoParamList = {

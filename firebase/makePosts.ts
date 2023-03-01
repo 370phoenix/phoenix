@@ -47,7 +47,7 @@ export async function writePostData(post: PostType): Promise<SuccessMessage | Er
             ...post,
         });
 
-        return { type: MessageType.success };
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
@@ -76,6 +76,7 @@ export async function handleAcceptReject({
         if (!r1.data) throw new Error("Missing User Data.");
         let requesterInfo = r1.data;
 
+        debugger;
         const i = requesterInfo.pending?.indexOf(postID);
         if (i && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
         if (isAccept) {
@@ -116,7 +117,48 @@ export async function handleAcceptReject({
         const r5 = await writeUser({ userId: posterID, userInfo });
         if (r5.type === MessageType.error) throw new Error(r5.message);
 
-        return { type: MessageType.success };
+        return { type: MessageType.success, data: undefined };
+    } catch (e: any) {
+        return { type: MessageType.error, message: `Error: ${e.message}` };
+    }
+}
+
+export async function matchPost(
+    userID: UserID,
+    post: PostType
+): Promise<SuccessMessage | ErrorMessage> {
+    try {
+        // Get Poster Info
+        const posterID = post.user;
+        const r1 = await getUserOnce(posterID);
+        if (r1.type !== MessageType.success) throw new Error(r1.message);
+        const posterInfo = r1.data;
+
+        // Get Requester Info
+        const r2 = await getUserOnce(userID);
+        if (r2.type !== MessageType.success) throw new Error(r2.message);
+        const requesterInfo = r2.data;
+
+        // Update requester to have pending
+        requesterInfo.pending = requesterInfo.pending
+            ? [...requesterInfo.pending, post.postID]
+            : [post.postID];
+        const r3 = await writeUser({ userId: userID, userInfo: requesterInfo });
+        if (r3.type !== MessageType.success) throw new Error(r3.message);
+
+        // Update Poster to have request
+        posterInfo.requests = posterInfo.requests
+            ? [...posterInfo.requests, [userID, post.postID]]
+            : [[userID, post.postID]];
+        const r4 = await writeUser({ userId: posterID, userInfo: posterInfo });
+        if (r4.type !== MessageType.success) throw new Error(r4.message);
+
+        // Update Post Info to have pending
+        post.pending = post.pending ? [...post.pending, userID] : [userID];
+        const r5 = await writePostData(post);
+        if (r5.type !== MessageType.success) throw new Error(r5.message);
+
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }

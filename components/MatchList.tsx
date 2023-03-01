@@ -65,12 +65,12 @@ export default function MatchList({ user }: Props) {
     if (!isLoading) {
         return (
             <View style={{ marginTop: 20 }}>
-                <Text textStyle="title" styleSize="l" style={styles.title}>
+                <Text textStyle="header" styleSize="l" style={styles.title}>
                     Requests
                 </Text>
                 <FlatList
                     data={requests}
-                    style={{ paddingTop: 16 }}
+                    style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
                         <RequestCard
@@ -81,7 +81,7 @@ export default function MatchList({ user }: Props) {
                         />
                     )}
                 />
-                <Text textStyle="title" styleSize="l" style={styles.title}>
+                <Text textStyle="header" styleSize="l" style={styles.title}>
                     Matches
                 </Text>
                 <FlatList
@@ -92,7 +92,7 @@ export default function MatchList({ user }: Props) {
                         return <MatchCard postID={item} userInfo={userInfo} />;
                     }}
                 />
-                <Text textStyle="title" styleSize="l" style={styles.title}>
+                <Text textStyle="header" styleSize="l" style={styles.title}>
                     Pending
                 </Text>
                 <FlatList

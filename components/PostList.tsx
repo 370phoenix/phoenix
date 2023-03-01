@@ -4,7 +4,7 @@ import { FlatList, RefreshControl } from "react-native";
 import PostCard from "./PostCard";
 import { View, Text } from "./Themed";
 import Colors from "../constants/Colors";
-import { PostType } from "../constants/DataTypes";
+import { PostID, PostType } from "../constants/DataTypes";
 import { fetchPosts } from "../firebase/fetchPosts";
 
 export default function PostList() {

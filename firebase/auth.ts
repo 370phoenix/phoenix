@@ -84,9 +84,9 @@ export enum MessageType {
 }
 
 // Data type used for returning responses to the UI layer
-export type SuccessMessage<T = void> = {
+export type SuccessMessage<T = undefined> = {
     message?: string;
-    data?: T;
+    data: T;
     type: MessageType.success;
 };
 export type ErrorMessage = {
@@ -175,7 +175,7 @@ export async function writeUser({
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
         await set(ref(db, "users/" + userId), cleanUndefined(userInfo));
-        return { type: MessageType.success };
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
@@ -213,7 +213,7 @@ export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
 export async function deleteAccount(user: User): Promise<SuccessMessage | ErrorMessage> {
     try {
         await remove(ref(db, "users/" + user.uid));
-        return { type: MessageType.success };
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
     }

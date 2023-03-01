@@ -75,7 +75,7 @@ function MoreInfo({ post }: { post: PostType }) {
             {post.riders &&
                 profiles &&
                 profiles.map((profile, index) => (
-                    <ProfileInfo userInfo={profile} key={String(Math.random())} />
+                    <ProfileInfo userInfo={profile} itemKey={String(Math.random())} />
                 ))}
             <Spacer direction="column" size={40} />
             <Button

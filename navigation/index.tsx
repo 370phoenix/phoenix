@@ -137,20 +137,24 @@ function RootNavigator() {
                                     ),
                                 })}
                             />
-                            <Stack.Screen name="MatchDetails" component={MatchDetailsScreen} options={({ navigation }) => ({
-                                title: "Match Details",
-                                headerLeft: () => (
-                                    <Button
-                                        title="Go back"
-                                        onPress={() => navigation.goBack()}
-                                        leftIcon={Left}
-                                        color="purple"
-                                        light
-                                        short
-                                        clear
-                                    />
-                                )
-                            })} />
+                            <Stack.Screen
+                                name="MatchDetails"
+                                component={MatchDetailsScreen}
+                                options={({ navigation }) => ({
+                                    title: "Match Details",
+                                    headerLeft: () => (
+                                        <Button
+                                            title="Go back"
+                                            onPress={() => navigation.goBack()}
+                                            leftIcon={Left}
+                                            color="purple"
+                                            light
+                                            short
+                                            clear
+                                        />
+                                    ),
+                                })}
+                            />
 
                             <Stack.Group
                                 screenOptions={{

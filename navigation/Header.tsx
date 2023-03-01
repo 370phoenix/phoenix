@@ -1,6 +1,6 @@
 import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { Platform, StyleSheet, View, StatusBar} from "react-native";
+import { Platform, StyleSheet, View, StatusBar } from "react-native";
 import LogoHorizontal from "../assets/icons/LogoHorizontal";
 import Colors from "../constants/Colors";
 
@@ -24,7 +24,10 @@ export default function Header({ style, title, options }: HeaderProps) {
             <View style={styles.body}>
                 <View style={styles.leftBtn}>{headerLeft && headerLeft(props)}</View>
                 <LogoHorizontal color={Colors.gray.w} />
-                <View style={styles.rightBtn}>{headerRight && headerRight(props)}</View>
+                <View style={styles.rightBtn}>
+                    <View style={{ flex: 1 }} />
+                    {headerRight && headerRight(props)}
+                </View>
             </View>
         </View>
     );
@@ -54,11 +57,13 @@ const styles = StyleSheet.create({
     },
     leftBtn: {
         flex: 1,
+        flexDirection: "row",
         alignItems: "flex-start",
         paddingLeft: 8,
     },
     rightBtn: {
         flex: 1,
+        flexDirection: "row",
         alignItems: "flex-end",
         paddingRight: 8,
     },

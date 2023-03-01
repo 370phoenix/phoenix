@@ -54,7 +54,7 @@ export default function MatchCard({ postID }: Props) {
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
-                    backgroundColor: pressed ? Colors.gray[3] : Colors.gray[4],
+                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
                 },
             ]}>
             <View style={styles.textPart}>
@@ -81,7 +81,7 @@ export default function MatchCard({ postID }: Props) {
                 )}
             </View>
             <View style={styles.riderIcon}>
-                <Full color={Colors.purple.p} height={30} />
+                <Full color={Colors.purple.p} height={28} />
                 <Text>
                     {post.riders ? post.riders.length + 1 : 1} / {post.totalSpots}
                 </Text>
@@ -93,6 +93,7 @@ export default function MatchCard({ postID }: Props) {
 const styles = StyleSheet.create({
     cardContainer: {
         paddingLeft: 16,
+        paddingVertical: 16,
         flexDirection: "row",
         alignItems: "center",
         borderTopWidth: 1,
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
         paddingRight: 16,
         justifyContent: "center",
     },
-    textPart: { flex: 1, paddingVertical: 16 },
+    textPart: { flex: 1 },
     error: {
         color: Colors.red.p,
     },
