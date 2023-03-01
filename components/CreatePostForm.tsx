@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-    TouchableWithoutFeedback,
-    View,
-    Keyboard,
-    StyleSheet,
-    ScrollView,
-} from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
 import uuid from "react-native-uuid";
 
 import CustomDateTimePicker from "./CustomDateTimePicker";
@@ -22,7 +16,6 @@ import { auth } from "../firebaseConfig";
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-
     // date time state
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
@@ -107,7 +100,6 @@ export default function CreatePostForm() {
         }
     };
 
-
     // group contains location and round trip info
     const TripDetails = (
         <>
@@ -130,60 +122,63 @@ export default function CreatePostForm() {
         </>
     );
 
-    const Form = (<ScrollView>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.body}>
-                <Spacer direction="column" size={24} />
-                <Text textStyle="header" styleSize="l">
-                    Create Post
-                </Text>
-                <Spacer direction="column" size={16} />
-                {TripDetails}
-                <Spacer direction="column" size={16} />
-                <DateTimeGroup
-                    start={startTime}
-                    onChangeStart={setStartTime}
-                    end={endTime}
-                    onChangeEnd={setEndTime}
-                />
-                {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
-
-                <Spacer direction="column" size={16} />
-                {/* <Text textStyle="label" styleSize="l">
-            Notes for riders?
-        </Text> */}
-                <Spacer direction="column" size={8} />
-                <TextArea
-                    label="Notes"
-                    inputState={[notes, setNotes]}
-                    placeholder="Type here..."
-                />
-                <Spacer direction="column" size={16} />
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}>
-                    <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
-                    <NumberPicker
-                        count={numSeats}
-                        handlePlus={addNumSeats}
-                        handleMinus={deleteNumSeats}
+    const Form = (
+        <ScrollView>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.body}>
+                    <Spacer direction="column" size={24} />
+                    <Text textStyle="header" styleSize="l">
+                        Create Post
+                    </Text>
+                    <Spacer direction="column" size={16} />
+                    {TripDetails}
+                    <Spacer direction="column" size={16} />
+                    <DateTimeGroup
+                        start={startTime}
+                        onChangeStart={setStartTime}
+                        end={endTime}
+                        onChangeEnd={setEndTime}
                     />
+                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
+
+                    <Spacer direction="column" size={16} />
+                    <Text textStyle="label" styleSize="l">
+                        Notes for riders?
+                    </Text>
+                    <Spacer direction="column" size={8} />
+                    <TextArea
+                        label=""
+                        inputState={[notes, setNotes]}
+                        placeholder="Type here..."
+                        placeholderTextColor={Colors.gray[2]}
+                    />
+                    <Spacer direction="column" size={16} />
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                        <NumberPicker
+                            count={numSeats}
+                            handlePlus={addNumSeats}
+                            handleMinus={deleteNumSeats}
+                        />
+                    </View>
+                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
+                    <Button
+                        onPress={onSubmit}
+                        color="navy"
+                        title="Post"
+                        style={{ justifyContent: "flex-end" }}
+                    />
+                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
-                <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                <Spacer direction="column" size={128} style={{ flex: 1 }} />
-                <Button
-                    onPress={onSubmit}
-                    color="navy"
-                    title="Post"
-                    style={{ justifyContent: "flex-end" }}
-                />
-                <Spacer direction="column" size={128} style={{ flex: 1 }} />
-            </View>
-        </TouchableWithoutFeedback>
-    </ScrollView>);
+            </TouchableWithoutFeedback>
+        </ScrollView>
+    );
 
     return (
         <>
