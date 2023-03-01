@@ -1,30 +1,20 @@
 import { StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
-import { PostID, PostType } from "../constants/DataTypes";
+import { PostType } from "../constants/DataTypes";
 import { Text, View, Spacer, Button } from "../components/Themed";
 import Colors from "../constants/Colors";
-import MatchList from "../components/MatchList";
-import { getAuth } from "firebase/auth/react-native";
-import { fetchPost } from "../firebase/fetchPosts";
 import { RootStackParamList } from "../types";
 import { getUserOnce, MessageType, UserInfo } from "../firebase/auth";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
 import ProfileInfo from "../components/ProfileInfo";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
-export default function MatchesModal({ route }: Props) {
-    const [message, setMessage] = useState<string | null>(null);
-
+export default function MatchDetailsScreen({ route }: Props) {
     const post = route.params?.post;
 
     return (
         <ScrollView directionalLockEnabled style={styles.container}>
-            {message && (
-                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                    {message}
-                </Text>
-            )}
             {post && <MoreInfo post={post} />}
         </ScrollView>
     );

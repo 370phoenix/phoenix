@@ -20,7 +20,7 @@ import LocationPicker, { LocationButton } from "../components/LocationPicker";
 import Colors from "../constants/Colors";
 import { PostType, Coords } from "../constants/DataTypes";
 import { auth } from "../firebaseConfig";
-import { createPost } from "../firebase/makePosts";
+import { createPost } from "../firebase/posts";
 
 // stores options for number picker form inputs
 

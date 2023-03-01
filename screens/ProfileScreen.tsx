@@ -20,21 +20,8 @@ export default function ProfileScreen({ navigation }: props) {
     useEffect(() => {
         const setUpdates = async () => {
             if (user) {
-                const res = await getUserUpdates(user, (data: any) => {
-                    if (data.username && data.phone && data.gradYear && data.major && data.gender) {
-                        setUserInfo({
-                            username: data.username,
-                            phone: data.phone,
-                            gradYear: data.gradYear,
-                            major: data.major,
-                            gender: data.gender,
-                            ridesCompleted: data.ridesCompleted ? data.ridesCompleted : 0,
-                            chillIndex: data.chillIndex ? data.chillIndex : null,
-                            posts: data.posts,
-                            pending: data.pending,
-                            matches: data.matches,
-                        });
-                    }
+                const res = await getUserUpdates(user, (data: UserInfo) => {
+                    setUserInfo(data);
                 });
 
                 if (res.type === MessageType.error) setMessage(res.message);

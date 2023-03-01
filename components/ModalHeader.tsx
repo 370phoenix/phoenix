@@ -3,7 +3,6 @@ import { ParamListBase } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet } from "react-native";
 import Colors from "../constants/Colors";
-import { RootStackParamList } from "../types";
 import { Button, View } from "./Themed";
 
 type Props = {

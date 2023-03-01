@@ -1,16 +1,11 @@
-import { StyleSheet, Pressable, Platform, Alert } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 
-import { View, Text, Spacer } from "./Themed";
+import { View, Text } from "./Themed";
 import Colors from "../constants/Colors";
-import { Button } from "./Themed";
 import { useEffect, useState } from "react";
-import { getUserOnce, MessageType, UserInfo, writeUser } from "../firebase/auth";
-import Accept from "../assets/icons/Accept";
-import Reject from "../assets/icons/Reject";
-import { PostID, UserID, PostType, Coords } from "../constants/DataTypes";
-import { handleAcceptReject, writePostData } from "../firebase/makePosts";
-import { fetchPost } from "../firebase/fetchPosts";
-import { fetchSomePosts } from "../firebase/posts";
+import { MessageType, UserInfo } from "../firebase/auth";
+import { PostType } from "../constants/DataTypes";
+import { fetchPost } from "../firebase/posts";
 import { convertLocation } from "../firebase/ConvertPostTypes";
 import RoundTrip from "../assets/icons/RoundTrip";
 import { Right } from "../assets/icons/Arrow";

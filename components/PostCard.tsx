@@ -1,8 +1,8 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
 
-import { View, Text, Spacer, Button } from "./Themed";
+import { View, Text, Spacer } from "./Themed";
 import Colors from "../constants/Colors";
-import { PostID, PostType, UserID } from "../constants/DataTypes";
+import { PostType, UserID } from "../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../firebase/ConvertPostTypes";
 import { useNavigation } from "@react-navigation/native";
 import { Right } from "../assets/icons/Arrow";

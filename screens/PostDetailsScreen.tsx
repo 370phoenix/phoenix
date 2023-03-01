@@ -12,11 +12,11 @@ import { MessageType, UserInfo, getUserOnce } from "../firebase/auth";
 import { RootStackParamList } from "../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { getAuth } from "firebase/auth/react-native";
-import { matchPost } from "../firebase/makePosts";
+import { matchPost } from "../firebase/posts";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
-    if (!route.params) return;
+    if (!route.params) return <></>;
     const paramPost = route.params.post;
 
     const [post, setPost] = useState<PostType | undefined | null>(null);

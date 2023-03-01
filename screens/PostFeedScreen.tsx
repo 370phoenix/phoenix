@@ -6,7 +6,7 @@ import { View } from "../components/Themed";
 import Colors from "../constants/Colors";
 import { RootTabScreenProps } from "../types";
 
-export default function TabOneScreen({ navigation }: RootTabScreenProps<"Feed">) {
+export default function PostFeedScreen({ navigation }: RootTabScreenProps<"Feed">) {
     return (
         <View style={styles.container}>
             <StatusBar style="light" />

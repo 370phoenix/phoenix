@@ -4,18 +4,21 @@ import { FlatList, RefreshControl } from "react-native";
 import PostCard from "./PostCard";
 import { View, Text } from "./Themed";
 import Colors from "../constants/Colors";
-import { PostID, PostType } from "../constants/DataTypes";
-import { fetchPosts } from "../firebase/fetchPosts";
+import { PostType } from "../constants/DataTypes";
+import { fetchAllPosts } from "../firebase/posts";
+import { MessageType } from "../firebase/auth";
 
 export default function PostList() {
     const [isLoading, setLoading] = useState(true);
     const [posts, setPosts] = useState<PostType[]>([]);
+    const [message, setMesssage] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchData = async () => {
         if ((posts.length === 0 && isLoading) || refreshing) {
-            const res = await fetchPosts();
-            if (typeof res !== "string") setPosts(res);
+            const res = await fetchAllPosts();
+            if (res.type === MessageType.success) setPosts(res.data);
+            else setMesssage(res.message);
             setLoading(false);
         }
     };
@@ -35,12 +38,12 @@ export default function PostList() {
 
     return (
         <View style={{ marginTop: 20 }}>
-            {typeof posts === "string" && (
+            {message && (
                 <Text style={{ color: Colors.red.p }} textStyle="label" styleSize="l">
-                    Failed to retrieve posts
+                    {message}
                 </Text>
             )}
-            {typeof posts !== "string" && posts.length !== 0 && (
+            {posts && posts.length !== 0 && (
                 <FlatList
                     data={posts}
                     style={{ paddingTop: 16, paddingBottom: 200 }}

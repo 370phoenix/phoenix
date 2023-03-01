@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { View, Text, Spacer, Button } from "../components/Themed";
+import { View, Text, Spacer } from "../components/Themed";
 import { UserInfo } from "../firebase/auth";
 
 type Props = {
