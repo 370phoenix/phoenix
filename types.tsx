@@ -6,8 +6,9 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AuthAction, AuthState, UserInfo } from "./firebase/auth";
-import { PostID, PostType } from "./constants/DataTypes";
+import { UserInfo } from "./utils/auth";
+import { PostType } from "./constants/DataTypes";
+import { MatchSublist } from "./components/matches/MatchList";
 
 declare global {
     namespace ReactNavigation {
@@ -25,19 +26,23 @@ export type RootStackParamList = {
     CreateProfile: CreateProfileParamList | undefined;
     PostDetails: PostDetailsParamList | undefined;
     CreatePost: undefined;
+    MatchDetails: MatchDetailsParamList | undefined;
+};
+
+export type MatchDetailsParamList = {
+    post: PostType;
+    list: MatchSublist;
 };
 
 export type PostDetailsParamList = {
-    post: PostID | PostType;
+    post: PostType;
 };
 
 export type ChangeInfoParamList = {
     userInfo: UserInfo;
 };
 
-export type CreateProfileParamList = {
-    authDispatch: React.Dispatch<AuthAction>;
-};
+export type CreateProfileParamList = {};
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,

@@ -1,44 +1,33 @@
-/**
- * If you are not familiar with React Navigation, refer to the "Fundamentals" guide:
- * https://reactnavigation.org/docs/getting-started
- *
- */
 import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import {
-    AuthAction,
-    AuthContext,
-    authReducer,
-    AuthState,
-    getUserOnce,
-    MessageType,
-} from "../firebase/auth";
-import WelcomeScreen from "../screens/WelcomeScreen";
-import SignInScreen from "../screens/SignInScreen";
+import { getUserOnce, MessageType } from "../utils/auth";
+import WelcomeScreen from "../screens/auth/WelcomeScreen";
+import SignInScreen from "../screens/auth/SignInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
-import ViewPostsScreen from "../screens/ViewPostScreen";
+import ViewPostsScreen from "../screens/PostFeedScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { onAuthStateChanged } from "firebase/auth/react-native";
-import { Button } from "../components/Themed";
+import { Button } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
 import Header from "./Header";
 import Matches from "../assets/icons/Matches";
-import MatchesScreen from "../screens/MatchesScreen";
+import MatchesScreen from "../screens/matches/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
 import TabBar from "./TabBar";
-import CreateProfileScreen from "../screens/CreateProfileScreen";
-import ChangeInfoScreen from "../screens/ChangeInfoScreen";
-import CreatePostScreen from "../screens/CreatePostScreen";
-import PostDetailsScreen from "../screens/PostDetailsScreen";
-import ModalHeader from "../components/ModalHeader";
-import { auth } from "../firebaseConfig";
+import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
+import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
+import CreatePostScreen from "../screens/modals/CreatePostScreen";
+import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
+import ModalHeader from "../components/shared/ModalHeader";
+import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { ReactNativeFirebase } from "@react-native-firebase/app";
 
 export default function Navigation() {
     return (
@@ -49,40 +38,35 @@ export default function Navigation() {
 }
 
 /**
- * A root stack navigator is often used for displaying modals on top of all other content.
+ * A root stack navigator is often used for displaying modals on top ofall other content.
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const currentUser = auth.currentUser;
-    const initialAuth = {
-        signedIn: currentUser ? true : false,
-        needsInfo: false,
-        user: currentUser ? currentUser : null,
-    };
-
-    // Reducer in /firebase/auth.ts
-    const [authState, authDispatch] = React.useReducer<React.Reducer<AuthState, AuthAction>>(
-        authReducer,
-        initialAuth as AuthState
-    );
+    const currentUser = auth().currentUser;
+    const [signedIn, setSignedIn] = React.useState(false);
+    const [needsInfo, setNeedsInfo] = React.useState(false);
 
     React.useEffect(() => {
-        const subscriber = onAuthStateChanged(auth, async (user) => {
+        const subscriber = auth().onAuthStateChanged(async (user) => {
             if (user) {
                 // User is signed in
                 try {
                     const userInfo = await getUserOnce(user.uid);
-                    if (userInfo.type === MessageType.info)
-                        authDispatch({ type: "COLLECT_INFO", user: user });
-                    else authDispatch({ type: "SIGN_IN", user: user });
+                    if (userInfo.type === MessageType.info) {
+                        setNeedsInfo(true);
+                        setSignedIn(true);
+                    } else {
+                        setNeedsInfo(false);
+                        setSignedIn(true);
+                    }
                 } catch (e: any) {
                     console.log(e.message);
                 }
             } else {
                 // User is signed out
-                authDispatch({ type: "SIGN_OUT" });
+                setSignedIn(false);
             }
         });
 
@@ -91,83 +75,96 @@ function RootNavigator() {
     }, []);
 
     return (
-        <AuthContext.Provider value={authState}>
-            <Stack.Navigator
-                screenOptions={{
-                    header: ({ navigation, route, options }) => {
-                        const title = getHeaderTitle(options, route.name);
-                        return <Header title={title} options={options} />;
-                    },
-                }}>
-                {authState.signedIn ? (
-                    authState.needsInfo ? (
-                        <Stack.Screen name="CreateProfile">
-                            {(props) => (
-                                <CreateProfileScreen {...props} authDispatch={authDispatch} />
-                            )}
-                        </Stack.Screen>
-                    ) : (
-                        <>
-                            <Stack.Screen
-                                name="Root"
-                                component={BottomTabNavigator}
-                                options={{ headerShown: false }}
-                            />
-                            <Stack.Screen
-                                name="NotFound"
-                                component={NotFoundScreen}
-                                options={{ title: "Oops!" }}
-                            />
-                            <Stack.Screen
-                                name="Matches"
-                                component={MatchesScreen}
-                                options={({ navigation }) => ({
-                                    title: "Matches",
-                                    headerLeft: () => (
-                                        <Button
-                                            title="Go back"
-                                            onPress={() => navigation.goBack()}
-                                            leftIcon={Left}
-                                            color="purple"
-                                            light
-                                            short
-                                            clear
-                                        />
-                                    ),
-                                })}
-                            />
-                            <Stack.Group
-                                screenOptions={{
-                                    presentation: "modal",
-                                    header: ({ navigation }) => (
-                                        <ModalHeader navigation={navigation} />
-                                    ),
-                                }}>
-                                <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
-                                <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-                                <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
-                            </Stack.Group>
-                        </>
-                    )
+        <Stack.Navigator
+            screenOptions={{
+                header: ({ navigation, route, options }) => {
+                    const title = getHeaderTitle(options, route.name);
+                    return <Header title={title} options={options} />;
+                },
+            }}>
+            {signedIn ? (
+                needsInfo ? (
+                    <Stack.Screen name="CreateProfile">
+                        {(props) => <CreateProfileScreen {...props} setNeedsInfo={setNeedsInfo} />}
+                    </Stack.Screen>
                 ) : (
                     <>
                         <Stack.Screen
-                            name="Welcome"
-                            component={WelcomeScreen}
+                            name="Root"
+                            component={BottomTabNavigator}
                             options={{ headerShown: false }}
                         />
                         <Stack.Screen
-                            name="SignIn"
-                            component={SignInScreen}
-                            options={{
-                                headerShown: false,
-                                animationTypeForReplace: authState.signedIn ? "push" : "pop",
-                            }}
+                            name="NotFound"
+                            component={NotFoundScreen}
+                            options={{ title: "Oops!" }}
                         />
+                        <Stack.Screen
+                            name="Matches"
+                            component={MatchesScreen}
+                            options={({ navigation }) => ({
+                                title: "Matches",
+                                headerLeft: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                ),
+                            })}
+                        />
+                        <Stack.Screen
+                            name="MatchDetails"
+                            component={MatchDetailsScreen}
+                            options={({ navigation }) => ({
+                                title: "Match Details",
+                                headerLeft: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                ),
+                            })}
+                        />
+
+                        <Stack.Group
+                            screenOptions={{
+                                presentation: "modal",
+                                header: ({ navigation }) => <ModalHeader navigation={navigation} />,
+                            }}>
+                            <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
+                            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+                            <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+                        </Stack.Group>
                     </>
-                )}
-            </Stack.Navigator>
-        </AuthContext.Provider>
+                )
+            ) : (
+                <>
+                    <Stack.Screen
+                        name="Welcome"
+                        component={WelcomeScreen}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="SignIn"
+                        component={SignInScreen}
+                        options={{
+                            headerShown: false,
+                            animationTypeForReplace: signedIn ? "push" : "pop",
+                        }}
+                    />
+                </>
+            )}
+        </Stack.Navigator>
     );
 }
 
@@ -230,7 +227,7 @@ function BottomTabNavigator() {
                         <Button
                             title="Sign out"
                             onPress={() => {
-                                auth.signOut();
+                                auth().signOut();
                             }}
                             color="purple"
                             fontSize={16}

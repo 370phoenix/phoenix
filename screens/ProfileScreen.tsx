@@ -1,49 +1,37 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
-import PostList from "../components/PostList";
-import ProfilePostList from "../components/ProfilePostList";
-import ProfileView from "../components/ProfileView";
+import ProfilePostList from "../components/profile/ProfilePostList";
+import ProfileView from "../components/profile/ProfileView";
 
-import { Spacer, View } from "../components/Themed";
+import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
-import { AuthContext, getUserUpdates, MessageType, UserInfo } from "../firebase/auth";
+import { getUserUpdates, MessageType, UserInfo } from "../utils/auth";
 import { RootTabParamList } from "../types";
+import auth from "@react-native-firebase/auth";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;
 export default function ProfileScreen({ navigation }: props) {
-    const authState = useContext(AuthContext);
-    const user = authState?.user;
+    const user = auth().currentUser;
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [message, setMessage] = useState("Loading user info...");
 
     useEffect(() => {
-        const setUpdates = async () => {
-            if (user) {
-                const res = await getUserUpdates(user, (data: any) => {
-                    if (data.username && data.phone && data.gradYear && data.major && data.gender) {
-                        setUserInfo({
-                            username: data.username,
-                            phone: data.phone,
-                            gradYear: data.gradYear,
-                            major: data.major,
-                            gender: data.gender,
-                            ridesCompleted: data.ridesCompleted ? data.ridesCompleted : 0,
-                            chillIndex: data.chillIndex ? data.chillIndex : null,
-                            posts: data.posts,
-                            pending: data.pending,
-                            matches: data.matches,
-                        });
-                    }
-                });
+        if (user) {
+            const res = getUserUpdates(user, (data: UserInfo) => {
+                setUserInfo(data);
+            });
 
-                if (res.type === MessageType.error) setMessage(res.message);
-            } else {
-                setMessage("No user found");
+            if (res.type === MessageType.error) {
+                setMessage(res.message);
+                return;
             }
-        };
 
-        setUpdates();
+            const unsubscribe = res.data;
+            return () => unsubscribe();
+        } else {
+            setMessage("No user found");
+        }
     }, []);
 
     return (
