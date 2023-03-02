@@ -105,8 +105,15 @@ export function getAllPostUpdates(
                 onUpdate(data);
             }
         });
+        const onChange = postsRef.on("child_changed", (snapshot) => {
+            if (snapshot.exists()) {
+                const data: PostType = snapshot.val();
+                onUpdate(data);
+            }
+        });
         const unsub = () => {
             postsRef.off("child_added", onAdd);
+            postsRef.off("child_changed", onChange);
         };
         return { type: MessageType.success, data: unsub };
     } catch (e: any) {
@@ -370,4 +377,16 @@ export function findRequestIndex(requests: [UserID, PostID][], request: [UserID,
         if (req[0] == request[0] && req[1] == request[1]) return i;
     }
     return -1;
+}
+
+export function comparePosts(a: PostType, b: PostType) {
+    if (!compareLengths("riders")) return false;
+    if (!compareLengths("pending")) return false;
+    return true;
+
+    function compareLengths(att: keyof PostType) {
+        const arrA = a[att] as string[];
+        const arrB = b[att] as string[];
+        return arrA.length == arrB.length;
+    }
 }

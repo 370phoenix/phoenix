@@ -4,7 +4,7 @@ import { FlatList, RefreshControl } from "react-native";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
 import { MessageType } from "../../utils/auth";
-import { fetchAllPosts, getAllPostUpdates } from "../../utils/posts";
+import { comparePosts, fetchAllPosts, getAllPostUpdates } from "../../utils/posts";
 import { View, Text } from "../shared/Themed";
 
 import PostCard from "./PostCard";
@@ -26,7 +26,16 @@ export default function PostList() {
     useEffect(() => {
         const res = getAllPostUpdates((post) => {
             setPosts((prev) => {
-                if (prev.find((val) => val.postID == post.postID)) return prev;
+                let i = 0;
+                if ((i = prev.findIndex((val) => val.postID == post.postID)) !== -1) {
+                    const found = prev[i];
+                    if (comparePosts(found, post)) return prev;
+
+                    // Else, replace post
+                    const newPosts = prev;
+                    newPosts.splice(i, 1);
+                    return [...newPosts, post];
+                }
                 return [...prev, post];
             });
         });
