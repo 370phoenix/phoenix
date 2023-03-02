@@ -358,6 +358,25 @@ export async function matchPost(
     }
 }
 
+/**
+ * Initiates a request for a user to unmatch from a post after pressing the unmatch button.
+ *
+ * @param userID (UserID): The ID of the user requesting to unmatch from the ride.
+ * @param post (PostType): The post the user is trying to unmatch from.
+ * @returns (SuccessMessage | ErrorMessage)
+ */
+export async function unmatchFromPost(
+    userID: UserID,
+    post: PostType
+): Promise<SuccessMessage | ErrorMessage> {
+    try {
+
+        return { type: MessageType.success, data: undefined };
+    } catch (e: any) {
+        return { type: MessageType.error, message: `Error: ${e.message}` };
+    }
+}
+
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 ///////////// HELPERS /////////////////////
