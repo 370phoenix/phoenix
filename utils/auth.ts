@@ -1,75 +1,35 @@
-import { createContext } from "react";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import database, { firebase } from "@react-native-firebase/database";
+import database from "@react-native-firebase/database";
 import { Unsubscribe } from "./posts";
 
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
-
-export type AuthState = {
-    signedIn: boolean;
-    needsInfo: boolean;
-    user: FirebaseAuthTypes.User | null;
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// TYPES ////////////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
+export type UserInfo = {
+    username: string;
+    phone: string;
+    major: string;
+    gradYear: number;
+    gender: string;
+    chillIndex: number | null;
+    ridesCompleted: number;
+    posts: PostID[] | undefined;
+    pending: PostID[] | undefined;
+    matches: PostID[] | undefined;
+    requests: [UserID, PostID][];
 };
 
-export type AuthAction =
-    | {
-          type: "SIGN_IN";
-          user: FirebaseAuthTypes.User;
-      }
-    | {
-          type: "SIGN_OUT";
-      }
-    | { type: "COLLECTED" }
-    | {
-          type: "COLLECT_INFO";
-          user: FirebaseAuthTypes.User;
-      };
-
-export function authReducer(prevState: AuthState, action: AuthAction) {
-    switch (action.type) {
-        case "SIGN_IN":
-            return {
-                needsInfo: prevState.needsInfo,
-                signedIn: true,
-                user: action.user,
-            };
-        case "SIGN_OUT":
-            return {
-                needsInfo: prevState.needsInfo,
-                signedIn: false,
-                user: null,
-            };
-        case "COLLECT_INFO":
-            return {
-                needsInfo: true,
-                signedIn: true,
-                user: action.user,
-            };
-        case "COLLECTED":
-            return {
-                needsInfo: false,
-                signedIn: true,
-                user: prevState.user,
-            };
-    }
-}
-
-export const AuthContext = createContext<AuthState>({
-    signedIn: false,
-    needsInfo: false,
-    user: null,
-});
-
+// MESSAGES //
 export enum MessageType {
     error,
     info,
     success,
 }
-
-// Data type used for returning responses to the UI layer
 export type SuccessMessage<T = undefined> = {
     message?: string;
     data: T;
@@ -85,6 +45,23 @@ export type InfoMessage = {
 };
 export type Message<T> = SuccessMessage<T> | ErrorMessage | InfoMessage;
 
+// For helper method cleanUndefined
+type Clean<T> = {
+    [K in keyof T]?: any;
+};
+
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// SIGN IN //////////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
+
+/**
+ * Initiates the phone verification process
+ *
+ * @param phoneNumber (string): The user's phone number
+ * @returns (SucessMessage<ConfirmationResult> | ErrorMessage): The confirm engine
+ */
 export async function getConfirm(
     phoneNumber: string
 ): Promise<SuccessMessage<FirebaseAuthTypes.ConfirmationResult> | ErrorMessage> {
@@ -101,6 +78,13 @@ export async function getConfirm(
     }
 }
 
+/**
+ * Signs the user in using a OTP
+ *
+ * @param confirm (ConfirmationResult): The confirm engine
+ * @param verificationCode (string): User-entered OTP
+ * @returns (SuccessMessage | ErrorMessage)
+ */
 export async function signIn(
     confirm: FirebaseAuthTypes.ConfirmationResult,
     verificationCode: string
@@ -113,43 +97,25 @@ export async function signIn(
     }
 }
 
-export type UserInfo = {
-    username: string;
-    phone: string;
-    major: string;
-    gradYear: number;
-    gender: string;
-    chillIndex: number | null;
-    ridesCompleted: number;
-    posts: PostID[] | undefined;
-    pending: PostID[] | undefined;
-    matches: PostID[] | undefined;
-    requests: [UserID, PostID][];
-};
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// USER DB //////////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
 
-interface WriteUserParams {
-    userId: string;
-    userInfo: UserInfo;
-}
-
-type Clean<T> = {
-    [K in keyof T]?: any;
-};
-
-function cleanUndefined<T extends object>(obj: T): T {
-    let clean: Clean<T> = {};
-    for (const k in obj) {
-        if (obj[k]) clean[k] = obj[k];
-    }
-    return clean as T;
-}
-
-export async function writeUser({
-    userId,
-    userInfo,
-}: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
+/**
+ * Used to overwrite the user info.
+ *
+ * @param userID (UserID): The user ID
+ * @param userInfo (UserInfo): The new user Info
+ * @returns (SuccessMessage | ErrorMessage)
+ */
+export async function writeUser(
+    userID: string,
+    userInfo: UserInfo
+): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + userId);
+        const userRef = database().ref("users/" + userID);
         await userRef.set(cleanUndefined(userInfo));
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -157,6 +123,13 @@ export async function writeUser({
     }
 }
 
+/**
+ * Get instant updates for user info
+ *
+ * @param user (User): The user to watch for updates on
+ * @param onUpdate ((data: UserInfo) => void) callback to operate on the data
+ * @returns (SuccessMessage<Unsubscribe> | ErrorMessage): An unsubscribe function
+ */
 export function getUserUpdates(
     user: FirebaseAuthTypes.User,
     onUpdate: (data: UserInfo) => void
@@ -176,6 +149,12 @@ export function getUserUpdates(
     }
 }
 
+/**
+ * Gets a user's info only once
+ *
+ * @param userID (UserID): The user to get the info of
+ * @returns (SuccessMessage<UserInfo> | ErrorMessage | InfoMessage) Informs there is no data, or returns it if there is.
+ */
 export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     try {
         const userRef = database().ref("users/" + userID);
@@ -187,6 +166,12 @@ export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     }
 }
 
+/**
+ * Delete a user's account info in the db.
+ *
+ * @param user (User): The user who's info to delete.
+ * @returns (SuccessMessage | ErrorMessage)
+ */
 export async function deleteAccount(
     user: FirebaseAuthTypes.User
 ): Promise<SuccessMessage | ErrorMessage> {
@@ -199,6 +184,12 @@ export async function deleteAccount(
     }
 }
 
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// VALIDATION ///////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
+
 type ValidateProfileParams = {
     username: string;
     major: string;
@@ -207,6 +198,12 @@ type ValidateProfileParams = {
     phone?: string | null;
     userInfo?: UserInfo | null;
 };
+/**
+ * Checks to see if user info is valid, and returns a clean version.
+ *
+ * @param param0 (ValidateProfileParams): inputs to validate
+ * @returns (SuccessMessage<UserInfo> | ErrorMessage)
+ */
 export function validateProfile({
     username,
     major,
@@ -283,4 +280,24 @@ export function validateProfile({
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
+}
+
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// HELPERS //////////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
+
+/**
+ * Get's rid of any undefined fields in obj.
+ *
+ * @param obj (T): An object to clean
+ * @returns (T): The clean object
+ */
+function cleanUndefined<T extends object>(obj: T): T {
+    let clean: Clean<T> = {};
+    for (const k in obj) {
+        if (obj[k]) clean[k] = obj[k];
+    }
+    return clean as T;
 }

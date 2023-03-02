@@ -53,10 +53,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 onPress: async () => {
                     try {
                         if (!valid.data) return;
-                        const res = await writeUser({
-                            userId: user.uid,
-                            userInfo: valid.data,
-                        });
+                        const res = await writeUser(user.uid, valid.data);
 
                         if (res.type === MessageType.error) {
                             setMessage(res.message);

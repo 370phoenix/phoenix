@@ -145,10 +145,7 @@ export async function deletePost(
         }
         userInfo.posts = newPosts;
 
-        const res = await writeUser({
-            userId,
-            userInfo,
-        });
+        const res = await writeUser(userId, userInfo);
         if (res.type === MessageType.error) throw Error(res.message);
 
         return { type: MessageType.success, data: undefined };
@@ -196,7 +193,7 @@ export async function createPost(
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
-        const r2 = await writeUser({ userId: user.uid, userInfo });
+        const r2 = await writeUser(user.uid, userInfo);
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
         return { type: MessageType.success, data: undefined };
@@ -279,7 +276,7 @@ export async function handleAcceptReject({
             requesterInfo.matches = requesterInfo.matches
                 ? [...requesterInfo.matches, postID]
                 : [postID];
-        const r2 = await writeUser({ userId: requesterID, userInfo: requesterInfo });
+        const r2 = await writeUser(requesterID, requesterInfo);
         if (r2.type === MessageType.error) throw new Error(r2.message);
 
         // Update Post Info
@@ -297,7 +294,7 @@ export async function handleAcceptReject({
         // Remove from requests for accept or deny
         const k = findRequestIndex(userInfo.requests, [requesterID, postID]);
         if (k !== -1) userInfo.requests.splice(k, 1);
-        const r5 = await writeUser({ userId: posterID, userInfo });
+        const r5 = await writeUser(posterID, userInfo);
         if (r5.type === MessageType.error) throw new Error(r5.message);
 
         return { type: MessageType.success, data: undefined };
@@ -333,14 +330,14 @@ export async function matchPost(
         requesterInfo.pending = requesterInfo.pending
             ? [...requesterInfo.pending, post.postID]
             : [post.postID];
-        const r3 = await writeUser({ userId: userID, userInfo: requesterInfo });
+        const r3 = await writeUser(userID, requesterInfo);
         if (r3.type !== MessageType.success) throw new Error(r3.message);
 
         // Update Poster to have request
         posterInfo.requests = posterInfo.requests
             ? [...posterInfo.requests, [userID, post.postID]]
             : [[userID, post.postID]];
-        const r4 = await writeUser({ userId: posterID, userInfo: posterInfo });
+        const r4 = await writeUser(posterID, posterInfo);
         if (r4.type !== MessageType.success) throw new Error(r4.message);
 
         // Update Post Info to have pending

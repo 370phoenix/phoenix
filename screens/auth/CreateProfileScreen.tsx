@@ -1,30 +1,30 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { Dispatch, useContext, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthAction, AuthContext, MessageType, validateProfile, writeUser } from "../../utils/auth";
+import { MessageType, validateProfile, writeUser } from "../../utils/auth";
+import auth from "@react-native-firebase/auth";
 
 type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 type UniqueProps = {
-    authDispatch: Dispatch<AuthAction>;
+    setNeedsInfo: Dispatch<SetStateAction<boolean>>;
 };
 type Props = NativeProps & UniqueProps;
-export default function CreateProfileScreen({ authDispatch }: Props) {
+export default function CreateProfileScreen({ setNeedsInfo }: Props) {
     const headerHeight = useHeaderHeight();
     const nameState = useState("");
     const majorState = useState("");
     const gradState = useState("");
     const genderState = useState("");
-    const authState = useContext(AuthContext);
 
     const [message, setMessage] = useState<string | null>(null);
 
     const onSubmit = async () => {
-        const user = authState.user;
+        const user = auth().currentUser;
 
         if (user && user.phoneNumber) {
             const valid = validateProfile({
@@ -41,8 +41,8 @@ export default function CreateProfileScreen({ authDispatch }: Props) {
             }
             if (!valid.data) return;
 
-            const res = await writeUser({ userId: user.uid, userInfo: valid.data });
-            if (res.type === MessageType.success) authDispatch({ type: "COLLECTED" });
+            const res = await writeUser(user.uid, valid.data);
+            if (res.type === MessageType.success) setNeedsInfo(false);
             else setMessage(res.message);
         }
     };

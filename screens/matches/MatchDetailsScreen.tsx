@@ -13,7 +13,7 @@ import auth from "@react-native-firebase/auth";
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
     const currentUser = auth().currentUser?.uid;
-    if (!currentUser || !route.params) return;
+    if (!currentUser || !route.params) return <></>;
 
     return (
         <ScrollView directionalLockEnabled style={styles.container}>

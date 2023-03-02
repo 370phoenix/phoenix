@@ -1,18 +1,18 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import ProfilePostList from "../components/profile/ProfilePostList";
 import ProfileView from "../components/profile/ProfileView";
 
 import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
-import { AuthContext, getUserUpdates, MessageType, UserInfo } from "../utils/auth";
+import { getUserUpdates, MessageType, UserInfo } from "../utils/auth";
 import { RootTabParamList } from "../types";
+import auth from "@react-native-firebase/auth";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;
 export default function ProfileScreen({ navigation }: props) {
-    const authState = useContext(AuthContext);
-    const user = authState?.user;
+    const user = auth().currentUser;
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [message, setMessage] = useState("Loading user info...");
 
