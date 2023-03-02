@@ -370,30 +370,35 @@ export async function unmatchPost(
     post: PostType
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-
         // remove postID from user.matches
         const r1 = await getUserOnce(userID);
         if (r1.type !== MessageType.success) throw new Error(r1.message);
         const userInfo = r1.data;
-        let newMatches = userInfo.matches;
-        if(!userInfo || !newMatches) throw Error("Error fetching user info");
+        const newMatches = userInfo.matches;
+        if (!userInfo || !newMatches) throw Error("Error fetching user info");
         const postIndex = newMatches.indexOf(post.postID);
-        newMatches = newMatches.splice(postIndex, 1);
+        if (postIndex === -1) throw Error("Post not found in user matches");
+        if(newMatches.length === 1) newMatches.shift();
+        else newMatches.splice(postIndex, 1);
         userInfo.matches = newMatches;
-
+        
+        // update user to remove post
         const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(r2.message);
-        
-        // remove userID from post.riders
-        let newRiders = post.riders;
-        if(!newRiders) throw Error("Error fetching users from post");
-        const userIndex = newRiders.indexOf(userID);
-        newRiders = newRiders.splice(userIndex, 1);
-        post.riders = newRiders;
 
+        // remove userID from post.riders
+        const newRiders = post.riders;
+        if (!newRiders) throw Error("Error fetching users from post");
+        const userIndex = newRiders.indexOf(userID);
+        if (userIndex === -1) throw Error("User not found in post riders");
+        if(newRiders.length === 1) newRiders.shift();
+        newRiders.splice(userIndex, 1);
+        post.riders = newRiders;
+        
+        // update post to remove user
         const r3 = await writePostData(post);
         if (r3.type !== MessageType.success) throw new Error(r3.message);
-
+        
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };

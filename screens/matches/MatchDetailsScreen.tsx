@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { PostType } from "../../constants/DataTypes";
@@ -10,6 +10,7 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
+import { unmatchPost } from "../../utils/posts";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
@@ -21,6 +22,7 @@ export default function MatchDetailsScreen({ route }: Props) {
 
     const [posterInfo, setPosterInfo] = useState<UserInfo | null>(null);
     const [profiles, setProfiles] = useState<UserInfo[] | null>(null);
+    const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const loadPoster = async () => {
@@ -47,8 +49,23 @@ export default function MatchDetailsScreen({ route }: Props) {
         if (!pending && !isMine) loadPoster();
     }, [post, isMine, pending]);
 
-    const onUnmatch = () => {
-        // TODO
+    const onUnmatch = async () => {
+        Alert.alert("Confirm Unmatch", "Are you sure you want to unmatch with this post?", [
+            {
+                text: "Cancel",
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (!currentUser) return;
+                    if (!post) return;
+                    if (!post.riders?.includes(currentUser)) return;
+
+                    const res = await unmatchPost(currentUser, post);
+                    if (res.type === MessageType.error) setMessage(res.message);
+                },
+            },
+        ]);
     };
 
     return (
@@ -86,7 +103,8 @@ export default function MatchDetailsScreen({ route }: Props) {
                         <ProfileInfo userInfo={profile} />
                     </View>
                 ))}
-            <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />
+            {message && <Text>{message}</Text>}
+            {currentUser !== post.user && <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />}
             <Spacer direction="column" size={200} />
         </ScrollView>
     );
