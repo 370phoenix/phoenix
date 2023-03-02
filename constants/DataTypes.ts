@@ -7,6 +7,19 @@ export type Coords = {
     lng: number;
 };
 
+export type NewPostType = {
+    pickup: Coords | string;
+    dropoff: Coords | string;
+    totalSpots: number;
+    notes: string;
+    startTime: number;
+    endTime: number;
+    roundTrip: boolean;
+    user: UserID;
+    riders: UserID[] | undefined;
+    pending: UserID[] | undefined;
+};
+
 export type PostType = {
     pickup: Coords | string;
     dropoff: Coords | string;

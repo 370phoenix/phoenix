@@ -20,6 +20,8 @@ yarn-error.log
 
 #testing
 coverage/
-
 android/
 ios/
+
+google-services.json
+GoogleService-Info.plist
