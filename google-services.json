@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "816203081042",
+    "firebase_url": "https://phoenix-370-default-rtdb.firebaseio.com",
+    "project_id": "phoenix-370",
+    "storage_bucket": "phoenix-370.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816203081042:android:4b464823465706a04f468b",
+        "android_client_info": {
+          "package_name": "com.willtheodore.phoenix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "816203081042-q7c5bkikuhqaqfeajs69oa4jhmuc9aa8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.willtheodore.phoenix",
+            "certificate_hash": "c705b6d7facc9bef80cb60f81e8641601a569376"
+          }
+        },
+        {
+          "client_id": "816203081042-fsduuead4mgkk67t435a6ti5jb71l356.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIrS_R_nkJa0mo0Z9Q-tpb_UL6eqPo76Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "816203081042-fsduuead4mgkk67t435a6ti5jb71l356.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "816203081042-dlkok6863f27oe8j4u2b29mgaf8jus6g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.willtheodore.phoenix"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
