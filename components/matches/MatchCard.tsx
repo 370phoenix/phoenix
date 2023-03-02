@@ -11,13 +11,15 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useNavigation } from "@react-navigation/native";
+import { MatchSublist } from "./MatchList";
 
 export type Props = {
     postID: string;
     userInfo: UserInfo | null;
+    list: MatchSublist;
 };
 
-export default function MatchCard({ postID }: Props) {
+export default function MatchCard({ postID, list }: Props) {
     const navigation = useNavigation();
 
     const [post, setPost] = useState<PostType | null>(null);
@@ -44,7 +46,7 @@ export default function MatchCard({ postID }: Props) {
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("MatchDetails", { post: post })} //pass the post info
+            onPress={() => navigation.navigate("MatchDetails", { post: post, list: list })} //pass the post info
             style={({ pressed }) => [
                 styles.cardContainer,
                 {

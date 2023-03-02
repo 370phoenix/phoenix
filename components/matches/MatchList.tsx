@@ -91,7 +91,13 @@ export default function MatchList({ user }: Props) {
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
-                        return <MatchCard postID={item} userInfo={userInfo} />;
+                        return (
+                            <MatchCard
+                                postID={item}
+                                userInfo={userInfo}
+                                list={MatchSublist.matches}
+                            />
+                        );
                     }}
                 />
                 <Text textStyle="header" styleSize="l" style={styles.title}>
@@ -103,7 +109,13 @@ export default function MatchList({ user }: Props) {
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
-                        return <MatchCard postID={item} userInfo={userInfo} />;
+                        return (
+                            <MatchCard
+                                postID={item}
+                                userInfo={userInfo}
+                                list={MatchSublist.pending}
+                            />
+                        );
                     }}
                 />
             </View>
@@ -129,3 +141,8 @@ const styles = StyleSheet.create({
         color: Colors.gray[1],
     },
 });
+
+export enum MatchSublist {
+    pending,
+    matches,
+}

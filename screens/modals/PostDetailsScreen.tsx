@@ -17,9 +17,8 @@ import auth from "@react-native-firebase/auth";
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
     if (!route.params) return <></>;
-    const paramPost = route.params.post;
+    const post = route.params.post;
 
-    const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const currentUser = auth().currentUser?.uid;
 
@@ -34,6 +33,7 @@ export default function DetailsModal({ route }: Props) {
                     if (!currentUser) return;
                     if (!post) return;
                     if (post.riders?.includes(currentUser)) return;
+                    if (post.pending?.includes(currentUser)) return;
 
                     const res = await matchPost(currentUser, post);
                     if (res.type === MessageType.error) setMessage(res.message);
@@ -41,17 +41,6 @@ export default function DetailsModal({ route }: Props) {
             },
         ]);
     };
-
-    useEffect(() => {
-        // DON'T DELETE: Will be used later for deep linking
-        // const getPostInfo = async (postID: PostID) => {
-        //     const res = await fetchPost(postID);
-        //     if (res.type === MessageType.error) setMessage(res.message);
-        //     else setPost(res.data);
-        // };
-
-        if (paramPost) setPost(paramPost);
-    }, []);
 
     return (
         <View style={styles.infoContainer}>
