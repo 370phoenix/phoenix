@@ -3,11 +3,11 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import MatchList from "../../components/matches/MatchList";
-import { getAuth } from "firebase/auth/react-native";
+import auth from "@react-native-firebase/auth";
 
 export default function MatchesScreen() {
-    const auth = getAuth();
-    if (!auth.currentUser)
+    const currentUser = auth().currentUser;
+    if (!currentUser)
         return (
             <View style={styles.container}>
                 <Text textStyle="label" style={styles.err}>
@@ -17,7 +17,7 @@ export default function MatchesScreen() {
         );
     return (
         <View style={styles.container}>
-            <MatchList user={auth.currentUser} />
+            <MatchList user={currentUser} />
         </View>
     );
 }

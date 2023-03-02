@@ -1,7 +1,6 @@
-import { FontAwesome } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useState } from "react";
-import { Dimensions, Platform, Pressable, StyleSheet } from "react-native";
+import { Dimensions, Pressable, StyleSheet } from "react-native";
 import CreateButton from "../assets/icons/CreateButton";
 import SteeringWheel from "../assets/icons/SteeringWheel";
 import { Full } from "../assets/icons/User";

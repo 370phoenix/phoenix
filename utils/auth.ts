@@ -1,32 +1,23 @@
-import {
-    ApplicationVerifier,
-    PhoneAuthProvider,
-    signInWithCredential,
-    User,
-    deleteUser,
-} from "firebase/auth/react-native";
-
 import { createContext } from "react";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
-import { get, getDatabase, onValue, ref, remove, set, Unsubscribe } from "firebase/database";
 import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
-import { auth, fire } from "../firebaseConfig";
 import { PostID, UserID } from "../constants/DataTypes";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { firebase } from "@react-native-firebase/database";
+import { Unsubscribe } from "./posts";
 
-const db = getDatabase(fire);
-auth.useDeviceLanguage();
+const db = firebase.app().database(process.env.REALTIME_DATABASE_URL);
 
 export type AuthState = {
     signedIn: boolean;
     needsInfo: boolean;
-    user: User | null;
+    user: FirebaseAuthTypes.User | null;
 };
 
 export type AuthAction =
     | {
           type: "SIGN_IN";
-          user: User;
+          user: FirebaseAuthTypes.User;
       }
     | {
           type: "SIGN_OUT";
@@ -34,7 +25,7 @@ export type AuthAction =
     | { type: "COLLECTED" }
     | {
           type: "COLLECT_INFO";
-          user: User;
+          user: FirebaseAuthTypes.User;
       };
 
 export function authReducer(prevState: AuthState, action: AuthAction) {
@@ -72,11 +63,6 @@ export const AuthContext = createContext<AuthState>({
     user: null,
 });
 
-type GetVerificationParams = {
-    phoneNumber: string;
-    captchaRef: React.RefObject<FirebaseRecaptchaVerifierModal>;
-};
-
 export enum MessageType {
     error,
     info,
@@ -99,40 +85,29 @@ export type InfoMessage = {
 };
 export type Message<T> = SuccessMessage<T> | ErrorMessage | InfoMessage;
 
-export async function getVerificationId({
-    phoneNumber,
-    captchaRef,
-}: GetVerificationParams): Promise<SuccessMessage<string> | ErrorMessage> {
+export async function getConfirm(
+    phoneNumber: string
+): Promise<SuccessMessage<FirebaseAuthTypes.ConfirmationResult> | ErrorMessage> {
     try {
         const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
 
         if (fullNumber.length !== 12 || fullNumber.match(/\+\d*/g) === null)
             throw new Error("Phone number incorrect format");
 
-        const phoneProvider = new PhoneAuthProvider(auth);
-        const verificationId = await phoneProvider.verifyPhoneNumber(
-            fullNumber,
-            captchaRef.current as ApplicationVerifier
-        );
-        return { data: verificationId, type: MessageType.success };
+        const confirmation = await auth().signInWithPhoneNumber(fullNumber);
+        return { data: confirmation, type: MessageType.success };
     } catch (e: any) {
         return { message: `Error verifying phone number: ${e.message}`, type: MessageType.error };
     }
 }
 
-type SignInParams = {
-    verificationId: string;
-    verificationCode: string;
-};
-
-export async function signIn({
-    verificationId,
-    verificationCode,
-}: SignInParams): Promise<InfoMessage | ErrorMessage> {
+export async function signIn(
+    confirm: FirebaseAuthTypes.ConfirmationResult,
+    verificationCode: string
+): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-        await signInWithCredential(auth, credential);
-        return { message: "Phone verification successful", type: MessageType.info };
+        await confirm.confirm(verificationCode);
+        return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
     }
@@ -174,7 +149,8 @@ export async function writeUser({
     userInfo,
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        await set(ref(db, "users/" + userId), cleanUndefined(userInfo));
+        const userRef = db.ref("userss/" + userId);
+        await userRef.set(cleanUndefined(userInfo));
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -182,17 +158,18 @@ export async function writeUser({
 }
 
 export function getUserUpdates(
-    user: User,
+    user: FirebaseAuthTypes.User,
     onUpdate: (data: UserInfo) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
-        const userRef = ref(db, "users/" + user.uid);
-        const unsub = onValue(userRef, (snapshot) => {
+        const userRef = db.ref("users/" + user.uid);
+        const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 onUpdate(data);
             }
         });
+        const unsub = () => userRef.off("value", onChange);
         return { message: "Listener attached.", type: MessageType.success, data: unsub };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -201,8 +178,8 @@ export function getUserUpdates(
 
 export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     try {
-        const userRef = ref(db, "users/" + userID);
-        const snapshot = await get(userRef);
+        const userRef = db.ref("users/" + userID);
+        const snapshot = await userRef.once("value");
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
@@ -210,9 +187,12 @@ export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     }
 }
 
-export async function deleteAccount(user: User): Promise<SuccessMessage | ErrorMessage> {
+export async function deleteAccount(
+    user: FirebaseAuthTypes.User
+): Promise<SuccessMessage | ErrorMessage> {
     try {
-        await remove(ref(db, "users/" + user.uid));
+        const userRef = db.ref("users/" + user.uid);
+        await userRef.remove();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };

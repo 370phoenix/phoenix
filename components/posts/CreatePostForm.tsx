@@ -19,8 +19,8 @@ import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
 import { PostType, Coords } from "../../constants/DataTypes";
-import { auth } from "../../firebaseConfig";
 import { createPost } from "../../utils/posts";
+import auth from "@react-native-firebase/auth";
 
 // stores options for number picker form inputs
 
@@ -61,7 +61,7 @@ export default function CreatePostForm() {
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
     // find current userID
-    const user = auth.currentUser;
+    const user = auth().currentUser;
     const userID = user ? user.uid : "No user found";
 
     //error message

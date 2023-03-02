@@ -1,5 +1,5 @@
-import { User } from "firebase/auth/react-native";
-import { child, get, getDatabase, onValue, ref, remove, set, Unsubscribe } from "firebase/database";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { firebase } from "@react-native-firebase/database";
 import { PostID, PostType, UserID } from "../constants/DataTypes";
 import {
     ErrorMessage,
@@ -9,6 +9,16 @@ import {
     UserInfo,
     writeUser,
 } from "./auth";
+
+const db = firebase.app().database(process.env.REALTIME_DATABASE_URL);
+
+///////////////////////////////////////////
+///////////////////////////////////////////
+//////////////// TYPES ////////////////////
+///////////////////////////////////////////
+///////////////////////////////////////////
+
+export type Unsubscribe = () => void;
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -24,8 +34,7 @@ import {
  */
 export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType> | ErrorMessage> {
     try {
-        const db = getDatabase();
-        const snapshot = await get(ref(db, "posts/" + postID));
+        const snapshot = await db.ref("posts/" + postID).once("value");
         const val = snapshot.val();
         if (snapshot.exists())
             return {
@@ -49,9 +58,8 @@ export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType
  */
 export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const db = getDatabase();
-        const response = await get(ref(db, "posts"));
-        const data: PostType[] = Object.values(response.val());
+        const snapshot = await db.ref("posts").once("value");
+        const data: PostType[] = Object.values(snapshot.val());
         data.sort((a, b) => a.startTime - b.startTime);
         return { type: MessageType.success, data: data };
     } catch (e: any) {
@@ -69,14 +77,13 @@ export async function fetchSomePosts(
     ids: PostID[]
 ): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const db = getDatabase();
-        const postsRef = ref(db, "posts");
+        const postsRef = db.ref("posts");
         const posts: PostType[] = [];
 
         for (const id of ids) {
-            const postRef = child(postsRef, id);
-            const res = await get(postRef);
-            if (res.exists()) posts.push(res.val());
+            const postRef = postsRef.child(id);
+            const snapshot = await postRef.once("value");
+            if (snapshot.exists()) posts.push(snapshot.val());
         }
 
         return { type: MessageType.success, data: posts };
@@ -89,14 +96,14 @@ export function getAllPostUpdates(
     onUpdate: (data: PostType[]) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
-        const db = getDatabase();
-        const postsRef = ref(db, "posts");
-        const unsub = onValue(postsRef, (snapshot) => {
+        const postsRef = db.ref("posts");
+        const onChange = postsRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType[] = Object.values(snapshot.val());
                 onUpdate(data);
             }
         });
+        const unsub = () => postsRef.off("value", onChange);
         return { type: MessageType.success, data: unsub };
     } catch (e: any) {
         return { type: MessageType.error, message: e.message };
@@ -123,8 +130,8 @@ export async function deletePost(
     userInfo: UserInfo
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const db = getDatabase();
-        await remove(ref(db, "posts/" + id));
+        const postRef = db.ref("posts/" + id);
+        await postRef.remove();
 
         let newPosts = userInfo.posts ? userInfo.posts : [];
         if (newPosts.length == 1) newPosts = [];
@@ -162,7 +169,7 @@ export async function deletePost(
  */
 export async function createPost(
     post: PostType,
-    user: User | null
+    user: FirebaseAuthTypes.User | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
         if (!user) throw Error("No user signed in.");
@@ -203,9 +210,8 @@ export async function createPost(
  */
 export async function writePostData(post: PostType): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const db = getDatabase();
-
-        await set(ref(db, "posts/" + post.postID), {
+        const postRef = db.ref("posts/" + post.postID);
+        await postRef.set({
             ...post,
         });
 

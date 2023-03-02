@@ -1,51 +1,44 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
 import { StatusBar } from "expo-status-bar";
-import { getApp } from "firebase/app";
 import React from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Left } from "../../assets/icons/Chevron";
 import { View, Text, Button, ValidationState, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { getVerificationId, MessageType, signIn } from "../../utils/auth";
+import { getConfirm, MessageType, signIn } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "SignIn">;
 
 export default function CreateScreen({ navigation }: Props) {
     const [phone, setPhone] = React.useState("");
     const [otp, setOtp] = React.useState("");
-    const [vId, setVId] = React.useState<string | null>(null);
+    const [confirm, setConfirm] = React.useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
     const [message, setMessage] = React.useState<string | null>(null);
-    const captchaRef = React.useRef<FirebaseRecaptchaVerifierModal>(null);
-
-    const app = getApp();
 
     // Reset flow if user goes back
     const onGoBack = () => {
         setPhone("");
-        setVId(null);
+        setConfirm(null);
         setMessage(null);
         navigation.goBack();
     };
 
     const onNext = async () => {
-        const res = await getVerificationId({
-            phoneNumber: phone,
-            captchaRef: captchaRef,
-        });
+        const res = await getConfirm(phone);
 
-        if (res.type === MessageType.success && res.data) {
-            setVId(res.data);
-        }
-        if (res.message) setMessage(res.message);
+        if (res.type === MessageType.success) {
+            setConfirm(res.data);
+        } else setMessage(res.message);
     };
 
     const onSubmit = async () => {
-        if (vId && otp) {
-            const res = await signIn({ verificationId: vId, verificationCode: otp });
-            setMessage(res.message);
+        if (confirm && otp) {
+            const res = await signIn(confirm, otp);
+            if (res.type === MessageType.success) setMessage("Phone verification successful.");
+            else setMessage(res.message);
         } else {
             setMessage("Error: missing code");
         }
@@ -67,18 +60,13 @@ export default function CreateScreen({ navigation }: Props) {
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={styles.form}>
-                <FirebaseRecaptchaVerifierModal
-                    ref={captchaRef}
-                    firebaseConfig={app ? app.options : undefined}
-                    attemptInvisibleVerification={Platform.OS === "ios" ? true : false}
-                />
                 <Text style={styles.title} textStyle="header" styleSize="l">
-                    {vId === null ? "Enter Phone Number" : "Enter verification code"}
+                    {confirm === null ? "Enter Phone Number" : "Enter verification code"}
                 </Text>
 
                 {message ? <Text style={[styles.message]}>{message}</Text> : ""}
 
-                {vId === null ? (
+                {confirm === null ? (
                     <TextField
                         autoFocus
                         autoComplete="tel"
@@ -107,10 +95,10 @@ export default function CreateScreen({ navigation }: Props) {
 
                 <Button
                     style={styles.button}
-                    title={vId ? "Submit" : "Next"}
+                    title={confirm ? "Submit" : "Next"}
                     color="purple"
                     light
-                    onPress={vId ? onSubmit : onNext}
+                    onPress={confirm ? onSubmit : onNext}
                 />
             </KeyboardAvoidingView>
         </View>

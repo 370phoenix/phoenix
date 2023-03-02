@@ -11,8 +11,8 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { getAuth } from "firebase/auth/react-native";
 import { matchPost } from "../../utils/posts";
+import auth from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -21,7 +21,7 @@ export default function DetailsModal({ route }: Props) {
 
     const [post, setPost] = useState<PostType | undefined | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const currentUser = getAuth().currentUser?.uid;
+    const currentUser = auth().currentUser?.uid;
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [

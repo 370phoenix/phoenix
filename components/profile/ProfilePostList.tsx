@@ -1,4 +1,3 @@
-import { getAuth } from "firebase/auth/react-native";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
@@ -7,6 +6,7 @@ import { MessageType, UserInfo } from "../../utils/auth";
 import { fetchSomePosts } from "../../utils/posts";
 import PostCard from "../posts/PostCard";
 import { View, Text } from "../shared/Themed";
+import auth from "@react-native-firebase/auth";
 
 type Props = {
     userInfo: UserInfo | null;
@@ -15,8 +15,7 @@ export default function ProfilePostList({ userInfo }: Props) {
     const [posts, setPosts] = useState<PostType[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
-    const auth = getAuth();
-    const userId = auth.currentUser?.uid;
+    const userId = auth().currentUser?.uid;
 
     // Fetch post info when user info updates
     useEffect(() => {

@@ -19,7 +19,6 @@ import ViewPostsScreen from "../screens/PostFeedScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
-import { onAuthStateChanged } from "firebase/auth/react-native";
 import { Button } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
@@ -33,8 +32,9 @@ import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
 import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
-import { auth } from "../firebaseConfig";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { ReactNativeFirebase } from "@react-native-firebase/app";
 
 export default function Navigation() {
     return (
@@ -51,7 +51,7 @@ export default function Navigation() {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const currentUser = auth.currentUser;
+    const currentUser = auth().currentUser;
     const initialAuth = {
         signedIn: currentUser ? true : false,
         needsInfo: false,
@@ -245,7 +245,7 @@ function BottomTabNavigator() {
                         <Button
                             title="Sign out"
                             onPress={() => {
-                                auth.signOut();
+                                auth().signOut();
                             }}
                             color="purple"
                             fontSize={16}
@@ -268,4 +268,13 @@ function TabBarIcon(props: {
     color: string;
 }) {
     return <FontAwesome size={20} style={{ marginBottom: -5 }} {...props} />;
+}
+function onAuthStateChanged(
+    auth: ReactNativeFirebase.FirebaseModuleWithStaticsAndApp<
+        FirebaseAuthTypes.Module,
+        FirebaseAuthTypes.Statics
+    >,
+    arg1: (user: any) => Promise<void>
+) {
+    throw new Error("Function not implemented.");
 }

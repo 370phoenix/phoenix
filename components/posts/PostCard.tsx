@@ -1,6 +1,6 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { getAuth } from "firebase/auth/react-native";
+import auth from "@react-native-firebase/auth";
 
 import { Right } from "../../assets/icons/Chevron";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -26,7 +26,7 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
 
-    const currentUser = getAuth().currentUser;
+    const currentUser = auth().currentUser;
 
     // Don't show your own posts in the feed
     if (!isProfile && post.user === currentUser?.uid) return <></>;

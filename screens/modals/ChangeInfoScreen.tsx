@@ -3,16 +3,16 @@ import { Alert, KeyboardAvoidingView, Platform, StyleSheet } from "react-native"
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../../utils/auth";
-import { auth } from "../../firebaseConfig";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useState } from "react";
+import auth from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
     const headerheight = useHeaderHeight();
 
-    const user = auth.currentUser;
+    const user = auth().currentUser;
     let userInfo: UserInfo | null = null;
 
     if (route.params) ({ userInfo } = route.params);

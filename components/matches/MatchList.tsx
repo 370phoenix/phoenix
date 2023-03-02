@@ -7,10 +7,10 @@ import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostID, UserID } from "../../constants/DataTypes";
 import { getUserUpdates, MessageType, UserInfo } from "../../utils/auth";
-import { User } from "firebase/auth/react-native";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 type Props = {
-    user: User;
+    user: FirebaseAuthTypes.User;
 };
 export default function MatchList({ user }: Props) {
     const [isLoading, setLoading] = useState(true);
