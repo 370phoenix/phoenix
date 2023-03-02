@@ -11,7 +11,7 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { matchPost } from "../../utils/posts";
+import { matchPost, deletePost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
@@ -42,6 +42,32 @@ export default function DetailsModal({ route }: Props) {
         ]);
     };
 
+    const handleDelete = () => {
+        Alert.alert("Confirm Delete", "Are you sure you want to delete this post?", [
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    try {
+                        if (!currentUser) throw Error("Error in fetching user");
+                        const res = await getUserOnce(currentUser);
+                        if (res.type !== MessageType.success) throw new Error(res.message);
+                        const userInfo = res.data;
+                        const [userID, userObj] = [currentUser, userInfo];
+                        if (userID && userObj) await deletePost(post.postID, userID, userObj);
+                        return { type: MessageType.success, data: undefined };
+                    } catch (e: any) {
+                        return { type: MessageType.error, message: `Error: ${e.message}` };
+                    }
+                },
+            },
+            {
+                text: "Cancel",
+            },
+        ]);
+    };
+
+    const headerHeight = useHeaderHeight();
+
     return (
         <View style={styles.infoContainer}>
             <ScrollView directionalLockEnabled style={styles.container}>
@@ -56,10 +82,15 @@ export default function DetailsModal({ route }: Props) {
             <View
                 style={{
                     backgroundColor: Colors.gray[4],
-                    height: useHeaderHeight() + 16,
+                    height: headerHeight + 16,
                     padding: 16,
                 }}>
-                <Button title="Match!" onPress={handleMatch} color="purple" />
+                {currentUser !== post.user && (
+                    <Button title="Match!" onPress={handleMatch} color="purple" />
+                )}
+                {currentUser === post.user && (
+                    <Button title="Delete Post" onPress={handleDelete} color="red" />
+                )}
                 <Spacer direction="column" size={24} />
             </View>
         </View>
