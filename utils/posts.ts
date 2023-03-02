@@ -365,11 +365,34 @@ export async function matchPost(
  * @param post (PostType): The post the user is trying to unmatch from.
  * @returns (SuccessMessage | ErrorMessage)
  */
-export async function unmatchFromPost(
+export async function unmatchPost(
     userID: UserID,
     post: PostType
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
+
+        // remove postID from user.matches
+        const r1 = await getUserOnce(userID);
+        if (r1.type !== MessageType.success) throw new Error(r1.message);
+        const userInfo = r1.data;
+        let newMatches = userInfo.matches;
+        if(!userInfo || !newMatches) throw Error("Error fetching user info");
+        const postIndex = newMatches.indexOf(post.postID);
+        newMatches = newMatches.splice(postIndex, 1);
+        userInfo.matches = newMatches;
+
+        const r2 = await writeUser(userID, userInfo);
+        if (r2.type === MessageType.error) throw Error(r2.message);
+        
+        // remove userID from post.riders
+        let newRiders = post.riders;
+        if(!newRiders) throw Error("Error fetching users from post");
+        const userIndex = newRiders.indexOf(userID);
+        newRiders = newRiders.splice(userIndex, 1);
+        post.riders = newRiders;
+
+        const r3 = await writePostData(post);
+        if (r3.type !== MessageType.success) throw new Error(r3.message);
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
