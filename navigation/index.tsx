@@ -65,7 +65,7 @@ function RootNavigator() {
     );
 
     React.useEffect(() => {
-        const subscriber = onAuthStateChanged(auth, async (user) => {
+        const subscriber = auth().onAuthStateChanged(async (user) => {
             if (user) {
                 // User is signed in
                 try {
@@ -268,13 +268,4 @@ function TabBarIcon(props: {
     color: string;
 }) {
     return <FontAwesome size={20} style={{ marginBottom: -5 }} {...props} />;
-}
-function onAuthStateChanged(
-    auth: ReactNativeFirebase.FirebaseModuleWithStaticsAndApp<
-        FirebaseAuthTypes.Module,
-        FirebaseAuthTypes.Statics
-    >,
-    arg1: (user: any) => Promise<void>
-) {
-    throw new Error("Function not implemented.");
 }
