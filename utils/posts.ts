@@ -385,8 +385,12 @@ export function comparePosts(a: PostType, b: PostType) {
     return true;
 
     function compareLengths(att: keyof PostType) {
-        const arrA = a[att] as string[];
-        const arrB = b[att] as string[];
+        const arrA = a[att] as string[] | undefined;
+        const arrB = b[att] as string[] | undefined;
+        if (!arrA && arrB) return false;
+        if (!arrB && arrA) return false;
+        if (!arrA && !arrB) return true;
+        if (!arrA || !arrB) return false;
         return arrA.length == arrB.length;
     }
 }
