@@ -1,47 +1,50 @@
 import { StyleSheet } from "react-native";
 import { View, Text, Spacer } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
+import Colors from "../../constants/Colors";
+import GradCap from "../../assets/icons/GradCap";
+import Gender from "../../assets/icons/Gender";
+import Book from "../../assets/icons/Book";
+import { SvgProps } from "react-native-svg";
 
 type Props = {
     userInfo: UserInfo;
 };
 export default function ProfileInfo({ userInfo }: Props) {
+    const iconSize = 30;
+    const iconColor = Colors.gray.w;
     return (
         <View style={styles.container}>
-            <Text textStyle="header" styleSize="m">
-                {userInfo.username}
-            </Text>
-            <Spacer direction="column" size={8} />
-            <Text textStyle="header" styleSize="s">
-                {convertPhone(userInfo.phone)}
-            </Text>
-            <Spacer direction="column" size={8} />
-            <View style={styles.majorGrad}>
-                <View style={styles.grad}>
-                    <Text textStyle="label" styleSize="l">
-                        Grad Year
-                    </Text>
-                    <Text textStyle="label" styleSize="m">
-                        {userInfo.gradYear}{" "}
-                    </Text>
-                </View>
-                <View style={styles.major}>
-                    <Text textStyle="label" styleSize="l">
-                        Major
-                    </Text>
-                    <Text textStyle="label" styleSize="m">
-                        {userInfo.major}{" "}
-                    </Text>
-                </View>
+            <View style={{ marginBottom: 12 }}>
+                <Text textStyle="header" styleSize="m" style={styles.purple}>
+                    {userInfo.username}
+                </Text>
+                <Text textStyle="lineTitle" style={styles.purple}>
+                    {convertPhone(userInfo.phone)}
+                </Text>
             </View>
+            <InfoRow icon={GradCap} text={String(userInfo.gradYear)} />
+            <InfoRow icon={Book} text={userInfo.major} />
+            <InfoRow icon={Gender} text={userInfo.gender} />
+        </View>
+    );
+}
 
-            <Spacer direction="column" size={8} />
-            <Text textStyle="label" styleSize="l">
-                Gender
-            </Text>
-
-            <Text textStyle="label" styleSize="m">
-                {userInfo.gender}
+type InfoProps = {
+    icon: (props: SvgProps) => JSX.Element;
+    text: string;
+};
+function InfoRow({ icon, text }: InfoProps) {
+    const props = {
+        height: 30,
+        width: 30,
+        color: Colors.purple.p,
+    };
+    return (
+        <View style={styles.infoRow}>
+            {icon(props)}
+            <Text textStyle="label" style={styles.infoText}>
+                {text}
             </Text>
         </View>
     );
@@ -61,22 +64,23 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         marginBottom: 16,
+        backgroundColor: Colors.gray.w,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+        borderRadius: 8,
     },
-    grad: {
-        flex: 1,
-        //alignItems: "center",
-        //justifyContent: "center",
-    },
-    major: {
-        flex: 1,
-        alignItems: "flex-start",
-        //justifyContent: "center",
-    },
-    majorGrad: {
-        flex: 1,
-        //alignItems: "center
-        //justifyContent: "center",
+    infoRow: {
+        width: "100%",
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    infoText: {
+        color: Colors.purple.p,
+        paddingLeft: 24,
+    },
+    purple: {
+        color: Colors.purple.p,
     },
 });

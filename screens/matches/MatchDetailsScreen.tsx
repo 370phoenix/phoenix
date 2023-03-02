@@ -8,32 +8,42 @@ import { RootStackParamList } from "../../types";
 import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import ProfileInfo from "../../components/profile/ProfileInfo";
+import auth from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
-    const post = route.params?.post;
+    const currentUser = auth().currentUser?.uid;
+    if (!currentUser || !route.params) return;
 
     return (
         <ScrollView directionalLockEnabled style={styles.container}>
-            {post && <MoreInfo post={post} />}
+            <MoreInfo post={route.params.post} isMine={currentUser === route.params.post.user} />
         </ScrollView>
     );
 }
 
-function MoreInfo({ post }: { post: PostType }) {
-    const [matched, setMatched] = useState(true);
+type MoreInfoProps = {
+    post: PostType;
+    isMine: boolean;
+};
+function MoreInfo({ post, isMine }: MoreInfoProps) {
+    const [posterInfo, setPosterInfo] = useState<UserInfo | null>(null);
     const [profiles, setProfiles] = useState<UserInfo[] | null>(null);
-    const onChangeMatched = () => setMatched(!matched);
 
     useEffect(() => {
+        const loadPoster = async () => {
+            const res = await getUserOnce(post.user);
+            if (res.type === MessageType.success) setPosterInfo(res.data);
+            else console.log(res.message);
+        };
         const loadUsers = async () => {
             const objects = [];
             if (post.riders) {
                 for (const rider of post.riders) {
                     const res = await getUserOnce(rider);
-                    if (res.type === MessageType.success && res.data) objects.push(res.data);
+                    if (res.type === MessageType.success) objects.push(res.data);
                     else {
-                        // TODO: error handling
+                        console.log(res.message);
                     }
                 }
             }
@@ -42,26 +52,41 @@ function MoreInfo({ post }: { post: PostType }) {
         };
 
         loadUsers();
-    }, [post]);
+        if (!isMine) loadPoster();
+    }, [post, isMine, setProfiles, setPosterInfo]);
+
+    const onUnmatch = () => {
+        // TODO
+    };
 
     return (
         <View style={styles.infoContainer}>
-            <Text textStyle="header">Ride Information</Text>
-            <Spacer direction="column" size={16} />
+            <Text textStyle="header" style={styles.mb16}>
+                Ride Information
+            </Text>
             <Text textStyle="label">
                 {convertLocation(post.pickup)} {"->"} {convertLocation(post.dropoff)}
             </Text>
             <Text>{convertDate(post.startTime)}</Text>
-            <Text>
+            <Text style={styles.mb16}>
                 {convertTime(post.startTime)} - {convertTime(post.endTime)}
             </Text>
-            <Spacer direction="column" size={16} />
-            <Text textStyle="label">{post.roundTrip ? "Round trip" : "One way"}</Text>
-            <Spacer direction="column" size={16} />
-            <Text>Notes: {post.notes}</Text>
-            <Spacer direction="column" size={40} />
-            <Text textStyle="header">Rider Profiles</Text>
-            <Spacer direction="column" size={16} />
+            <Text textStyle="label" style={styles.mb16}>
+                {post.roundTrip ? "Round trip" : "One way"}
+            </Text>
+            <Text style={styles.mb16}>Notes: {post.notes}</Text>
+            {posterInfo && (
+                <>
+                    <Text textStyle="header" style={styles.mb8}>
+                        Coordinator Profile
+                    </Text>
+                    <ProfileInfo userInfo={posterInfo} />
+                    <Spacer direction="column" size={16} />
+                </>
+            )}
+            <Text textStyle="header" style={styles.mb8}>
+                Rider Profiles
+            </Text>
             {post.riders &&
                 profiles &&
                 profiles.map((profile, index) => (
@@ -69,13 +94,8 @@ function MoreInfo({ post }: { post: PostType }) {
                         <ProfileInfo userInfo={profile} />
                     </View>
                 ))}
-            <Spacer direction="column" size={40} />
-            <Button
-                title={matched ? "Unmatch" : "Rematch"}
-                onPress={onChangeMatched}
-                color={matched ? "red" : "purple"}
-            />
-            <Spacer direction="column" size={800} />
+            <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />
+            <Spacer direction="column" size={200} />
         </View>
     );
 }
@@ -90,4 +110,11 @@ const styles = StyleSheet.create({
         paddingTop: 32,
         paddingHorizontal: 16,
     },
+    mb8: {
+        marginBottom: 8,
+    },
+    mb16: {
+        marginBottom: 16,
+    },
+    button: { marginTop: 40 },
 });
