@@ -3,10 +3,10 @@ import Filter from "bad-words";
 import Genders from "../constants/Genders.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { firebase } from "@react-native-firebase/database";
+import database, { firebase } from "@react-native-firebase/database";
 import { Unsubscribe } from "./posts";
 
-const db = firebase.app().database(process.env.REALTIME_DATABASE_URL);
+const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
 export type AuthState = {
     signedIn: boolean;
@@ -149,7 +149,7 @@ export async function writeUser({
     userInfo,
 }: WriteUserParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = db.ref("userss/" + userId);
+        const userRef = database().ref("users/" + userId);
         await userRef.set(cleanUndefined(userInfo));
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -162,7 +162,7 @@ export function getUserUpdates(
     onUpdate: (data: UserInfo) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
-        const userRef = db.ref("users/" + user.uid);
+        const userRef = database().ref("users/" + user.uid);
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
@@ -178,7 +178,7 @@ export function getUserUpdates(
 
 export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     try {
-        const userRef = db.ref("users/" + userID);
+        const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
@@ -191,7 +191,7 @@ export async function deleteAccount(
     user: FirebaseAuthTypes.User
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = db.ref("users/" + user.uid);
+        const userRef = database().ref("users/" + user.uid);
         await userRef.remove();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {

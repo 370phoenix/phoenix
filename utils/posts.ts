@@ -1,6 +1,6 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { firebase } from "@react-native-firebase/database";
-import { PostID, PostType, UserID } from "../constants/DataTypes";
+import database, { firebase } from "@react-native-firebase/database";
+import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
 import {
     ErrorMessage,
     getUserOnce,
@@ -10,7 +10,7 @@ import {
     writeUser,
 } from "./auth";
 
-const db = firebase.app().database(process.env.REALTIME_DATABASE_URL);
+const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -34,7 +34,9 @@ export type Unsubscribe = () => void;
  */
 export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType> | ErrorMessage> {
     try {
-        const snapshot = await db.ref("posts/" + postID).once("value");
+        const snapshot = await database()
+            .ref("posts/" + postID)
+            .once("value");
         const val = snapshot.val();
         if (snapshot.exists())
             return {
@@ -58,7 +60,7 @@ export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType
  */
 export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const snapshot = await db.ref("posts").once("value");
+        const snapshot = await database().ref("posts").once("value");
         const data: PostType[] = Object.values(snapshot.val());
         data.sort((a, b) => a.startTime - b.startTime);
         return { type: MessageType.success, data: data };
@@ -77,7 +79,7 @@ export async function fetchSomePosts(
     ids: PostID[]
 ): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const postsRef = db.ref("posts");
+        const postsRef = database().ref("posts");
         const posts: PostType[] = [];
 
         for (const id of ids) {
@@ -93,17 +95,19 @@ export async function fetchSomePosts(
 }
 
 export function getAllPostUpdates(
-    onUpdate: (data: PostType[]) => void
+    onUpdate: (data: PostType) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
-        const postsRef = db.ref("posts");
-        const onChange = postsRef.on("value", (snapshot) => {
+        const postsRef = database().ref("posts");
+        const onAdd = postsRef.on("child_added", (snapshot) => {
             if (snapshot.exists()) {
-                const data: PostType[] = Object.values(snapshot.val());
+                const data: PostType = snapshot.val();
                 onUpdate(data);
             }
         });
-        const unsub = () => postsRef.off("value", onChange);
+        const unsub = () => {
+            postsRef.off("child_added", onAdd);
+        };
         return { type: MessageType.success, data: unsub };
     } catch (e: any) {
         return { type: MessageType.error, message: e.message };
@@ -130,7 +134,7 @@ export async function deletePost(
     userInfo: UserInfo
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const postRef = db.ref("posts/" + id);
+        const postRef = database().ref("posts/" + id);
         await postRef.remove();
 
         let newPosts = userInfo.posts ? userInfo.posts : [];
@@ -168,14 +172,20 @@ export async function deletePost(
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function createPost(
-    post: PostType,
+    post: NewPostType,
     user: FirebaseAuthTypes.User | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
         if (!user) throw Error("No user signed in.");
 
-        const res = await writePostData(post);
-        if (res.type === MessageType.error) throw Error(res.message);
+        const postRef = database().ref("posts/").push();
+        if (!postRef.key) throw new Error("No key generated.");
+        const postID = postRef.key;
+        const newPost: PostType = {
+            ...post,
+            postID,
+        };
+        const res = await postRef.set(newPost);
 
         const r1 = await getUserOnce(user.uid);
         if (r1.type !== MessageType.success) throw Error(`Error fetching user data: ${r1.message}`);
@@ -184,7 +194,7 @@ export async function createPost(
         if (!userInfo) throw new Error("Could not find user info.");
 
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
-        posts.push(post.postID);
+        posts.push(postID);
         userInfo.posts = posts;
         const r2 = await writeUser({ userId: user.uid, userInfo });
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
@@ -210,10 +220,8 @@ export async function createPost(
  */
 export async function writePostData(post: PostType): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const postRef = db.ref("posts/" + post.postID);
-        await postRef.set({
-            ...post,
-        });
+        const postRef = database().ref("posts/" + post.postID);
+        await postRef.set(post);
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {

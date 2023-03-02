@@ -19,17 +19,17 @@ type Props = {
     post: PostType;
 };
 export default function PostCard({ post, isProfile = false, userInfo = [null, null] }: Props) {
+    const currentUser = auth().currentUser;
+    // Don't show your own posts in the feed
+    if (!isProfile && post.user === currentUser?.uid) return <></>;
+    if (!post.dropoff) return <></>;
+
     const navigation = useNavigation();
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
     const fDate = convertDate(post.startTime);
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
-
-    const currentUser = auth().currentUser;
-
-    // Don't show your own posts in the feed
-    if (!isProfile && post.user === currentUser?.uid) return <></>;
 
     return (
         <Pressable

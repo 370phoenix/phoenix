@@ -18,7 +18,7 @@ import NumberPicker from "../shared/NumberPicker";
 import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
-import { PostType, Coords } from "../../constants/DataTypes";
+import { PostType, Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
 
@@ -89,10 +89,9 @@ export default function CreatePostForm() {
 
         // Push to database
         if (isValid) {
-            const post: PostType = {
+            const post: NewPostType = {
                 pickup,
                 dropoff,
-                postID: String(uuid.v4()),
                 totalSpots: numSeats,
                 notes,
                 startTime: startTime.getTime(),

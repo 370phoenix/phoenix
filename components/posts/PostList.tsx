@@ -10,7 +10,6 @@ import { View, Text } from "../shared/Themed";
 import PostCard from "./PostCard";
 
 export default function PostList() {
-    const [isLoading, setLoading] = useState(true);
     const [posts, setPosts] = useState<PostType[]>([]);
     const [message, setMesssage] = useState<string | null>(null);
     // REFRESH OFF FOR NOW - uneeded API call, auto-refresh implemented.
@@ -25,8 +24,11 @@ export default function PostList() {
     // };
 
     useEffect(() => {
-        const res = getAllPostUpdates((posts) => {
-            setPosts(posts);
+        const res = getAllPostUpdates((post) => {
+            setPosts((prev) => {
+                if (prev.find((val) => val.postID == post.postID)) return prev;
+                return [...prev, post];
+            });
         });
 
         if (res.type === MessageType.error) {
@@ -38,7 +40,7 @@ export default function PostList() {
         return () => {
             unsubscribe();
         };
-    }, [posts, isLoading]);
+    }, [setMesssage]);
 
     return (
         <View style={{ marginTop: 20 }}>
@@ -51,6 +53,7 @@ export default function PostList() {
                 <FlatList
                     data={posts}
                     style={{ paddingTop: 16, paddingBottom: 200 }}
+                    keyExtractor={(item) => item.postID}
                     // refreshControl={
                     //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     // }

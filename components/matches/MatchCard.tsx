@@ -28,7 +28,6 @@ export default function MatchCard({ postID }: Props) {
     }, [postID]);
 
     const loadInfo = async () => {
-        //debugger;
         const res = await fetchPost(postID);
         if (res.type !== MessageType.success) {
             if (res.message == "Error: post missing or not found.") {

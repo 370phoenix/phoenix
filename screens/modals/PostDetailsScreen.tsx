@@ -33,6 +33,7 @@ export default function DetailsModal({ route }: Props) {
                 onPress: async () => {
                     if (!currentUser) return;
                     if (!post) return;
+                    if (post.riders?.includes(currentUser)) return;
 
                     const res = await matchPost(currentUser, post);
                     if (res.type === MessageType.error) setMessage(res.message);
