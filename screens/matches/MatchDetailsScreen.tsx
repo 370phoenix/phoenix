@@ -57,6 +57,7 @@ export default function MatchDetailsScreen({ route }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
+                    if (currentUser === post.user) 
                     if (!currentUser) return;
                     if (!post) return;
                     if (!post.riders?.includes(currentUser)) return;

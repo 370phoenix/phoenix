@@ -20,7 +20,12 @@ export default function DetailsModal({ route }: Props) {
     const post = route.params.post;
 
     const [message, setMessage] = useState<string | null>(null);
+
     const currentUser = auth().currentUser?.uid;
+    let isMatched;
+    if (!currentUser) isMatched = false;
+    else isMatched = post.riders?.includes(currentUser) || post.pending?.includes(currentUser);
+    const [matched, setMatched] = useState(isMatched);
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
@@ -37,6 +42,7 @@ export default function DetailsModal({ route }: Props) {
 
                     const res = await matchPost(currentUser, post);
                     if (res.type === MessageType.error) setMessage(res.message);
+                    else setMatched(true);
                 },
             },
         ]);
@@ -86,7 +92,13 @@ export default function DetailsModal({ route }: Props) {
                     padding: 16,
                 }}>
                 {currentUser !== post.user && (
-                    <Button title="Match!" onPress={handleMatch} color="purple" />
+                    <Button
+                        title={matched ? "Requested" : "Match!"}
+                        onPress={handleMatch}
+                        color="purple"
+                        disabled={matched}
+                        style={matched && { opacity: 0.7 }}
+                    />
                 )}
                 {currentUser === post.user && (
                     <Button title="Delete Post" onPress={handleDelete} color="red" />
