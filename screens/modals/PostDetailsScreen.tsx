@@ -1,3 +1,5 @@
+import auth from "@react-native-firebase/auth";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
@@ -7,12 +9,10 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
-import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
-import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
+import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import { matchPost, deletePost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -92,8 +92,9 @@ export default function DetailsModal({ route }: Props) {
                     padding: 16,
                 }}>
                 {currentUser !== post.user && (
+                    // TODO: Make separate button with cancel match (remove from pending)
                     <Button
-                        title={matched ? "Requested" : "Match!"}
+                        title={matched ? "Cancel Match" : "Match!"}
                         onPress={handleMatch}
                         color="purple"
                         disabled={matched}
@@ -110,10 +111,8 @@ export default function DetailsModal({ route }: Props) {
 }
 
 function MoreInfo({ post }: { post: PostType }) {
-    // const [matched, setMatched] = useState(false);
     const [riders, setRiders] = useState<UserInfo[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    // const onChangeMatched = () => setMatched(!matched);
 
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
