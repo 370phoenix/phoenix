@@ -405,6 +405,53 @@ export async function unmatchPost(
     }
 }
 
+/**
+ * Initiates a request for a user to cancel pending match request from a post.
+ *
+ * @param userID (UserID): The ID of the user requesting to cancel a match request.
+ * @param post (PostType): The post the user is trying to cancel a match request for.
+ * @returns (SuccessMessage | ErrorMessage)
+ */
+export async function cancelPendingMatch(
+    userID: UserID,
+    post: PostType
+): Promise<SuccessMessage | ErrorMessage> {
+    try {
+        // remove postID from user.matches
+        const r1 = await getUserOnce(userID);
+        if (r1.type !== MessageType.success) throw new Error(r1.message);
+        const userInfo = r1.data;
+        const newPending = userInfo.pending;
+        if (!userInfo || !newPending) throw Error("Error fetching user info");
+        const postIndex = newPending.indexOf(post.postID);
+        if (postIndex === -1) throw Error("Post not found in user's pending rides");
+        if(newPending.length === 1) newPending.shift();
+        else newPending.splice(postIndex, 1);
+        userInfo.matches = newPending;
+        
+        // update user to remove post
+        const r2 = await writeUser(userID, userInfo);
+        if (r2.type === MessageType.error) throw Error(r2.message);
+
+        // remove userID from post.pending
+        const newRiders = post.pending;
+        if (!newRiders) throw Error("Error fetching users from post");
+        const userIndex = newRiders.indexOf(userID);
+        if (userIndex === -1) throw Error("User not found in post riders");
+        if(newRiders.length === 1) newRiders.shift();
+        newRiders.splice(userIndex, 1);
+        post.pending = newRiders;
+        
+        // update post to remove user
+        const r3 = await writePostData(post);
+        if (r3.type !== MessageType.success) throw new Error(r3.message);
+        
+        return { type: MessageType.success, data: undefined };
+    } catch (e: any) {
+        return { type: MessageType.error, message: `Error: ${e.message}` };
+    }
+}
+
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 ///////////// HELPERS /////////////////////

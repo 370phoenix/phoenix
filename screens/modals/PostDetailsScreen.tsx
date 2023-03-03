@@ -74,6 +74,10 @@ export default function DetailsModal({ route }: Props) {
 
     const headerHeight = useHeaderHeight();
 
+    const MatchButton = <Button title={"Match!"} onPress={handleMatch} color="purple" />;
+    const UnmatchButton = <Button title={"Cancel Request"} onPress={handleMatch} color="red" />;
+    const DeleteButton = <Button title="Delete Post" onPress={handleDelete} color="red" />;
+
     return (
         <View style={styles.infoContainer}>
             <ScrollView directionalLockEnabled style={styles.container}>
@@ -91,19 +95,8 @@ export default function DetailsModal({ route }: Props) {
                     height: headerHeight + 16,
                     padding: 16,
                 }}>
-                {currentUser !== post.user && (
-                    // TODO: Make separate button with cancel match (remove from pending)
-                    <Button
-                        title={matched ? "Cancel Match" : "Match!"}
-                        onPress={handleMatch}
-                        color="purple"
-                        disabled={matched}
-                        style={matched && { opacity: 0.7 }}
-                    />
-                )}
-                {currentUser === post.user && (
-                    <Button title="Delete Post" onPress={handleDelete} color="red" />
-                )}
+                {currentUser !== post.user && matched ? UnmatchButton : MatchButton}
+                {currentUser === post.user && DeleteButton}
                 <Spacer direction="column" size={24} />
             </View>
         </View>
