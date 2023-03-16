@@ -81,7 +81,8 @@ type BadgeProps = {
 };
 function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
     const total = post.totalSpots;
-    const filled = (post.riders ? post.riders.length : 0) + 1;
+    const postRiders = post.riders ? post.riders.filter((val) => val != null) : [];
+    const filled = postRiders.length + 1;
     const pending = post.pending ? post.pending.length : 0;
     const riders = Array<number>(total);
     const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);

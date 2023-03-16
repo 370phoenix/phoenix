@@ -170,7 +170,7 @@ function MoreInfo({ post }: { post: PostType }) {
             </Text>
             {post.riders ? (
                 <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {post.riders.length + 1}/{post.totalSpots} spots filled
+                    {post.riders.filter((val) => val != null).length}/{post.totalSpots} spots filled
                 </Text>
             ) : (
                 <></>
