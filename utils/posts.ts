@@ -1,5 +1,5 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import database, { firebase } from "@react-native-firebase/database";
+import { firebase } from "@react-native-firebase/database";
 import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
 import {
     ErrorMessage,
@@ -34,9 +34,7 @@ export type Unsubscribe = () => void;
  */
 export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType> | ErrorMessage> {
     try {
-        const snapshot = await database()
-            .ref("posts/" + postID)
-            .once("value");
+        const snapshot = await db.ref("posts/" + postID).once("value");
         const val = snapshot.val();
         if (snapshot.exists())
             return {
@@ -60,7 +58,7 @@ export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType
  */
 export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const snapshot = await database().ref("posts").once("value");
+        const snapshot = await db.ref("posts").once("value");
         const data: PostType[] = Object.values(snapshot.val());
         data.sort((a, b) => a.startTime - b.startTime);
         return { type: MessageType.success, data: data };
@@ -79,7 +77,7 @@ export async function fetchSomePosts(
     ids: PostID[]
 ): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
-        const postsRef = database().ref("posts");
+        const postsRef = db.ref("posts");
         const posts: PostType[] = [];
 
         for (const id of ids) {
@@ -97,28 +95,32 @@ export async function fetchSomePosts(
 export function getAllPostUpdates(
     onUpdate: (data: PostType) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
-    try {
-        const postsRef = database().ref("posts");
-        const onAdd = postsRef.on("child_added", (snapshot) => {
+    const postsRef = db.ref("posts");
+    const onAdd = postsRef.on(
+        "child_added",
+        (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
                 onUpdate(data);
             }
-        });
-        const onChange = postsRef.on("child_changed", (snapshot) => {
+        },
+        (error) => {}
+    );
+    const onChange = postsRef.on(
+        "child_changed",
+        (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
                 onUpdate(data);
             }
-        });
-        const unsub = () => {
-            postsRef.off("child_added", onAdd);
-            postsRef.off("child_changed", onChange);
-        };
-        return { type: MessageType.success, data: unsub };
-    } catch (e: any) {
-        return { type: MessageType.error, message: e.message };
-    }
+        },
+        (error) => {}
+    );
+    const unsub = () => {
+        postsRef.off("child_added", onAdd);
+        postsRef.off("child_changed", onChange);
+    };
+    return { type: MessageType.success, data: unsub };
 }
 
 ///////////////////////////////////////////
@@ -141,7 +143,7 @@ export async function deletePost(
     userInfo: UserInfo
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const postRef = database().ref("posts/" + id);
+        const postRef = db.ref("posts/" + id);
         await postRef.remove();
 
         let newPosts = userInfo.posts ? userInfo.posts : [];
@@ -182,7 +184,7 @@ export async function createPost(
     try {
         if (!user) throw Error("No user signed in.");
 
-        const postRef = database().ref("posts/").push();
+        const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
         const postID = postRef.key;
         const newPost: PostType = {
@@ -224,7 +226,7 @@ export async function createPost(
  */
 export async function writePostData(post: PostType): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const postRef = database().ref("posts/" + post.postID);
+        const postRef = db.ref("posts/" + post.postID);
         await postRef.set(post);
 
         return { type: MessageType.success, data: undefined };

@@ -44,7 +44,6 @@ export default function Navigation() {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const currentUser = auth().currentUser;
     const [signedIn, setSignedIn] = React.useState(false);
     const [needsInfo, setNeedsInfo] = React.useState(false);
 
@@ -178,7 +177,6 @@ function BottomTabNavigator() {
     return (
         <BottomTab.Navigator
             initialRouteName="Feed"
-            // NOT WORKING due to bug
             tabBar={(props) => <TabBar {...props} />}
             backBehavior="none"
             screenOptions={{
