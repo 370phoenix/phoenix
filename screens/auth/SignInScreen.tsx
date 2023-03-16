@@ -61,7 +61,7 @@ export default function CreateScreen({ navigation }: Props) {
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={styles.form}>
                 <Text style={styles.title} textStyle="header" styleSize="l">
-                    {confirm === null ? "Enter Phone Number" : "Enter verification code"}
+                    {confirm === null ? "Enter Phone Number (US Only)" : "Enter verification code"}
                 </Text>
 
                 {message ? <Text style={[styles.message]}>{message}</Text> : ""}
