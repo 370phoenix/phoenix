@@ -4,7 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import { getUserOnce, MessageType } from "../utils/auth";
+import { UserInfo } from "../utils/auth";
 import WelcomeScreen from "../screens/auth/WelcomeScreen";
 import SignInScreen from "../screens/auth/SignInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -27,13 +27,47 @@ import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { ReactNativeFirebase } from "@react-native-firebase/app";
+import { createContext } from "react";
+import { useInterpret, useSelector } from "@xstate/react";
+import { AuthMachine } from "../utils/machines";
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
+
+const authMachine = createMachine(AuthMachine, {
+    guards: {
+        resultExists: (_, event: any) => event.data !== undefined && event.data !== null,
+        shouldCheckInfo: (context, _) => {
+            if (!context.obj) return false;
+            if ("major" in context.obj) return false;
+            return true;
+        },
+        objExists: (context, _) => context.obj !== undefined && context.obj !== null,
+    },
+    actions: {
+        assignUser: (context, _) => {
+            assign({ user: (context.obj as FirebaseAuthTypes.User)!.uid });
+        },
+        assignInfo: (context, _) => {
+            assign({ userInfo: (context.obj as UserInfo)! });
+        },
+    },
+});
+export const AuthContext = createContext({} as InterpreterFrom<typeof authMachine>);
 
 export default function Navigation() {
+    const initialContext = {
+        user: null,
+        userInfo: null,
+        obj: auth().currentUser ?? null,
+    };
+    console.log(initialContext);
+    const authService = useInterpret(authMachine.withContext(initialContext));
+
     return (
-        <NavigationContainer linking={LinkingConfiguration}>
-            <RootNavigator />
-        </NavigationContainer>
+        <AuthContext.Provider value={authService}>
+            <NavigationContainer linking={LinkingConfiguration}>
+                <RootNavigator />
+            </NavigationContainer>
+        </AuthContext.Provider>
     );
 }
 
@@ -43,31 +77,21 @@ export default function Navigation() {
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const signedInSelector = (state: any) => state.matches("Signed In");
+const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
+
 function RootNavigator() {
-    const [signedIn, setSignedIn] = React.useState(false);
-    const [needsInfo, setNeedsInfo] = React.useState(false);
+    const authService = React.useContext(AuthContext);
+    const signedIn = useSelector(authService, signedInSelector);
+    const needsInfo = useSelector(authService, needsInfoSelector);
+    const { send } = authService;
 
     React.useEffect(() => {
         const subscriber = auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                // User is signed in
-                try {
-                    const userInfo = await getUserOnce(user.uid);
-                    if (userInfo.type === MessageType.info) {
-                        setNeedsInfo(true);
-                        setSignedIn(true);
-                    } else {
-                        setNeedsInfo(false);
-                        setSignedIn(true);
-                    }
-                } catch (e: any) {
-                    console.log(e.message);
-                }
-            } else {
-                // User is signed out
-                setSignedIn(false);
-            }
+            send({ type: "INFO CHANGED", obj: user });
         });
+
+        // TODO: Add User Info Listener
 
         // Stop listening to the updates when component unmounts
         return subscriber;
@@ -84,7 +108,7 @@ function RootNavigator() {
             {signedIn ? (
                 needsInfo ? (
                     <Stack.Screen name="CreateProfile">
-                        {(props) => <CreateProfileScreen {...props} setNeedsInfo={setNeedsInfo} />}
+                        {(props) => <CreateProfileScreen {...props} />}
                     </Stack.Screen>
                 ) : (
                     <>
