@@ -12,16 +12,6 @@ import PostCard from "./PostCard";
 export default function PostList() {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [message, setMesssage] = useState<string | null>(null);
-    // REFRESH OFF FOR NOW - uneeded API call, auto-refresh implemented.
-    // const [refreshing, setRefreshing] = useState(false);
-    // pull down to refresh, updates posts
-    // const onRefresh: any = async () => {
-    //     setLoading(true);
-    //     // setRefreshing(true);
-    //     await fetchData();
-    //     // setRefreshing(false);
-    //     setLoading(false);
-    // };
 
     useEffect(() => {
         const res = getAllPostUpdates({
@@ -29,7 +19,8 @@ export default function PostList() {
                 setPosts((prev) => {
                     let i = 0;
                     if ((i = prev.findIndex((val) => val.postID === post.postID)) !== -1) {
-                        const newPosts = prev;
+                        // MUST change array address (create a new array) to cause a re-render. Copy arrays like below for state changes.
+                        const newPosts = [...prev];
                         newPosts[i] = post;
                         return newPosts;
                     }
@@ -43,7 +34,7 @@ export default function PostList() {
                 setPosts((prev) => {
                     let i = 0;
                     if ((i = prev.findIndex((val) => val.postID === post.postID)) !== -1) {
-                        const newPosts = prev;
+                        const newPosts = [...prev];
                         newPosts.splice(i, 1);
                         return newPosts;
                     }
@@ -75,9 +66,6 @@ export default function PostList() {
                     data={posts}
                     style={{ paddingTop: 16, paddingBottom: 200 }}
                     keyExtractor={(item) => item.postID}
-                    // refreshControl={
-                    //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    // }
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => <PostCard post={item} />}
                 />
