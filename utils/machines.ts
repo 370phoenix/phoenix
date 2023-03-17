@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
 import { UserID } from "../constants/DataTypes";
-import { checkUserInfo, getUserOnce, UserInfo } from "./auth";
+import { checkUserInfo, UserInfo } from "./auth";
 
 export type AuthMachineContext = {
     user: UserID | null;
@@ -35,7 +35,7 @@ const AuthMachine = {
         "Signed In": {
             on: {
                 "Sign Out": {
-                    target: "Signing Out",
+                    target: "Welcome Screen",
                     actions: [assign({ user: null }), assign({ userInfo: null })],
                 },
                 "INFO CHANGED": {
@@ -122,23 +122,6 @@ const AuthMachine = {
                 },
             },
         },
-        "Signing Out": {
-            invoke: {
-                src: "signOut",
-                id: "signOut",
-                onDone: [
-                    {
-                        target: "Initial",
-                    },
-                ],
-                onError: [
-                    {
-                        target: "Initial",
-                        description: "fails silently in prod",
-                    },
-                ],
-            },
-        },
         "Welcome Screen": {
             on: {
                 "INFO CHANGED": {
@@ -152,7 +135,8 @@ const AuthMachine = {
     },
 };
 
-export const signedInSelector = (state: any) => state.matches("Signed In");
+export const signedInSelector = (state: any) =>
+    state.context.user !== null && state.context.user !== undefined;
 export const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user as UserID) : null;
@@ -163,7 +147,6 @@ export const userInfoSelector = (state: any) =>
 export const authMachine = createMachine(AuthMachine, {
     guards: {
         userInfoExists: (_, event: any) => {
-            console.log(event);
             return event.data && event.data[1] !== undefined;
         },
         shouldCheckInfo: (context, _) => {
@@ -173,7 +156,6 @@ export const authMachine = createMachine(AuthMachine, {
         },
         objExists: (context, _) => context.obj !== undefined && context.obj !== null,
     },
-    // TODO: Add services
 });
 
 export const AuthContext = createContext({} as InterpreterFrom<typeof authMachine>);

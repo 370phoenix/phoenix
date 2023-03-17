@@ -27,7 +27,13 @@ import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
 import auth from "@react-native-firebase/auth";
 import { useSelector } from "@xstate/react";
-import { AuthContext, needsInfoSelector, signedInSelector } from "../utils/machines";
+import {
+    AuthContext,
+    needsInfoSelector,
+    signedInSelector,
+    userIDSelector,
+} from "../utils/machines";
+import { getUserUpdates } from "../utils/auth";
 
 export default function Navigation() {
     return (
@@ -47,6 +53,19 @@ function RootNavigator() {
     const authService = React.useContext(AuthContext);
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
+    const userID = useSelector(authService, userIDSelector);
+
+    React.useEffect(() => {
+        if (!userID) return;
+
+        const subscriber = getUserUpdates(userID, (data) => {
+            authService.send("INFO CHANGED", { obj: data });
+        });
+
+        if (typeof subscriber === "string") return;
+
+        return subscriber;
+    }, []);
 
     return (
         <Stack.Navigator

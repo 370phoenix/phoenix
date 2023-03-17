@@ -24,6 +24,20 @@ export type UserInfo = {
     requests: [UserID, PostID][];
 };
 
+export type FBUserInfo = {
+    username: string;
+    phone: string;
+    major: string;
+    gradYear: number;
+    gender: string;
+    chillIndex: number | undefined;
+    ridesCompleted: number;
+    posts: { [key: number]: string } | undefined;
+    pending: { [key: number]: string } | undefined;
+    matches: { [key: number]: string } | undefined;
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
+};
+
 // MESSAGES //
 export enum MessageType {
     error,
@@ -123,20 +137,6 @@ export async function writeUser(
     }
 }
 
-export type FBUserInfo = {
-    username: string;
-    phone: string;
-    major: string;
-    gradYear: number;
-    gender: string;
-    chillIndex: number | undefined;
-    ridesCompleted: number;
-    posts: { [key: number]: string } | undefined;
-    pending: { [key: number]: string } | undefined;
-    matches: { [key: number]: string } | undefined;
-    requests: { [key: number]: { 0: string; 1: string } } | undefined;
-};
-
 function convertUserInfo(data: FBUserInfo): UserInfo {
     const newRequests = data.requests
         ? Object.values(data.requests).map((req) => {
@@ -165,7 +165,7 @@ function convertUserInfo(data: FBUserInfo): UserInfo {
 export function getUserUpdates(
     userID: UserID,
     onUpdate: (data: UserInfo) => void
-): SuccessMessage<Unsubscribe> | ErrorMessage {
+): Unsubscribe | string {
     try {
         const userRef = database().ref("users/" + userID);
         const onChange = userRef.on("value", (snapshot) => {
@@ -175,9 +175,9 @@ export function getUserUpdates(
             }
         });
         const unsub = () => userRef.off("value", onChange);
-        return { message: "Listener attached.", type: MessageType.success, data: unsub };
+        return unsub;
     } catch (e: any) {
-        return { message: `Error ${e.message}`, type: MessageType.error };
+        return `Error ${e.message}`;
     }
 }
 

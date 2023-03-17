@@ -15,16 +15,16 @@ export default function App() {
     const authService = useInterpret(authMachine);
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(async (user) => {
+        const authSubscriber = auth().onAuthStateChanged(async (user) => {
             if (user) {
                 authService.send({ type: "INFO CHANGED", obj: user.uid });
+            } else {
+                authService.send({ type: "Sign Out" });
             }
         });
 
-        // TODO: Add User Info Listener
-
         // Stop listening to the updates when component unmounts
-        return subscriber;
+        return authSubscriber;
     }, []);
 
     if (!isLoadingComplete) {
