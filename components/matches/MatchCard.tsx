@@ -79,7 +79,8 @@ export default function MatchCard({ postID, list }: Props) {
             <View style={styles.riderIcon}>
                 <Full color={Colors.purple.p} height={28} />
                 <Text>
-                    {post.riders ? post.riders.length + 1 : 1} / {post.totalSpots}
+                    {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1} /{" "}
+                    {post.totalSpots}
                 </Text>
             </View>
         </Pressable>

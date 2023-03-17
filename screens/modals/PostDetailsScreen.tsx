@@ -34,6 +34,10 @@ export default function DetailsModal({ route }: Props) {
                     if (!post) return;
                     if (post.riders?.includes(currentUser)) return;
                     if (post.pending?.includes(currentUser)) return;
+                    const filled = post.riders
+                        ? post.riders.filter((val) => val != null).length + 1
+                        : 1;
+                    if (filled >= post.totalSpots) return;
 
                     const res = await matchPost(currentUser, post);
                     if (res.type === MessageType.error) setMessage(res.message);
@@ -133,13 +137,10 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
                 Pickup window: {startTime}-{endTime}
             </Text>
-            {post.riders ? (
-                <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {post.riders.filter((val) => val != null).length}/{post.totalSpots} spots filled
-                </Text>
-            ) : (
-                <></>
-            )}
+            <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
+                {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1}/
+                {post.totalSpots} spots filled
+            </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
                 {post.roundTrip ? (
