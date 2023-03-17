@@ -154,9 +154,11 @@ const AuthMachine = {
 
 export const signedInSelector = (state: any) => state.matches("Signed In");
 export const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
-export const userIDSelector = (state: any) => {
-    return state.context.user ? (state.context.user as UserID) : null;
-};
+export const userIDSelector = (state: any) =>
+    state.context.user ? (state.context.user as UserID) : null;
+
+export const userInfoSelector = (state: any) =>
+    state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 
 export const authMachine = createMachine(AuthMachine, {
     guards: {

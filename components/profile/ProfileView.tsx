@@ -6,9 +6,8 @@ import { View, Text, Spacer, Button } from "../shared/Themed";
 
 type Props = {
     userInfo: UserInfo | null;
-    message: string | null;
 };
-export default function ProfileView({ userInfo, message }: Props) {
+export default function ProfileView({ userInfo }: Props) {
     const navigation = useNavigation();
 
     return (
@@ -35,9 +34,7 @@ export default function ProfileView({ userInfo, message }: Props) {
                     />
                 </>
             ) : (
-                <Text textStyle="header" styleSize="s" style={{ color: Colors.navy.p }}>
-                    {message}
-                </Text>
+                <></>
             )}
         </View>
     );
