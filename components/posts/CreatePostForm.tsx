@@ -21,6 +21,7 @@ import Colors from "../../constants/Colors";
 import { PostType, Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
+import validateData, { MessageType } from "../../utils/postValidation";
 
 // stores options for number picker form inputs
 
@@ -39,6 +40,8 @@ export default function CreatePostForm() {
     const [isRoundtrip, setIsRoundtrip] = useState(true);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
+
+    const [message, setMessage] = useState<string | null>(null);
 
     // contains constraints for modifying seats
     const addNumSeats = () => {
@@ -72,9 +75,23 @@ export default function CreatePostForm() {
     // create object from form inputs on submit event
     const onSubmit = async () => {
         //validate;
-        let isValid = true;
+        //let isValid = true;
+        const valid = validateData({
+            startTime: startTime,
+            endTime: endTime,
+            pickup: pickup,
+            dropoff: dropoff,
+            numSeats,
+            notes: notes,
 
-        if (startTime.getTime() === endTime.getTime()) {
+        });
+
+        if (valid.type === MessageType.error) {
+            setMessage(valid.message);
+            return;
+        }
+
+        /*if (startTime.getTime() === endTime.getTime()) {
             isValid = false;
             setMessage1("Error: Invalid time window");
         }
@@ -86,9 +103,10 @@ export default function CreatePostForm() {
             isValid = false;
             setMessage3("Error: Invalid dropoff location");
         }
+        */
 
         // Push to database
-        if (isValid) {
+        if (valid.type === MessageType.success) {
             const post: NewPostType = {
                 pickup,
                 dropoff,
@@ -113,6 +131,11 @@ export default function CreatePostForm() {
     const TripDetails = (
         <>
             <Text textStyle="label" styleSize="l" style={styles.label}>
+                {message && (
+                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                        {message}
+                    </Text>
+                )}
                 From
             </Text>
             <LocationPicker
