@@ -194,10 +194,12 @@ export async function deletePost(
  */
 export async function createPost(
     post: NewPostType,
-    user: FirebaseAuthTypes.User | null
+    userID: UserID | null,
+    userInfo: UserInfo | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        if (!user) throw Error("No user signed in.");
+        if (!userID) throw Error("No user signed in.");
+        if (!userInfo) throw Error("No user info found.");
 
         const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
@@ -206,18 +208,12 @@ export async function createPost(
             ...post,
             postID,
         };
-        const res = await postRef.set(newPost);
-
-        const r1 = await getUserOnce(user.uid);
-        if (r1.type !== MessageType.success) throw Error(`Error fetching user data: ${r1.message}`);
-
-        const userInfo = r1.data;
-        if (!userInfo) throw new Error("Could not find user info.");
+        await postRef.set(newPost);
 
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
-        const r2 = await writeUser(user.uid, userInfo);
+        const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
         return { type: MessageType.success, data: undefined };

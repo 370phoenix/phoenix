@@ -10,16 +10,15 @@ import { getUserUpdates, MessageType, UserInfo } from "../../utils/auth";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 type Props = {
-    user: FirebaseAuthTypes.User;
+    userID: UserID;
 };
-export default function MatchList({ user }: Props) {
+export default function MatchList({ userID }: Props) {
     const [isLoading, setLoading] = useState(true);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [requests, setRequests] = useState<[UserID, PostID][] | null>(null);
     const [matches, setMatches] = useState<PostID[] | null>(null);
     const [pending, setPending] = useState<PostID[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const [userID, setUserID] = useState<string | null>(null);
 
     useEffect(() => {
         loadUserInfo()
@@ -27,7 +26,7 @@ export default function MatchList({ user }: Props) {
                 return unsub;
             })
             .catch((e) => setMessage(e.message));
-    }, [user]);
+    }, []);
 
     // Update the arrays with info from user
     useEffect(() => {
@@ -55,11 +54,11 @@ export default function MatchList({ user }: Props) {
 
     // Load the user info for the current user
     const loadUserInfo = async () => {
-        const res = await getUserUpdates(user.uid, (data) => {
+        const res = await getUserUpdates(userID, (data) => {
             setUserInfo(data);
         });
-        if (res.type === MessageType.error) setMessage(res.message);
-        else return res.data;
+        if (typeof res === "string") setMessage(res);
+        else return res;
     };
 
     if (!isLoading) {
@@ -78,7 +77,7 @@ export default function MatchList({ user }: Props) {
                             requesterID={item[0]}
                             postID={item[1]}
                             userInfo={userInfo}
-                            posterID={user.uid}
+                            posterID={userID}
                         />
                     )}
                 />

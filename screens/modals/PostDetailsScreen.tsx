@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
@@ -13,6 +13,8 @@ import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -20,7 +22,8 @@ export default function DetailsModal({ route }: Props) {
     const post = route.params.post;
 
     const [message, setMessage] = useState<string | null>(null);
-    const currentUser = auth().currentUser?.uid;
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
@@ -30,16 +33,16 @@ export default function DetailsModal({ route }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!currentUser) return;
+                    if (!userID) return;
                     if (!post) return;
-                    if (post.riders?.includes(currentUser)) return;
-                    if (post.pending?.includes(currentUser)) return;
+                    if (post.riders?.includes(userID)) return;
+                    if (post.pending?.includes(userID)) return;
                     const filled = post.riders
                         ? post.riders.filter((val) => val != null).length + 1
                         : 1;
                     if (filled >= post.totalSpots) return;
 
-                    const res = await matchPost(currentUser, post);
+                    const res = await matchPost(userID, post);
                     if (res.type === MessageType.error) setMessage(res.message);
                 },
             },

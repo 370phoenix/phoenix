@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
 import { PostType, PostID } from "../../constants/DataTypes";
@@ -6,7 +6,8 @@ import { MessageType, UserInfo } from "../../utils/auth";
 import { fetchSomePosts } from "../../utils/posts";
 import PostCard from "../posts/PostCard";
 import { View, Text } from "../shared/Themed";
-import auth from "@react-native-firebase/auth";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 
 type Props = {
     userInfo: UserInfo | null;
@@ -15,7 +16,9 @@ export default function ProfilePostList({ userInfo }: Props) {
     const [posts, setPosts] = useState<PostType[] | null>(null);
     const [message, setMessage] = useState<string | null>(null);
 
-    const userId = auth().currentUser?.uid;
+    const authService = useContext(AuthContext);
+    const id = useSelector(authService, userIDSelector);
+    const userID = id ? id : "No user found";
 
     // Fetch post info when user info updates
     useEffect(() => {
@@ -94,7 +97,7 @@ export default function ProfilePostList({ userInfo }: Props) {
                         <PostCard
                             post={item}
                             isProfile
-                            userInfo={[userId ? userId : "", userInfo]}
+                            userInfo={[userID ? userID : "", userInfo]}
                         />
                     )}
                     contentContainerStyle={{ paddingBottom: 50 }}
