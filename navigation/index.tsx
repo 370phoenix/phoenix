@@ -32,7 +32,7 @@ import {
     needsInfoSelector,
     signedInSelector,
     userIDSelector,
-} from "../utils/machines";
+} from "../utils/machines/authMachine";
 import { getUserUpdates } from "../utils/auth";
 
 export default function Navigation() {

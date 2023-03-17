@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
-import { UserID } from "../constants/DataTypes";
-import { checkUserInfo, UserInfo } from "./auth";
+import { UserID } from "../../constants/DataTypes";
+import { checkUserInfo, UserInfo } from "../auth";
 
 export type AuthMachineContext = {
     user: UserID | null;

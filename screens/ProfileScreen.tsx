@@ -8,7 +8,7 @@ import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { RootTabParamList } from "../types";
 import { useSelector } from "@xstate/react";
-import { AuthContext, userInfoSelector } from "../utils/machines";
+import { AuthContext, userInfoSelector } from "../utils/machines/authMachine";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;
 export default function ProfileScreen({ navigation }: props) {
