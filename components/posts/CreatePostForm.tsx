@@ -36,7 +36,7 @@ export default function CreatePostForm() {
     const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
 
-    const [isRoundtrip, setIsRoundtrip] = useState(true);
+    const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
 
