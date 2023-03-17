@@ -24,20 +24,32 @@ export default function PostList() {
     // };
 
     useEffect(() => {
-        const res = getAllPostUpdates((post) => {
-            setPosts((prev) => {
-                let i = 0;
-                if ((i = prev.findIndex((val) => val.postID == post.postID)) !== -1) {
-                    const found = prev[i];
-                    if (comparePosts(found, post)) return prev;
-
-                    // Else, replace post
-                    const newPosts = prev;
-                    newPosts.splice(i, 1);
-                    return [...newPosts, post];
-                }
-                return [...prev, post];
-            });
+        const res = getAllPostUpdates({
+            onChildChanged: (post) => {
+                setPosts((prev) => {
+                    let i = 0;
+                    if ((i = prev.findIndex((val) => val.postID === post.postID)) !== -1) {
+                        const newPosts = prev;
+                        newPosts[i] = post;
+                        return newPosts;
+                    }
+                    return prev;
+                });
+            },
+            onChildAdded: (post) => {
+                setPosts((prev) => [...prev, post]);
+            },
+            onChildRemoved: (post) => {
+                setPosts((prev) => {
+                    let i = 0;
+                    if ((i = prev.findIndex((val) => val.postID === post.postID)) !== -1) {
+                        const newPosts = prev;
+                        newPosts.splice(i, 1);
+                        return newPosts;
+                    }
+                    return prev;
+                });
+            },
         });
 
         if (res.type === MessageType.error) {

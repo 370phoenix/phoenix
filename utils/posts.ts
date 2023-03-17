@@ -92,16 +92,24 @@ export async function fetchSomePosts(
     }
 }
 
-export function getAllPostUpdates(
-    onUpdate: (data: PostType) => void
-): SuccessMessage<Unsubscribe> | ErrorMessage {
+type PostUpdateParams = {
+    onChildChanged: (data: PostType) => void;
+    onChildAdded: (data: PostType) => void;
+    onChildRemoved: (data: PostType) => void;
+};
+
+export function getAllPostUpdates({
+    onChildAdded,
+    onChildChanged,
+    onChildRemoved,
+}: PostUpdateParams): SuccessMessage<Unsubscribe> | ErrorMessage {
     const postsRef = db.ref("posts");
     const onAdd = postsRef.on(
         "child_added",
         (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
-                onUpdate(data);
+                onChildAdded(data);
             }
         },
         (error) => {}
@@ -111,14 +119,21 @@ export function getAllPostUpdates(
         (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
-                onUpdate(data);
+                onChildChanged(data);
             }
         },
         (error) => {}
     );
+    const onRemove = postsRef.on("child_removed", (snapshot) => {
+        if (snapshot.exists()) {
+            const data: PostType = snapshot.val();
+            onChildRemoved(data);
+        }
+    });
     const unsub = () => {
         postsRef.off("child_added", onAdd);
         postsRef.off("child_changed", onChange);
+        postsRef.off("child_removed", onRemove);
     };
     return { type: MessageType.success, data: unsub };
 }

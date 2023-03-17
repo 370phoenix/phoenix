@@ -34,6 +34,10 @@ export default function DetailsModal({ route }: Props) {
                     if (!post) return;
                     if (post.riders?.includes(currentUser)) return;
                     if (post.pending?.includes(currentUser)) return;
+                    const filled = post.riders
+                        ? post.riders.filter((val) => val != null).length + 1
+                        : 1;
+                    if (filled >= post.totalSpots) return;
 
                     const res = await matchPost(currentUser, post);
                     if (res.type === MessageType.error) setMessage(res.message);
