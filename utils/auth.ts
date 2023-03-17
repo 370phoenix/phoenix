@@ -78,7 +78,7 @@ type Clean<T> = {
  */
 export async function getConfirm(
     phoneNumber: string
-): Promise<SuccessMessage<FirebaseAuthTypes.ConfirmationResult> | ErrorMessage> {
+): Promise<FirebaseAuthTypes.ConfirmationResult | string> {
     try {
         const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
 
@@ -86,9 +86,9 @@ export async function getConfirm(
             throw new Error("Phone number incorrect format");
 
         const confirmation = await auth().signInWithPhoneNumber(fullNumber);
-        return { data: confirmation, type: MessageType.success };
+        return confirmation;
     } catch (e: any) {
-        return { message: `Error verifying phone number: ${e.message}`, type: MessageType.error };
+        return `Error verifying phone number: ${e.message}`;
     }
 }
 
@@ -102,12 +102,12 @@ export async function getConfirm(
 export async function signIn(
     confirm: FirebaseAuthTypes.ConfirmationResult,
     verificationCode: string
-): Promise<SuccessMessage | ErrorMessage> {
+): Promise<true | string> {
     try {
         await confirm.confirm(verificationCode);
-        return { type: MessageType.success, data: undefined };
+        return true;
     } catch (e: any) {
-        return { message: `Error: ${e.message}`, type: MessageType.error };
+        return `Error: ${e.message}`;
     }
 }
 

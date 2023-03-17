@@ -6,43 +6,27 @@ import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Left } from "../../assets/icons/Chevron";
 import { View, Text, Button, ValidationState, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { getConfirm, MessageType, signIn } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { useMachine } from "@xstate/react";
+import { signInMachine } from "../../utils/machines/signInMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "SignIn">;
 
-export default function CreateScreen({ navigation }: Props) {
+export default function SignInScreen({ navigation }: Props) {
     const [phone, setPhone] = React.useState("");
     const [otp, setOtp] = React.useState("");
-    const [confirm, setConfirm] = React.useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
-    const [message, setMessage] = React.useState<string | null>(null);
+
+    const [state, send] = useMachine(signInMachine);
+    const { error, confirm } = state.context;
 
     // Reset flow if user goes back
     const onGoBack = () => {
         setPhone("");
-        setConfirm(null);
-        setMessage(null);
+        send("CLOSE");
         navigation.goBack();
     };
 
-    const onNext = async () => {
-        const res = await getConfirm(phone);
-
-        if (res.type === MessageType.success) {
-            setConfirm(res.data);
-        } else setMessage(res.message);
-    };
-
-    const onSubmit = async () => {
-        if (confirm && otp) {
-            const res = await signIn(confirm, otp);
-            if (res.type === MessageType.success) setMessage("Phone verification successful.");
-            else setMessage(res.message);
-        } else {
-            setMessage("Error: missing code");
-        }
-    };
+    const loading = state.matches("Get Confirm") || state.matches("Submit Verification");
 
     return (
         <View style={styles.container}>
@@ -61,10 +45,18 @@ export default function CreateScreen({ navigation }: Props) {
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={styles.form}>
                 <Text style={styles.title} textStyle="header" styleSize="l">
-                    {confirm === null ? "Enter Phone Number (US Only)" : "Enter verification code"}
+                    {confirm === null ? "Enter Phone Number" : "Enter verification code"}
                 </Text>
 
-                {message ? <Text style={[styles.message]}>{message}</Text> : ""}
+                {error ? <Text style={[styles.message]}>{error}</Text> : ""}
+
+                {loading ? (
+                    <Text textStyle="header" styleSize="m" style={styles.loading}>
+                        Loading...
+                    </Text>
+                ) : (
+                    ""
+                )}
 
                 {confirm === null ? (
                     <TextField
@@ -75,7 +67,7 @@ export default function CreateScreen({ navigation }: Props) {
                         clearTextOnFocus
                         validationState={ValidationState.default}
                         inputState={[phone, setPhone]}
-                        label="phone number (US)"
+                        label="phone number (US only)"
                         style={styles.inputs}
                         light
                     />
@@ -94,11 +86,16 @@ export default function CreateScreen({ navigation }: Props) {
                 )}
 
                 <Button
+                    disabled={loading}
                     style={styles.button}
                     title={confirm ? "Submit" : "Next"}
                     color="purple"
                     light
-                    onPress={confirm ? onSubmit : onNext}
+                    onPress={
+                        state.context.confirm
+                            ? () => send("CHECK OTP", { otp: otp })
+                            : () => send("CHECK PHONE", { phone: phone })
+                    }
                 />
             </KeyboardAvoidingView>
         </View>
@@ -146,5 +143,9 @@ const styles = StyleSheet.create({
         color: Colors.gray.w,
         textAlign: "center",
         paddingBottom: 16,
+    },
+    loading: {
+        paddingBottom: 20,
+        color: Colors.gray.w,
     },
 });
