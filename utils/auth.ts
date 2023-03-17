@@ -16,7 +16,7 @@ export type UserInfo = {
     major: string;
     gradYear: number;
     gender: string;
-    chillIndex: number | null;
+    chillIndex: number | undefined;
     ridesCompleted: number;
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
@@ -123,6 +123,38 @@ export async function writeUser(
     }
 }
 
+export type FBUserInfo = {
+    username: string;
+    phone: string;
+    major: string;
+    gradYear: number;
+    gender: string;
+    chillIndex: number | undefined;
+    ridesCompleted: number;
+    posts: { [key: number]: string } | undefined;
+    pending: { [key: number]: string } | undefined;
+    matches: { [key: number]: string } | undefined;
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
+};
+
+function convertUserInfo(data: FBUserInfo): UserInfo {
+    const newRequests = data.requests
+        ? Object.values(data.requests).map((req) => {
+              const userID = req[0],
+                  postID = req[1];
+              return [userID, postID] as [string, string];
+          })
+        : [];
+
+    return {
+        ...data,
+        posts: data.posts ? Object.values(data.posts) : [],
+        pending: data.pending ? Object.values(data.pending) : [],
+        matches: data.matches ? Object.values(data.matches) : [],
+        requests: newRequests,
+    };
+}
+
 /**
  * Get instant updates for user info
  *
@@ -139,7 +171,7 @@ export function getUserUpdates(
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                onUpdate(data);
+                onUpdate(convertUserInfo(data));
             }
         });
         const unsub = () => userRef.off("value", onChange);
@@ -263,12 +295,12 @@ export function validateProfile({
             return {
                 type: MessageType.success,
                 data: {
+                    chillIndex: undefined,
                     username: username,
                     major: major,
                     gender: gender,
                     gradYear: gradYear,
                     phone: phone,
-                    chillIndex: null,
                     ridesCompleted: 0,
                     posts: [],
                     pending: [],

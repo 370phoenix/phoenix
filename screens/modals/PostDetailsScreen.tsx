@@ -133,13 +133,10 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
                 Pickup window: {startTime}-{endTime}
             </Text>
-            {post.riders ? (
-                <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {post.riders.filter((val) => val != null).length}/{post.totalSpots} spots filled
-                </Text>
-            ) : (
-                <></>
-            )}
+            <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
+                {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1}/
+                {post.totalSpots} spots filled
+            </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
                 {post.roundTrip ? (
