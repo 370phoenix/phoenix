@@ -55,7 +55,7 @@ export default function MatchList({ user }: Props) {
 
     // Load the user info for the current user
     const loadUserInfo = async () => {
-        const res = await getUserUpdates(user, (data) => {
+        const res = await getUserUpdates(user.uid, (data) => {
             setUserInfo(data);
         });
         if (res.type === MessageType.error) setMessage(res.message);

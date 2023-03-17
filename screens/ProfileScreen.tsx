@@ -1,5 +1,5 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import ProfilePostList from "../components/profile/ProfilePostList";
 import ProfileView from "../components/profile/ProfileView";
@@ -8,17 +8,19 @@ import { Spacer, View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getUserUpdates, MessageType, UserInfo } from "../utils/auth";
 import { RootTabParamList } from "../types";
-import auth from "@react-native-firebase/auth";
+import { useSelector } from "@xstate/react";
+import { AuthContext, userIDSelector } from "../utils/machines";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;
 export default function ProfileScreen({ navigation }: props) {
-    const user = auth().currentUser;
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [message, setMessage] = useState("Loading user info...");
 
     useEffect(() => {
-        if (user) {
-            const res = getUserUpdates(user, (data: UserInfo) => {
+        if (userID) {
+            const res = getUserUpdates(userID, (data: UserInfo) => {
                 setUserInfo(data);
             });
 
@@ -37,7 +39,7 @@ export default function ProfileScreen({ navigation }: props) {
     return (
         <View style={styles.container}>
             <View style={styles.body}>
-                <ProfileView user={user} userInfo={userInfo} message={message} />
+                <ProfileView userInfo={userInfo} message={message} />
                 <Spacer direction="column" size={16} />
                 <ProfilePostList userInfo={userInfo} />
             </View>

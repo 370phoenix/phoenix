@@ -163,11 +163,11 @@ function convertUserInfo(data: FBUserInfo): UserInfo {
  * @returns (SuccessMessage<Unsubscribe> | ErrorMessage): An unsubscribe function
  */
 export function getUserUpdates(
-    user: FirebaseAuthTypes.User,
+    userID: UserID,
     onUpdate: (data: UserInfo) => void
 ): SuccessMessage<Unsubscribe> | ErrorMessage {
     try {
-        const userRef = database().ref("users/" + user.uid);
+        const userRef = database().ref("users/" + userID);
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
@@ -195,6 +195,22 @@ export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
+    }
+}
+
+export async function checkUserInfo(
+    userID: UserID | undefined
+): Promise<[UserID, UserInfo | undefined] | string> {
+    try {
+        let id = userID ? userID : auth().currentUser?.uid;
+        if (!id) throw Error("No User ID");
+
+        const userRef = database().ref("users/" + id);
+        const snapshot = await userRef.once("value");
+        if (snapshot.exists()) return [id, snapshot.val()];
+        else return [id, undefined];
+    } catch (e: any) {
+        return `Error: ${e.message}`;
     }
 }
 

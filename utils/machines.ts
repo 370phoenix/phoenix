@@ -1,21 +1,25 @@
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { userInfo } from "os";
-import { assign, DoneInvokeEvent } from "xstate";
+import { createContext } from "react";
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
 import { UserID } from "../constants/DataTypes";
-import { getUserOnce, UserInfo } from "./auth";
+import { checkUserInfo, getUserOnce, UserInfo } from "./auth";
 
 export type AuthMachineContext = {
     user: UserID | null;
     userInfo: UserInfo | null;
-    obj: FirebaseAuthTypes.User | UserInfo | null;
+    obj: UserID | UserInfo | null;
 };
 
-export const AuthMachine = {
+const AuthMachine = {
     schema: {
         context: {} as AuthMachineContext,
         events: {} as
             | { type: "Sign Out" }
-            | { type: "INFO CHANGED"; obj: FirebaseAuthTypes.User | UserInfo | null },
+            | { type: "INFO CHANGED"; obj: UserID | UserInfo | null },
+        guards: {} as
+            | { type: "userInfoExists" }
+            | { type: "shouldCheckInfo" }
+            | { type: "objExists" }
+            | { type: "firstLoad" },
     },
     context: { user: null, userInfo: null, obj: null },
     predictableActionArguments: true,
@@ -36,9 +40,9 @@ export const AuthMachine = {
                 },
                 "INFO CHANGED": {
                     target: "Checking Updates",
-                    actions: assign((context, event: any) => {
-                        obj: event.obj;
-                    }),
+                    actions: assign((_, event: any) => ({
+                        obj: event.obj,
+                    })),
                 },
             },
         },
@@ -46,9 +50,9 @@ export const AuthMachine = {
             on: {
                 "INFO CHANGED": {
                     target: "Checking Updates",
-                    actions: assign((context, event: any) => {
-                        obj: event.obj;
-                    }),
+                    actions: assign((_, event: any) => ({
+                        obj: event.obj,
+                    })),
                 },
             },
         },
@@ -58,34 +62,58 @@ export const AuthMachine = {
                 "Checking User Info": {
                     invoke: {
                         id: "getUserInfo",
-                        src: (context: AuthMachineContext, event: any) =>
-                            getUserOnce(context.user!),
+                        src: (context: AuthMachineContext) =>
+                            checkUserInfo(context.user ? context.user : undefined),
                         onDone: [
                             {
                                 target: "#Authentication Machine.Signed In",
-                                cond: "resultExists",
-                                actions: assign({
-                                    userInfo: (context, event: DoneInvokeEvent<UserInfo>) =>
-                                        event.data,
-                                }),
+                                cond: { type: "userInfoExists" },
+                                actions: assign(
+                                    (
+                                        _,
+                                        event: DoneInvokeEvent<[UserID, UserInfo | undefined]>
+                                    ) => ({
+                                        user: event.data[0],
+                                        userInfo: event.data[1],
+                                    })
+                                ),
                             },
                             {
                                 target: "#Authentication Machine.Create Profile Screen",
+                                actions: assign(
+                                    (
+                                        _,
+                                        event: DoneInvokeEvent<[UserID, UserInfo | undefined]>
+                                    ) => ({
+                                        user: event.data[0],
+                                    })
+                                ),
                             },
                         ],
+                        onError: {
+                            target: "Start",
+                        },
                     },
                 },
                 "Start": {
                     always: [
                         {
                             target: "Checking User Info",
-                            cond: "shouldCheckInfo",
-                            actions: "assignUser",
+                            cond: { type: "shouldCheckInfo" },
+                            actions: [
+                                assign((context: any, _) => ({
+                                    user: context.obj as UserID,
+                                })),
+                            ],
                         },
                         {
                             target: "#Authentication Machine.Welcome Screen",
-                            cond: "objExists",
-                            actions: "assignInfo",
+                            cond: { type: "objExists" },
+                            actions: [
+                                assign((context: any, _) => ({
+                                    userInfo: context.obj as UserInfo,
+                                })),
+                            ],
                         },
                         {
                             target: "#Authentication Machine.Welcome Screen",
@@ -115,11 +143,35 @@ export const AuthMachine = {
             on: {
                 "INFO CHANGED": {
                     target: "Checking Updates",
-                    actions: assign((context, event: any) => {
-                        obj: event.obj;
-                    }),
+                    actions: assign((_, event: any) => ({
+                        obj: event.obj,
+                    })),
                 },
             },
         },
     },
 };
+
+export const signedInSelector = (state: any) => state.matches("Signed In");
+export const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
+export const userIDSelector = (state: any) => {
+    return state.context.user ? (state.context.user as UserID) : null;
+};
+
+export const authMachine = createMachine(AuthMachine, {
+    guards: {
+        userInfoExists: (_, event: any) => {
+            console.log(event);
+            return event.data && event.data[1] !== undefined;
+        },
+        shouldCheckInfo: (context, _) => {
+            if (!context.obj) return true;
+            if (typeof context.obj != "string") return false;
+            return true;
+        },
+        objExists: (context, _) => context.obj !== undefined && context.obj !== null,
+    },
+    // TODO: Add services
+});
+
+export const AuthContext = createContext({} as InterpreterFrom<typeof authMachine>);
