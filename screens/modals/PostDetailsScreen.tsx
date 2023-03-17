@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import auth from "@react-native-firebase/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -95,7 +96,7 @@ export default function DetailsModal({ route }: Props) {
                     height: headerHeight + 16,
                     padding: 16,
                 }}>
-                {currentUser !== post.user && matched ? UnmatchButton : MatchButton}
+                {currentUser !== post.user && (matched ? UnmatchButton : MatchButton)}
                 {currentUser === post.user && DeleteButton}
                 <Spacer direction="column" size={24} />
             </View>
