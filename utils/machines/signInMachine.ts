@@ -16,9 +16,6 @@ const SignInMachine = {
                         }),
                     ],
                 },
-                "CLOSE": {
-                    target: "Input Phone",
-                },
             },
         },
         "Get Confirm": {
