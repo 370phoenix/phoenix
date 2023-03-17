@@ -125,10 +125,12 @@ export async function signIn(
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function writeUser(
-    userID: string,
-    userInfo: UserInfo
+    userID: string | null,
+    userInfo: UserInfo | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
+        if (!userID || !userInfo) throw new Error("No User ID or Info.");
+
         const userRef = database().ref("users/" + userID);
         await userRef.set(cleanUndefined(userInfo));
         return { type: MessageType.success, data: undefined };
@@ -259,74 +261,57 @@ export function validateProfile({
     gradString,
     phone = null,
     userInfo = null,
-}: ValidateProfileParams): SuccessMessage<UserInfo> | ErrorMessage {
+}: ValidateProfileParams): UserInfo | string {
     try {
-        const noUserError: ErrorMessage = {
-            type: MessageType.error,
-            message: "Must supply either phone or previous user info.",
-        };
-        if (!(phone || userInfo)) return noUserError;
+        const noUserError = "Must supply either phone or previous user info.";
+        if (!(phone || userInfo)) throw new Error(noUserError);
 
         const filter = new Filter();
 
-        if (filter.isProfane(username))
-            return { type: MessageType.error, message: "Display name cannot be profane." };
+        if (filter.isProfane(username)) throw new Error("Display name cannot be profane.");
 
-        if (filter.isProfane(major))
-            return { type: MessageType.error, message: "Major cannot be profane." };
+        if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
 
         if (!Genders.includes(gender.toLowerCase()))
-            return {
-                type: MessageType.error,
-                message: "Gender not accepted. Please email us if we've made a mistake.",
-            };
+            throw new Error("Gender not accepted. Please email us if we've made a mistake.");
 
         if (gradString.match(/\D/g) !== null)
-            return {
-                type: MessageType.error,
-                message: "Please make sure grad year is all digits.",
-            };
+            throw new Error("Please make sure grad year is all digits.");
 
         const gradYear = Number(gradString);
         if (userInfo)
             // Changing Info
             return {
-                type: MessageType.success,
-                data: {
-                    username: username,
-                    major: major,
-                    gender: gender,
-                    gradYear: gradYear,
-                    phone: userInfo.phone,
-                    chillIndex: userInfo.chillIndex,
-                    ridesCompleted: userInfo.ridesCompleted,
-                    posts: userInfo.posts ? userInfo.posts : [],
-                    pending: userInfo.pending ? userInfo.pending : [],
-                    matches: userInfo.matches ? userInfo.matches : [],
-                    requests: userInfo.requests ? userInfo.requests : [],
-                },
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: userInfo.phone,
+                chillIndex: userInfo.chillIndex,
+                ridesCompleted: userInfo.ridesCompleted,
+                posts: userInfo.posts ? userInfo.posts : [],
+                pending: userInfo.pending ? userInfo.pending : [],
+                matches: userInfo.matches ? userInfo.matches : [],
+                requests: userInfo.requests ? userInfo.requests : [],
             };
         else if (phone) {
             // Inital Profile Setup
             return {
-                type: MessageType.success,
-                data: {
-                    chillIndex: undefined,
-                    username: username,
-                    major: major,
-                    gender: gender,
-                    gradYear: gradYear,
-                    phone: phone,
-                    ridesCompleted: 0,
-                    posts: [],
-                    pending: [],
-                    matches: [],
-                    requests: [],
-                },
+                chillIndex: undefined,
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: phone,
+                ridesCompleted: 0,
+                posts: [],
+                pending: [],
+                matches: [],
+                requests: [],
             };
         } else return noUserError;
     } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
+        return `Error: ${e.message}`;
     }
 }
 
