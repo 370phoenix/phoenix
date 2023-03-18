@@ -10,6 +10,8 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
+import { useMachine } from "@xstate/react";
+import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
@@ -19,33 +21,13 @@ export default function MatchDetailsScreen({ route }: Props) {
     const isMine = post.user == currentUser;
     const pending = list === MatchSublist.pending;
 
-    const [posterInfo, setPosterInfo] = useState<UserInfo | null>(null);
-    const [profiles, setProfiles] = useState<UserInfo[] | null>(null);
+    const [state, send] = useMachine(multipleUserMachine);
+    const { riders } = state.context;
 
     useEffect(() => {
-        const loadPoster = async () => {
-            const res = await getUserOnce(post.user);
-            if (res.type === MessageType.success) setPosterInfo(res.data);
-            else console.log(res.message);
-        };
-        const loadUsers = async () => {
-            const objects = [];
-            if (post.riders) {
-                for (const rider of post.riders) {
-                    const res = await getUserOnce(rider);
-                    if (res.type === MessageType.success) objects.push(res.data);
-                    else {
-                        console.log(res.message);
-                    }
-                }
-            }
-
-            setProfiles(objects);
-        };
-
-        if (!pending) loadUsers();
-        if (!pending && !isMine) loadPoster();
-    }, [post, isMine, pending]);
+        if (!state.matches("Start")) return;
+        send("LOAD", { ids: post.riders ? [post.user, ...post.riders] : [post.user] });
+    }, [send, state, post]);
 
     const onUnmatch = () => {
         // TODO
@@ -67,12 +49,12 @@ export default function MatchDetailsScreen({ route }: Props) {
                 {post.roundTrip ? "Round trip" : "One way"}
             </Text>
             <Text style={styles.mb16}>Notes: {post.notes}</Text>
-            {posterInfo && (
+            {riders && (
                 <>
                     <Text textStyle="header" style={styles.mb8}>
                         Coordinator Profile
                     </Text>
-                    <ProfileInfo userInfo={posterInfo} />
+                    <ProfileInfo userInfo={riders[0]} />
                     <Spacer direction="column" size={16} />
                 </>
             )}
@@ -80,8 +62,8 @@ export default function MatchDetailsScreen({ route }: Props) {
                 Rider Profiles
             </Text>
             {!pending &&
-                profiles &&
-                profiles.map((profile, index) => (
+                riders &&
+                riders.map((profile, index) => (
                     <View key={index}>
                         <ProfileInfo userInfo={profile} />
                     </View>

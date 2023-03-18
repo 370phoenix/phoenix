@@ -8,11 +8,10 @@ import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
-import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
+import { MessageType, UserInfo } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
@@ -89,7 +88,7 @@ function MoreInfo({ post }: { post: PostType }) {
         const ids = post.riders ? post.riders : [];
         if (!ids.includes(post.user)) ids.push(post.user);
         send("LOAD", { ids });
-    }, [send]);
+    }, [send, state, post]);
 
     console.log(riders);
 
