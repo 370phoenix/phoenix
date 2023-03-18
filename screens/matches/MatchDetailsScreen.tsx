@@ -1,11 +1,9 @@
 import { StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
-import { PostType } from "../../constants/DataTypes";
+import React, { useEffect } from "react";
 import { Text, View, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
-import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
@@ -18,11 +16,12 @@ export default function MatchDetailsScreen({ route }: Props) {
     const currentUser = auth().currentUser?.uid;
     if (!currentUser || !route.params) return <></>;
     const { post, list } = route.params;
-    const isMine = post.user == currentUser;
     const pending = list === MatchSublist.pending;
 
     const [state, send] = useMachine(multipleUserMachine);
     const { riders } = state.context;
+
+    console.log(riders);
 
     useEffect(() => {
         if (!state.matches("Start")) return;
@@ -49,7 +48,7 @@ export default function MatchDetailsScreen({ route }: Props) {
                 {post.roundTrip ? "Round trip" : "One way"}
             </Text>
             <Text style={styles.mb16}>Notes: {post.notes}</Text>
-            {riders && (
+            {!pending && riders.length > 0 && (
                 <>
                     <Text textStyle="header" style={styles.mb8}>
                         Coordinator Profile

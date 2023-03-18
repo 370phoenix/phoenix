@@ -2,16 +2,16 @@ import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { useEffect, useState } from "react";
-import { MessageType, UserInfo } from "../../utils/auth";
-import { PostType } from "../../constants/DataTypes";
-import { fetchPost } from "../../utils/posts";
+import { useEffect } from "react";
+import { UserInfo } from "../../utils/auth";
 import { convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useNavigation } from "@react-navigation/native";
 import { MatchSublist } from "./MatchList";
+import { useMachine } from "@xstate/react";
+import { postInfoMachine } from "../../utils/machines/postInfoMachine";
 
 export type Props = {
     postID: string;
@@ -21,28 +21,16 @@ export type Props = {
 
 export default function MatchCard({ postID, list }: Props) {
     const navigation = useNavigation();
-
-    const [post, setPost] = useState<PostType | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
+    const [state, send] = useMachine(postInfoMachine);
+    const { post } = state.context;
 
     useEffect(() => {
-        loadInfo();
-    }, [postID]);
-
-    const loadInfo = async () => {
-        const res = await fetchPost(postID);
-        if (res.type !== MessageType.success) {
-            if (res.message == "Error: post missing or not found.") {
-                // remove this ID from user info Posts or Matches (depending on where it is)
-            }
-            setMessage(res.message);
-        } else if (!res.data) setMessage("No post data returned.");
-        else {
-            setPost(res.data);
-        }
-    };
+        if (!state.matches("Start")) return;
+        send("LOAD", { id: postID });
+    }, [state, send, postID]);
 
     if (!post) return <View />;
+    console.log(post);
 
     return (
         <Pressable
@@ -69,12 +57,6 @@ export default function MatchCard({ postID, list }: Props) {
                         {convertLocation(post.dropoff)}
                     </Text>
                 </View>
-
-                {message && (
-                    <Text textStyle="label" style={styles.error}>
-                        {message}
-                    </Text>
-                )}
             </View>
             <View style={styles.riderIcon}>
                 <Full color={Colors.purple.p} height={28} />
