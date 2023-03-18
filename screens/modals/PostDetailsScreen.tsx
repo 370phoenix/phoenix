@@ -83,14 +83,11 @@ function MoreInfo({ post }: { post: PostType }) {
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);
 
-    useEffect(() => {
-        if (!state.matches("Start")) return;
+    if (state.matches("Start")) {
         const ids = post.riders ? post.riders : [];
         if (!ids.includes(post.user)) ids.push(post.user);
         send("LOAD", { ids });
-    }, [send, state, post]);
-
-    console.log(riders);
+    }
 
     return (
         <View style={styles.infoContainer}>

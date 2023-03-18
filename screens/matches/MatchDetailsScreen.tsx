@@ -1,6 +1,5 @@
 import { StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect } from "react";
 import { Text, View, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
@@ -21,12 +20,8 @@ export default function MatchDetailsScreen({ route }: Props) {
     const [state, send] = useMachine(multipleUserMachine);
     const { riders } = state.context;
 
-    console.log(riders);
-
-    useEffect(() => {
-        if (!state.matches("Start")) return;
+    if (state.matches("Start"))
         send("LOAD", { ids: post.riders ? [post.user, ...post.riders] : [post.user] });
-    }, [send, state, post]);
 
     const onUnmatch = () => {
         // TODO

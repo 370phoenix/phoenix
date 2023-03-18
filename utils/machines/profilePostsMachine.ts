@@ -80,7 +80,6 @@ export const profilePostMachine = createMachine(ProfilePostMachine, {
     services: {
         loadNewPosts: async (context) => {
             const { posts, userPosts } = context;
-            console.log(userPosts);
             let toLoad: string[] = [];
             for (const id of userPosts) {
                 let flag = false;

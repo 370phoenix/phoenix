@@ -28,11 +28,8 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [gender, setGender] = useState(userInfo ? userInfo.gender : "");
 
     const [message, setMessage] = useState<string | null>(null);
-    console.log(state.event.type);
-    console.log(state.context.rawInfo);
 
     useEffect(() => {
-        console.log("RUNNING");
         if (!userID || !userInfo) return;
         send("UPDATE INFO", {
             userID: userID,

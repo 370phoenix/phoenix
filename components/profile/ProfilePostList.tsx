@@ -1,9 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
-import { PostType, PostID } from "../../constants/DataTypes";
-import { MessageType, UserInfo } from "../../utils/auth";
-import { fetchSomePosts } from "../../utils/posts";
+import { UserInfo } from "../../utils/auth";
 import PostCard from "../posts/PostCard";
 import { View, Text } from "../shared/Themed";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
@@ -20,9 +18,9 @@ export default function ProfilePostList({ userInfo }: Props) {
     const [state, send] = useMachine(profilePostMachine);
     const { error, posts } = state.context;
 
+    if (!userInfo) return <></>;
+
     useEffect(() => {
-        if (!userInfo) return;
-        console.log(state);
         if (state.matches("Updating Posts.Start")) send("LOAD", { userPosts: userInfo.posts });
         else send("UPDATE", { userPosts: userInfo.posts });
 

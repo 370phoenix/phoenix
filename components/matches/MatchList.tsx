@@ -36,7 +36,6 @@ export default function MatchList({ userID }: Props) {
             : rawMatches
             ? [...rawMatches]
             : [];
-    console.log("REQUESTS", matches);
 
     return (
         <View style={{ marginTop: 20 }}>
