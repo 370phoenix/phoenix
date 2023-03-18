@@ -14,7 +14,8 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
-import { useSelector } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
+import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -74,10 +75,8 @@ export default function DetailsModal({ route }: Props) {
 }
 
 function MoreInfo({ post }: { post: PostType }) {
-    // const [matched, setMatched] = useState(false);
-    const [riders, setRiders] = useState<UserInfo[] | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
-    // const onChangeMatched = () => setMatched(!matched);
+    const [state, send] = useMachine(multipleUserMachine);
+    const { riders, error } = state.context;
 
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
@@ -86,30 +85,13 @@ function MoreInfo({ post }: { post: PostType }) {
     const endTime = convertTime(post.endTime);
 
     useEffect(() => {
-        async function fetchRiders() {
-            const ids = post.riders ? post.riders : [];
-            if (!ids.includes(post.user)) ids.push(post.user);
-            if (riders) return;
-            if (!ids) return;
+        if (!state.matches("Start")) return;
+        const ids = post.riders ? post.riders : [];
+        if (!ids.includes(post.user)) ids.push(post.user);
+        send("LOAD", { ids });
+    }, [send]);
 
-            const ridersInfo: UserInfo[] = [];
-            for (const id of ids) {
-                const res = await getUserOnce(id);
-                if (res.type !== MessageType.success) {
-                    setMessage(res.message);
-                    return;
-                }
-
-                const userInfo = res.data;
-                if (!userInfo) throw new Error("Could not find user info.");
-
-                ridersInfo.push(userInfo);
-            }
-
-            setRiders(ridersInfo);
-        }
-        fetchRiders();
-    }, [post, riders, setRiders, setMessage]);
+    console.log(riders);
 
     return (
         <View style={styles.infoContainer}>
@@ -162,7 +144,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
-            {riders && <UserList riders={riders} message={message} />}
+            {riders && <UserList riders={riders} message={error} />}
         </View>
     );
 }

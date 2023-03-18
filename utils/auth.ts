@@ -183,6 +183,20 @@ export function getUserUpdates(
     }
 }
 
+export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string> {
+    try {
+        const info = [];
+        for (const user of users) {
+            const res = await getUserOnce(user);
+            if (res.type !== MessageType.success) throw Error(res.message);
+            info.push(res.data);
+        }
+        return info;
+    } catch (e: any) {
+        return e.message;
+    }
+}
+
 /**
  * Gets a user's info only once
  *
