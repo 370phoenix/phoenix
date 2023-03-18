@@ -23,14 +23,17 @@ export default function CreateProfileScreen(props: Props) {
     const [state, send] = useMachine(createProfileMachine);
     const { error } = state.context;
 
+    if (state.matches("Start")) send({ type: "ADVANCE", prevInfo: null });
+
     useEffect(() => {
         if (!user) return;
-        send("UPDATE INFO", {
+        send({
+            type: "UPDATE INFO",
             userID: user.uid,
             info: {
-                name: name.trim(),
+                username: name.trim(),
                 major: major.trim(),
-                grad: grad.trim(),
+                gradString: grad.trim(),
                 gender: gender.trim(),
                 phone: user.phoneNumber,
             },

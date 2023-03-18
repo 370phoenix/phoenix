@@ -237,11 +237,9 @@ export async function checkUserInfo(
  * @param user (User): The user who's info to delete.
  * @returns (SuccessMessage | ErrorMessage)
  */
-export async function deleteAccount(
-    user: FirebaseAuthTypes.User
-): Promise<SuccessMessage | ErrorMessage> {
+export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + user.uid);
+        const userRef = database().ref("users/" + userID);
         await userRef.remove();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
