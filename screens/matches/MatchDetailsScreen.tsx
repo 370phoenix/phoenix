@@ -62,7 +62,7 @@ export default function MatchDetailsScreen({ route }: Props) {
             </Text>
             {!pending &&
                 riders &&
-                riders.map((profile, index) => (
+                riders.slice(1).map((profile, index) => (
                     <View key={index}>
                         <ProfileInfo userInfo={profile} />
                     </View>

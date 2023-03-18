@@ -203,8 +203,9 @@ export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string
  * @param userID (UserID): The user to get the info of
  * @returns (SuccessMessage<UserInfo> | ErrorMessage | InfoMessage) Informs there is no data, or returns it if there is.
  */
-export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
+export async function getUserOnce(userID: UserID | null): Promise<Message<UserInfo>> {
     try {
+        if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };

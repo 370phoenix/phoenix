@@ -250,6 +250,7 @@ type ARParams = {
     isAccept: boolean;
     userInfo: UserInfo | null;
     requesterID: UserID;
+    requesterInfo: UserInfo | null;
     posterID: UserID;
     postID: PostID;
 };
@@ -269,16 +270,12 @@ export async function handleAcceptReject({
     isAccept,
     userInfo,
     requesterID,
+    requesterInfo,
     postID,
     posterID,
 }: ARParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        if (!userInfo) throw new Error("Missing User Info.");
-
-        // Get Requester Info
-        const r1 = await getUserOnce(requesterID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const requesterInfo = r1.data;
+        if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
 
         // Get post from DB
         const r3 = await fetchPost(postID);

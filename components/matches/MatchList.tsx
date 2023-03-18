@@ -72,14 +72,16 @@ export default function MatchList({ userID }: Props) {
                     data={requests}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        <RequestCard
-                            requesterID={item[0]}
-                            postID={item[1]}
-                            userInfo={userInfo}
-                            posterID={userID}
-                        />
-                    )}
+                    renderItem={({ item }) => {
+                        return (
+                            <RequestCard
+                                requesterID={item[0]}
+                                postID={item[1]}
+                                userInfo={userInfo}
+                                posterID={userID}
+                            />
+                        );
+                    }}
                 />
                 <Text textStyle="header" styleSize="l" style={styles.title}>
                     Matches

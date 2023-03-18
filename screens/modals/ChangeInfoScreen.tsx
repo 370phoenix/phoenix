@@ -30,7 +30,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             return;
         }
 
-        const valid = validateProfile({
+        const valid = await validateProfile({
             username: nameState[0].trim(),
             major: majorState[0].trim(),
             gradString: gradState[0].trim(),
@@ -38,8 +38,8 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             userInfo: userInfo,
         });
 
-        if (valid.type === MessageType.error) {
-            setMessage(valid.message);
+        if (typeof valid === "string") {
+            setMessage(valid);
             return;
         }
 
@@ -52,8 +52,8 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 text: "Confirm",
                 onPress: async () => {
                     try {
-                        if (!valid.data) return;
-                        const res = await writeUser(user.uid, valid.data);
+                        if (!valid) return;
+                        const res = await writeUser(user.uid, valid);
 
                         if (res.type === MessageType.error) {
                             setMessage(res.message);
