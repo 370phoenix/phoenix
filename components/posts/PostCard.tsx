@@ -108,7 +108,10 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
     const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
 
     riders.fill(0);
-    riders.fill(2, 0, filled);
+    if (isMatched) {
+        riders.fill(2, 0, filled - 1);
+        riders[filled - 1] = 3;
+    } else riders.fill(2, 0, filled);
     riders.fill(1, filled, filled + pending);
 
     if (!isProfile) {
@@ -148,11 +151,8 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                     {row.map((rider, index_2) => (
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
-                                isMatched && index_1 === 0 && index_2 == 0 ? (
-                                    <Full
-                                        color={rider === 1 ? Colors.purple.m : Colors.purple[1]}
-                                        height={20}
-                                    />
+                                rider === 3 ? (
+                                    <Full color={Colors.purple[1]} height={20} />
                                 ) : (
                                     <Full
                                         color={rider === 1 ? Colors.purple.m : Colors.purple.p}
