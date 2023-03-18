@@ -131,11 +131,7 @@ export default function CreatePostForm() {
     const TripDetails = (
         <>
             <Text textStyle="label" styleSize="l" style={styles.label}>
-                {message && (
-                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                        {message}
-                    </Text>
-                )}
+
                 From
             </Text>
             <LocationPicker
@@ -206,6 +202,11 @@ export default function CreatePostForm() {
                         behavior={Platform.OS === "ios" ? "padding" : undefined}
                         keyboardVerticalOffset={height}>
                         <TextArea label="Notes" inputState={[notes, setNotes]} />
+                        {message && (
+                            <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                                {message}
+                            </Text>
+                        )}
                         <Button onPress={onSubmit} color="navy" title="Post" />
                         <Spacer direction="column" size={128} style={{ flex: 1 }} />
                     </KeyboardAvoidingView>
