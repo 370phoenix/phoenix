@@ -82,7 +82,6 @@ export const postListMachine = createMachine(PostListMachine, {
     },
     actions: {
         addPost: assign((context, event) => {
-            console.log("post" in event ? event.post : "none");
             return {
                 posts: "post" in event ? [...context.posts, event.post] : context.posts,
             };

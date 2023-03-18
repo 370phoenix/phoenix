@@ -7,85 +7,38 @@ import { fetchSomePosts } from "../../utils/posts";
 import PostCard from "../posts/PostCard";
 import { View, Text } from "../shared/Themed";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
-import { useSelector } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
+import { profilePostMachine } from "../../utils/machines/profilePostsMachine";
 
 type Props = {
     userInfo: UserInfo | null;
 };
 export default function ProfilePostList({ userInfo }: Props) {
-    const [posts, setPosts] = useState<PostType[] | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
-
     const authService = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
+    const [state, send] = useMachine(profilePostMachine);
+    const { error, posts } = state.context;
 
-    // Fetch post info when user info updates
     useEffect(() => {
         if (!userInfo) return;
-        const userPosts = userInfo.posts;
+        console.log(state);
+        if (state.matches("Updating Posts.Start")) send("LOAD", { userPosts: userInfo.posts });
+        else send("UPDATE", { userPosts: userInfo.posts });
 
-        const removeUserPosts = () => {
-            if (!posts) return;
-            if (!userPosts || userPosts.length === 0) {
-                setPosts(null);
-            } else if (userPosts) {
-                for (const post of posts) {
-                    if (!userPosts.includes(post.postID)) {
-                        const i = posts.indexOf(post);
-                        const newPosts = posts;
-                        newPosts.splice(i, 1);
-                        setPosts(newPosts);
-                    }
-                }
-            }
+        () => {
+            send("EXIT");
         };
-
-        const loadUserPosts = async () => {
-            if (!userPosts) return;
-            let toLoad: PostID[] = [];
-            if (posts) {
-                for (const id of userPosts) {
-                    let flag = false;
-                    for (const post of posts) {
-                        if (post.postID === id) {
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (!flag) toLoad.push(id);
-                }
-            } else toLoad = userPosts;
-
-            if (toLoad.length < 1) return;
-
-            const res = await fetchSomePosts(toLoad);
-            if (res.type === MessageType.error) {
-                setMessage(res.message);
-                return;
-            }
-            if (!res.data) return;
-
-            let newPosts;
-            if (posts) {
-                newPosts = posts.concat(res.data);
-            } else newPosts = res.data;
-            newPosts.sort((a, b) => a.startTime - b.startTime);
-            setPosts(newPosts);
-        };
-
-        removeUserPosts();
-        loadUserPosts();
-    }, [userInfo]);
+    }, [send, userInfo]);
 
     return (
         <View style={styles.container}>
             <Text textStyle="header" style={styles.header}>
                 Your Posts
             </Text>
-            {message && (
+            {error && (
                 <Text textStyle="label" style={styles.error}>
-                    {message}
+                    {error}
                 </Text>
             )}
             {posts && (

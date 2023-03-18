@@ -11,7 +11,7 @@ import { useSelector } from "@xstate/react";
 import { AuthContext, userInfoSelector } from "../utils/machines/authMachine";
 
 type props = BottomTabScreenProps<RootTabParamList, "Profile">;
-export default function ProfileScreen({ navigation }: props) {
+export default function ProfileScreen({}: props) {
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
 
