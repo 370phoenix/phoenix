@@ -36,6 +36,9 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const fDate = convertDate(post.startTime);
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
+
+    const color = isProfile ? Colors.navy : Colors.purple;
+
     let isMatched = false;
     if (Array.isArray(updatedUserInfo?.matches))
         isMatched =
@@ -58,26 +61,26 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
             ]}
             key={post.postID}>
             <View style={styles.body}>
-                <Text textStyle="header" styleSize="s" style={styles.text}>
+                <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                     {pickup}
                 </Text>
                 <View style={styles.headerContainer}>
                     {post.roundTrip ? (
-                        <RoundTrip color={Colors.purple.p} height={20} />
+                        <RoundTrip color={color.p} height={20} />
                     ) : (
-                        <Right color={Colors.purple.p} height={20} />
+                        <Right color={color.p} height={20} />
                     )}
-                    <Text textStyle="header" styleSize="s" style={styles.text}>
+                    <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                         {dropoff}
                     </Text>
                 </View>
                 <Spacer direction="column" size={16} />
 
-                <Text textStyle="label" style={styles.text}>
+                <Text textStyle="label" style={{ color: color.p }}>
                     {fDate}
                 </Text>
                 {!isProfile && (
-                    <Text textStyle="body" styleSize="s" style={styles.text}>
+                    <Text textStyle="body" styleSize="s" style={{ color: color.p }}>
                         {fStartTime} - {fEndTime}
                     </Text>
                 )}
@@ -107,8 +110,10 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
     const riders = Array<number>(total);
     const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
 
+    const color = isProfile ? Colors.navy : Colors.purple;
+
     riders.fill(0);
-    if (isMatched) {
+    if (isMatched && !isProfile) {
         riders.fill(2, 0, filled - 1);
         riders[filled - 1] = 3;
     } else riders.fill(2, 0, filled);
@@ -152,15 +157,12 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
                                 rider === 3 ? (
-                                    <Full color={Colors.purple[1]} height={20} />
+                                    <Full color={color[1]} height={20} />
                                 ) : (
-                                    <Full
-                                        color={rider === 1 ? Colors.purple.m : Colors.purple.p}
-                                        height={20}
-                                    />
+                                    <Full color={rider === 1 ? color.m : color.p} height={20} />
                                 )
                             ) : (
-                                <Outline color={Colors.purple.p} height={20} />
+                                <Outline color={color.p} height={20} />
                             )}
                         </View>
                     ))}
@@ -173,9 +175,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                                 style={({ pressed }) => [
                                     styles.trash,
                                     {
-                                        backgroundColor: pressed
-                                            ? Colors.purple.m
-                                            : Colors.purple.p,
+                                        backgroundColor: pressed ? color.m : color.p,
                                     },
                                 ]}>
                                 <Trash color={Colors.gray.w} width={16} />
@@ -206,9 +206,6 @@ const styles = StyleSheet.create({
     },
     body: { flex: 1, width: "100%" },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
-    text: {
-        color: Colors.purple.p,
-    },
     riderBadge: { height: 100, flexDirection: "column", justifyContent: "center" },
     riderBadgeProfile: {
         marginTop: -12,
@@ -229,4 +226,5 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    text: {},
 });
