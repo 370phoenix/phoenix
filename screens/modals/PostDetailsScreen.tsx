@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
@@ -17,46 +18,10 @@ import auth from "@react-native-firebase/auth";
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
     if (!route.params) return <></>;
-<<<<<<< HEAD
-    const paramPost = route.params.post;
-=======
     const post = route.params.post;
->>>>>>> main
 
     const [message, setMessage] = useState<string | null>(null);
     const currentUser = auth().currentUser?.uid;
-<<<<<<< HEAD
-
-    const handleMatch = () => {
-        Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
-            {
-                text: "Cancel",
-            },
-            {
-                text: "Confirm",
-                onPress: async () => {
-                    if (!currentUser) return;
-                    if (!post) return;
-                    if (post.riders?.includes(currentUser)) return;
-
-                    const res = await matchPost(currentUser, post);
-                    if (res.type === MessageType.error) setMessage(res.message);
-                },
-            },
-        ]);
-    };
-
-    useEffect(() => {
-        // DON'T DELETE: Will be used later for deep linking
-        // const getPostInfo = async (postID: PostID) => {
-        //     const res = await fetchPost(postID);
-        //     if (res.type === MessageType.error) setMessage(res.message);
-        //     else setPost(res.data);
-        // };
-
-        if (paramPost) setPost(paramPost);
-    }, []);
-=======
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
@@ -81,7 +46,6 @@ export default function DetailsModal({ route }: Props) {
             },
         ]);
     };
->>>>>>> main
 
     return (
         <View style={styles.infoContainer}>

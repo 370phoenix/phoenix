@@ -11,24 +11,15 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useNavigation } from "@react-navigation/native";
-<<<<<<< HEAD
-=======
 import { MatchSublist } from "./MatchList";
->>>>>>> main
 
 export type Props = {
     postID: string;
     userInfo: UserInfo | null;
-<<<<<<< HEAD
-};
-
-export default function MatchCard({ postID }: Props) {
-=======
     list: MatchSublist;
 };
 
 export default function MatchCard({ postID, list }: Props) {
->>>>>>> main
     const navigation = useNavigation();
 
     const [post, setPost] = useState<PostType | null>(null);
@@ -55,11 +46,7 @@ export default function MatchCard({ postID, list }: Props) {
 
     return (
         <Pressable
-<<<<<<< HEAD
-            onPress={() => navigation.navigate("MatchDetails", { post: post })} //pass the post info
-=======
             onPress={() => navigation.navigate("MatchDetails", { post: post, list: list })} //pass the post info
->>>>>>> main
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -92,12 +79,8 @@ export default function MatchCard({ postID, list }: Props) {
             <View style={styles.riderIcon}>
                 <Full color={Colors.purple.p} height={28} />
                 <Text>
-<<<<<<< HEAD
-                    {post.riders ? post.riders.length + 1 : 1} / {post.totalSpots}
-=======
                     {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1} /{" "}
                     {post.totalSpots}
->>>>>>> main
                 </Text>
             </View>
         </Pressable>
