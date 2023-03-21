@@ -1,17 +1,18 @@
+import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 
-import { View, Text } from "../shared/Themed";
-import Colors from "../../constants/Colors";
-import { useEffect, useState } from "react";
-import { MessageType, UserInfo } from "../../utils/auth";
-import { PostType } from "../../constants/DataTypes";
-import { fetchPost } from "../../utils/posts";
-import { convertLocation } from "../../utils/convertPostTypes";
-import RoundTrip from "../../assets/icons/RoundTrip";
-import { Right } from "../../assets/icons/Arrow";
-import { Full } from "../../assets/icons/User";
-import { useNavigation } from "@react-navigation/native";
 import { MatchSublist } from "./MatchList";
+import { Right } from "../../assets/icons/Arrow";
+import RoundTrip from "../../assets/icons/RoundTrip";
+import { Full } from "../../assets/icons/User";
+import Colors from "../../constants/Colors";
+import { PostType } from "../../constants/DataTypes";
+import { MessageType, UserInfo } from "../../utils/auth";
+import { convertLocation } from "../../utils/convertPostTypes";
+import { fetchPost } from "../../utils/posts";
+import { View, Text } from "../shared/Themed";
+
 
 export type Props = {
     postID: string;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { StyleSheet, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
@@ -9,35 +10,16 @@ import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
-<<<<<<< HEAD
-=======
 import { MatchSublist } from "../../components/matches/MatchList";
->>>>>>> main
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
     const currentUser = auth().currentUser?.uid;
     if (!currentUser || !route.params) return <></>;
-<<<<<<< HEAD
-
-    return (
-        <ScrollView directionalLockEnabled style={styles.container}>
-            <MoreInfo post={route.params.post} isMine={currentUser === route.params.post.user} />
-        </ScrollView>
-    );
-}
-
-type MoreInfoProps = {
-    post: PostType;
-    isMine: boolean;
-};
-function MoreInfo({ post, isMine }: MoreInfoProps) {
-=======
     const { post, list } = route.params;
     const isMine = post.user == currentUser;
     const pending = list === MatchSublist.pending;
 
->>>>>>> main
     const [posterInfo, setPosterInfo] = useState<UserInfo | null>(null);
     const [profiles, setProfiles] = useState<UserInfo[] | null>(null);
 
