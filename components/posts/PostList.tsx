@@ -4,11 +4,7 @@ import { FlatList, RefreshControl } from "react-native";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
 import { MessageType } from "../../utils/auth";
-<<<<<<< HEAD
-import { fetchAllPosts, getAllPostUpdates } from "../../utils/posts";
-=======
 import { comparePosts, fetchAllPosts, getAllPostUpdates } from "../../utils/posts";
->>>>>>> main
 import { View, Text } from "../shared/Themed";
 
 import PostCard from "./PostCard";
@@ -16,25 +12,6 @@ import PostCard from "./PostCard";
 export default function PostList() {
     const [posts, setPosts] = useState<PostType[]>([]);
     const [message, setMesssage] = useState<string | null>(null);
-<<<<<<< HEAD
-    // REFRESH OFF FOR NOW - uneeded API call, auto-refresh implemented.
-    // const [refreshing, setRefreshing] = useState(false);
-    // pull down to refresh, updates posts
-    // const onRefresh: any = async () => {
-    //     setLoading(true);
-    //     // setRefreshing(true);
-    //     await fetchData();
-    //     // setRefreshing(false);
-    //     setLoading(false);
-    // };
-
-    useEffect(() => {
-        const res = getAllPostUpdates((post) => {
-            setPosts((prev) => {
-                if (prev.find((val) => val.postID == post.postID)) return prev;
-                return [...prev, post];
-            });
-=======
 
     useEffect(() => {
         const res = getAllPostUpdates({
@@ -64,7 +41,6 @@ export default function PostList() {
                     return prev;
                 });
             },
->>>>>>> main
         });
 
         if (res.type === MessageType.error) {
@@ -90,12 +66,6 @@ export default function PostList() {
                     data={posts}
                     style={{ paddingTop: 16, paddingBottom: 200 }}
                     keyExtractor={(item) => item.postID}
-<<<<<<< HEAD
-                    // refreshControl={
-                    //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    // }
-=======
->>>>>>> main
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => <PostCard post={item} />}
                 />
