@@ -10,11 +10,8 @@ import { MessageType, validateProfile, writeUser } from "../../utils/auth";
 import auth from "@react-native-firebase/auth";
 
 type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-type UniqueProps = {
-    setNeedsInfo: Dispatch<SetStateAction<boolean>>;
-};
-type Props = NativeProps & UniqueProps;
-export default function CreateProfileScreen({ setNeedsInfo }: Props) {
+type Props = NativeProps;
+export default function CreateProfileScreen(props: Props) {
     const headerHeight = useHeaderHeight();
     const nameState = useState("");
     const majorState = useState("");
@@ -42,8 +39,7 @@ export default function CreateProfileScreen({ setNeedsInfo }: Props) {
             if (!valid.data) return;
 
             const res = await writeUser(user.uid, valid.data);
-            if (res.type === MessageType.success) setNeedsInfo(false);
-            else setMessage(res.message);
+            if (res.type !== MessageType.success) setMessage(res.message);
         }
     };
 

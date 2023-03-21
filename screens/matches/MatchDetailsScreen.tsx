@@ -9,11 +9,16 @@ import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
+<<<<<<< HEAD
+=======
+import { MatchSublist } from "../../components/matches/MatchList";
+>>>>>>> main
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
     const currentUser = auth().currentUser?.uid;
     if (!currentUser || !route.params) return <></>;
+<<<<<<< HEAD
 
     return (
         <ScrollView directionalLockEnabled style={styles.container}>
@@ -27,6 +32,12 @@ type MoreInfoProps = {
     isMine: boolean;
 };
 function MoreInfo({ post, isMine }: MoreInfoProps) {
+=======
+    const { post, list } = route.params;
+    const isMine = post.user == currentUser;
+    const pending = list === MatchSublist.pending;
+
+>>>>>>> main
     const [posterInfo, setPosterInfo] = useState<UserInfo | null>(null);
     const [profiles, setProfiles] = useState<UserInfo[] | null>(null);
 
@@ -51,16 +62,16 @@ function MoreInfo({ post, isMine }: MoreInfoProps) {
             setProfiles(objects);
         };
 
-        loadUsers();
-        if (!isMine) loadPoster();
-    }, [post, isMine, setProfiles, setPosterInfo]);
+        if (!pending) loadUsers();
+        if (!pending && !isMine) loadPoster();
+    }, [post, isMine, pending]);
 
     const onUnmatch = () => {
         // TODO
     };
 
     return (
-        <View style={styles.infoContainer}>
+        <ScrollView directionalLockEnabled style={styles.container}>
             <Text textStyle="header" style={styles.mb16}>
                 Ride Information
             </Text>
@@ -87,7 +98,7 @@ function MoreInfo({ post, isMine }: MoreInfoProps) {
             <Text textStyle="header" style={styles.mb8}>
                 Rider Profiles
             </Text>
-            {post.riders &&
+            {!pending &&
                 profiles &&
                 profiles.map((profile, index) => (
                     <View key={index}>
@@ -96,7 +107,7 @@ function MoreInfo({ post, isMine }: MoreInfoProps) {
                 ))}
             <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />
             <Spacer direction="column" size={200} />
-        </View>
+        </ScrollView>
     );
 }
 
@@ -104,10 +115,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.gray[4],
         marginTop: -20,
-        paddingTop: 20,
-    },
-    infoContainer: {
-        paddingTop: 32,
+        paddingTop: 52,
         paddingHorizontal: 16,
     },
     mb8: {

@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 import { Text, View } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
@@ -16,9 +16,9 @@ export default function MatchesScreen() {
             </View>
         );
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <MatchList user={currentUser} />
-        </View>
+        </ScrollView>
     );
 }
 

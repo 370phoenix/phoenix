@@ -27,7 +27,7 @@ export default function ProfileView({ user, userInfo, message }: Props) {
                     <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted)} />
                     <Spacer direction="column" size={32} />
                     <Button
-                        title="Change Account Info"
+                        title="Preferences"
                         onPress={() =>
                             navigation.navigate("ChangeInfo", {
                                 userInfo: userInfo,

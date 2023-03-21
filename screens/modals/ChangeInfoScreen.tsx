@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { Alert, KeyboardAvoidingView, Linking, Platform, StyleSheet } from "react-native";
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../../utils/auth";
@@ -112,6 +112,12 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                     color="red"
                     style={styles.button}
                 />
+                <Button
+                    onPress={() => Linking.openURL("https://forms.gle/DfQnUnXuQNcGR3ec7")}
+                    title="Bug Report/Feedback"
+                    color="purple"
+                    style={[styles.button, styles.feedback]}
+                />
 
                 <View style={{ flex: 1 }} />
             </KeyboardAvoidingView>
@@ -143,5 +149,8 @@ const styles = StyleSheet.create({
     },
     message: {
         color: Colors.red.p,
+    },
+    feedback: {
+        marginTop: 30,
     },
 });

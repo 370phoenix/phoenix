@@ -6,8 +6,14 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+<<<<<<< HEAD
 import { AuthAction, AuthState, UserInfo } from "./utils/auth";
 import { PostID, PostType } from "./constants/DataTypes";
+=======
+import { UserInfo } from "./utils/auth";
+import { PostType } from "./constants/DataTypes";
+import { MatchSublist } from "./components/matches/MatchList";
+>>>>>>> main
 
 declare global {
     namespace ReactNavigation {
@@ -30,6 +36,10 @@ export type RootStackParamList = {
 
 export type MatchDetailsParamList = {
     post: PostType;
+<<<<<<< HEAD
+=======
+    list: MatchSublist;
+>>>>>>> main
 };
 
 export type PostDetailsParamList = {
@@ -40,9 +50,7 @@ export type ChangeInfoParamList = {
     userInfo: UserInfo;
 };
 
-export type CreateProfileParamList = {
-    authDispatch: React.Dispatch<AuthAction>;
-};
+export type CreateProfileParamList = {};
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,
