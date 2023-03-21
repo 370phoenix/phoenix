@@ -36,7 +36,7 @@ const AuthMachine = {
             on: {
                 "Sign Out": {
                     target: "Welcome Screen",
-                    actions: [assign({ user: null }), assign({ userInfo: null })],
+                    actions: "clearInfo",
                 },
                 "INFO CHANGED": {
                     target: "Checking Updates",
@@ -145,6 +145,9 @@ export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 
 export const authMachine = createMachine(AuthMachine, {
+    actions: {
+        clearInfo: assign({ user: null, userInfo: null }),
+    },
     guards: {
         userInfoExists: (_, event: any) => {
             return event.data && event.data[1] !== undefined;
