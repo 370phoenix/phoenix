@@ -1,16 +1,11 @@
-import { useHeaderHeight } from "@react-navigation/elements";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
     TouchableWithoutFeedback,
     View,
     Keyboard,
     StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
     ScrollView,
 } from "react-native";
-import uuid from "react-native-uuid";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
 import CustomSwitch from "../shared/CustomSwitch";
@@ -18,15 +13,19 @@ import NumberPicker from "../shared/NumberPicker";
 import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
-import { PostType, Coords, NewPostType } from "../../constants/DataTypes";
+import { Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 import SuccessfulPost from "./SuccessfulPost";
 
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const height = useHeaderHeight();
+    const authService = useContext(AuthContext);
+    const id = useSelector(authService, userIDSelector);
+    const userID = id ? id : "No user found";
+    const userInfo = useSelector(authService, userInfoSelector);
 
     // date time state
     const [startTime, setStartTime] = useState(new Date());
@@ -60,10 +59,6 @@ export default function CreatePostForm() {
 
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
-
-    // find current userID
-    const user = auth().currentUser;
-    const userID = user ? user.uid : "No user found";
 
     //error message
     const [message1, setMessage1] = useState<string | null>(null);
@@ -106,7 +101,7 @@ export default function CreatePostForm() {
             };
 
             //Verify completion
-            await createPost(post, user);
+            await createPost(post, userID, userInfo);
             setWriteComplete(true);
 
         }

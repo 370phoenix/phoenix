@@ -4,10 +4,15 @@ import { ScrollView, StyleSheet } from "react-native";
 import MatchList from "../../components/matches/MatchList";
 import { Text, View } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
+import { useContext } from "react";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 
 export default function MatchesScreen() {
-    const currentUser = auth().currentUser;
-    if (!currentUser)
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
+
+    if (!userID)
         return (
             <View style={styles.container}>
                 <Text textStyle="label" style={styles.err}>
@@ -17,7 +22,7 @@ export default function MatchesScreen() {
         );
     return (
         <ScrollView style={styles.container}>
-            <MatchList user={currentUser} />
+            <MatchList userID={userID} />
         </ScrollView>
     );
 }

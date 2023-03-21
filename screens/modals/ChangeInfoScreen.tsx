@@ -5,44 +5,45 @@ import { Button, Spacer, Text, TextField, View } from "../../components/shared/T
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useState } from "react";
-import auth from "@react-native-firebase/auth";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useMachine, useSelector } from "@xstate/react";
+import { createProfileMachine } from "../../utils/machines/createProfileMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
     const headerheight = useHeaderHeight();
 
-    const user = auth().currentUser;
-    let userInfo: UserInfo | null = null;
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
+    const { userInfo } = route.params ? route.params : { userInfo: null };
 
-    if (route.params) ({ userInfo } = route.params);
+    const [state, send] = useMachine(createProfileMachine);
 
-    const nameState = useState(userInfo ? userInfo.username : "");
-    const majorState = useState(userInfo ? userInfo.major : "");
-    const gradState = useState(userInfo ? String(userInfo.gradYear) : "");
-    const genderState = useState(userInfo ? userInfo.gender : "");
+    if (state.matches("Start")) send({ type: "ADVANCE", prevInfo: userInfo });
+
+    const [name, setName] = useState(userInfo ? userInfo.username : "");
+    const [major, setMajor] = useState(userInfo ? userInfo.major : "");
+    const [grad, setGrad] = useState(userInfo ? String(userInfo.gradYear) : "");
+    const [gender, setGender] = useState(userInfo ? userInfo.gender : "");
 
     const [message, setMessage] = useState<string | null>(null);
 
-    const onConfirm = async () => {
-        if (!user || !userInfo) {
-            setMessage("Error getting user id or information.");
-            return;
-        }
-
-        const valid = validateProfile({
-            username: nameState[0].trim(),
-            major: majorState[0].trim(),
-            gradString: gradState[0].trim(),
-            gender: genderState[0].trim(),
-            userInfo: userInfo,
+    useEffect(() => {
+        if (!userID || !userInfo) return;
+        send("UPDATE INFO", {
+            userID: userID,
+            info: {
+                username: name.trim(),
+                major: major.trim(),
+                gradString: grad.trim(),
+                gender: gender.trim(),
+                phone: null,
+            },
         });
+    }, [name, major, grad, gender, userID, send]);
 
-        if (valid.type === MessageType.error) {
-            setMessage(valid.message);
-            return;
-        }
-
+    const onConfirm = async () => {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
                 text: "Cancel",
@@ -50,30 +51,20 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             },
             {
                 text: "Confirm",
-                onPress: async () => {
-                    try {
-                        if (!valid.data) return;
-                        const res = await writeUser(user.uid, valid.data);
-
-                        if (res.type === MessageType.error) {
-                            setMessage(res.message);
-                        } else {
-                            if (navigation.canGoBack()) navigation.goBack();
-                        }
-                    } catch (e: any) {
-                        console.log(e.message);
-                    }
+                onPress: () => {
+                    send("SUBMIT");
+                    navigation.goBack();
                 },
             },
         ]);
     };
 
     const onDelete = async () => {
-        if (!user) {
+        if (!userID) {
             setMessage("Error: no user found.");
             return;
         }
-        const res = await deleteAccount(user);
+        const res = await deleteAccount(userID);
         if (res.type === MessageType.error) setMessage(res.message);
     };
 
@@ -87,10 +78,14 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                     Tap to Change Information
                 </Text>
 
-                <TextField style={styles.input} label={"name"} inputState={nameState} />
-                <TextField style={styles.input} label={"major"} inputState={majorState} />
-                <TextField style={styles.input} label={"grad year"} inputState={gradState} />
-                <TextField style={styles.input} label={"gender"} inputState={genderState} />
+                <TextField style={styles.input} label={"name"} inputState={[name, setName]} />
+                <TextField style={styles.input} label={"major"} inputState={[major, setMajor]} />
+                <TextField style={styles.input} label={"grad year"} inputState={[grad, setGrad]} />
+                <TextField
+                    style={styles.input}
+                    label={"pronouns"}
+                    inputState={[gender, setGender]}
+                />
 
                 {message && (
                     <Text textStyle="label" styleSize="m" style={styles.message}>
@@ -101,6 +96,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 <Spacer direction="column" size={50} />
 
                 <Button
+                    disabled={!state.matches("Information Valid")}
                     onPress={() => onConfirm()}
                     title="Confirm?"
                     color="navy"

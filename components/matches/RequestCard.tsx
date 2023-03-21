@@ -2,12 +2,12 @@ import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { useEffect, useState } from "react";
-import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/auth";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { UserID } from "../../constants/DataTypes";
-import { handleAcceptReject } from "../../utils/posts";
+import { useMachine } from "@xstate/react";
+import { requestCardMachine } from "../../utils/machines/requestCardMachine";
 
 export type Props = {
     requesterID: UserID;
@@ -16,16 +16,10 @@ export type Props = {
     userInfo: UserInfo | null;
 };
 export default function RequestCard({ requesterID, posterID, postID, userInfo }: Props) {
-    //const name = userID.username;
-    const [gender, setGender] = useState<string | null>(null);
-    const [gradYear, setYear] = useState<string | null>(null);
-    const [name, setName] = useState<string | null>(null);
-    const [major, setMajor] = useState<string | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
+    const [state, send] = useMachine(requestCardMachine);
+    const { requesterInfo } = state.context;
 
-    useEffect(() => {
-        loadInfo();
-    }, [requesterID]);
+    if (state.matches("Start")) send("LOAD INFO", { id: requesterID });
 
     const handleButton = async (isAccept: boolean) => {
         Alert.alert(
@@ -35,13 +29,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
                 {
                     text: "Confirm",
                     onPress: () =>
-                        handleAcceptReject({
-                            isAccept,
-                            userInfo,
-                            requesterID,
-                            postID,
-                            posterID,
-                        }),
+                        send(isAccept ? "ACCEPT" : "REJECT", { postID, posterID, userInfo }),
                 },
                 {
                     text: "Cancel",
@@ -50,51 +38,38 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
         );
     };
 
-    const loadInfo = async () => {
-        const res = await getUserOnce(requesterID);
-        if (res.type !== MessageType.success) setMessage(res.message);
-        else {
-            const userInfo = res.data;
-            if (
-                !userInfo ||
-                !userInfo.gender ||
-                !userInfo.username ||
-                !userInfo.major ||
-                !userInfo.gradYear
-            ) {
-                setMessage("Couldn't find user information.");
-                return;
-            }
-            setGender(userInfo.gender);
-            setName(userInfo.username);
-            setMajor(userInfo.major);
-            setYear("'" + String(userInfo.gradYear).slice(2, 4));
-        }
-    };
-
-    return (
-        <Pressable
-            //navigate to post onPress={() => }
-            style={({ pressed }) => [
-                styles.cardContainer,
-                {
-                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
-                },
-            ]}>
-            <View style={styles.textPart}>
-                <View style={styles.headerContainer}>
-                    <Text textStyle="header" styleSize="m" style={styles.name}>
-                        {name}
-                    </Text>
-                    <Text textStyle="label" style={styles.subtext}>
-                        {gender}
-                    </Text>
-                </View>
-
-                <Text textStyle="body" styleSize="m">
-                    {major} {gradYear}
+    if (["Start", "Loading"].some(state.matches))
+        return (
+            <View style={styles.cardContainer}>
+                <Text textStyle="header" styleSize="m" style={styles.name}>
+                    Loading...
                 </Text>
             </View>
+        );
+
+    return (
+        <View style={styles.cardContainer}>
+            <View style={styles.textPart}>
+                {requesterInfo ? (
+                    <>
+                        <View style={styles.headerContainer}>
+                            <Text textStyle="header" styleSize="m" style={styles.name}>
+                                {requesterInfo.username}
+                            </Text>
+                            <Text textStyle="label" style={styles.subtext}>
+                                {requesterInfo.gender}
+                            </Text>
+                        </View>
+
+                        <Text textStyle="body" styleSize="m">
+                            {requesterInfo.major} {requesterInfo.gradYear}
+                        </Text>
+                    </>
+                ) : (
+                    <Text>No Info.</Text>
+                )}
+            </View>
+
             <AcceptDenyButton
                 isAccept={false}
                 handleAction={() => {
@@ -102,7 +77,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
                 }}
             />
             <AcceptDenyButton isAccept={true} handleAction={() => handleButton(true)} />
-        </Pressable>
+        </View>
     );
 }
 
@@ -136,6 +111,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderTopWidth: 1,
+        backgroundColor: Colors.gray.w,
     },
     body: { flex: 1 },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },

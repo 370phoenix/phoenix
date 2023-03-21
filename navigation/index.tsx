@@ -4,7 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import { UserInfo } from "../utils/auth";
 import WelcomeScreen from "../screens/auth/WelcomeScreen";
 import SignInScreen from "../screens/auth/SignInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -31,6 +30,8 @@ import { createContext } from "react";
 import { useInterpret, useSelector } from "@xstate/react";
 import { AuthMachine } from "../utils/machines";
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
+import { getUserUpdates, UserInfo } from "../utils/auth";
+import { userIDSelector } from "../utils/machines/authMachine";
 
 const authMachine = createMachine(AuthMachine, {
     guards: {
@@ -84,16 +85,17 @@ function RootNavigator() {
     const authService = React.useContext(AuthContext);
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
-    const { send } = authService;
+    const userID = useSelector(authService, userIDSelector);
 
     React.useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(async (user) => {
-            send({ type: "INFO CHANGED", obj: user });
+        if (!userID) return;
+
+        const subscriber = getUserUpdates(userID, (data) => {
+            authService.send("INFO CHANGED", { obj: data });
         });
 
-        // TODO: Add User Info Listener
+        if (typeof subscriber === "string") return;
 
-        // Stop listening to the updates when component unmounts
         return subscriber;
     }, []);
 
