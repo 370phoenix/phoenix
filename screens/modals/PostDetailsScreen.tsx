@@ -12,7 +12,7 @@ import { MessageType, UserInfo } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
-import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 
