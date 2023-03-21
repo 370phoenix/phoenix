@@ -35,6 +35,7 @@ export default function validateData({
     numSeats,
     notes,
 }: ValidatePostParams): SuccessMessage | ErrorMessage {
+    //checks each case and returns error or success message
     try {
         if (!startTime)
             return { type: MessageType.error, message: "Enter a start time." }

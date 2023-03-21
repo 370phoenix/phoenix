@@ -74,8 +74,9 @@ export default function CreatePostForm() {
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-        //validate;
-        //let isValid = true;
+
+        //uses validation function
+        //errors are displayed as error messages below
         const valid = validateData({
             startTime: startTime,
             endTime: endTime,
@@ -90,20 +91,6 @@ export default function CreatePostForm() {
             setMessage(valid.message);
             return;
         }
-
-        /*if (startTime.getTime() === endTime.getTime()) {
-            isValid = false;
-            setMessage1("Error: Invalid time window");
-        }
-        if (pickupText === "") {
-            isValid = false;
-            setMessage2("Error: Invalid pickup location");
-        }
-        if (dropoffText === "") {
-            isValid = false;
-            setMessage3("Error: Invalid dropoff location");
-        }
-        */
 
         // Push to database
         if (valid.type === MessageType.success) {
