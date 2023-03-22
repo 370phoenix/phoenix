@@ -1,47 +1,44 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { MessageType, validateProfile, writeUser } from "../../utils/auth";
 import auth from "@react-native-firebase/auth";
+import { useMachine } from "@xstate/react";
+import { createProfileMachine } from "../../utils/machines/createProfileMachine";
 
 type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 type Props = NativeProps;
 export default function CreateProfileScreen(props: Props) {
     const headerHeight = useHeaderHeight();
-    const nameState = useState("");
-    const majorState = useState("");
-    const gradState = useState("");
-    const genderState = useState("");
+    const user = auth().currentUser;
+    const [name, setName] = useState("");
+    const [major, setMajor] = useState("");
+    const [grad, setGrad] = useState("");
+    const [gender, setGender] = useState("");
 
-    const [message, setMessage] = useState<string | null>(null);
+    const [state, send] = useMachine(createProfileMachine);
+    const { error } = state.context;
 
-    const onSubmit = async () => {
-        const user = auth().currentUser;
+    if (state.matches("Start")) send({ type: "ADVANCE", prevInfo: null });
 
-        if (user && user.phoneNumber) {
-            const valid = validateProfile({
-                username: nameState[0].trim(),
-                major: majorState[0].trim(),
-                gradString: gradState[0].trim(),
-                gender: genderState[0].trim(),
+    useEffect(() => {
+        if (!user) return;
+        send({
+            type: "UPDATE INFO",
+            userID: user.uid,
+            info: {
+                username: name.trim(),
+                major: major.trim(),
+                gradString: grad.trim(),
+                gender: gender.trim(),
                 phone: user.phoneNumber,
-            });
-
-            if (valid.type === MessageType.error) {
-                setMessage(valid.message);
-                return;
-            }
-            if (!valid.data) return;
-
-            const res = await writeUser(user.uid, valid.data);
-            if (res.type !== MessageType.success) setMessage(res.message);
-        }
-    };
+            },
+        });
+    }, [name, major, grad, gender, user, send]);
 
     return (
         <View style={styles.container}>
@@ -61,21 +58,21 @@ export default function CreateProfileScreen(props: Props) {
                     style={{ color: Colors.gray.w, marginBottom: 32 }}>
                     Please complete your profile.
                 </Text>
-                {message && (
+                {error && (
                     <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                        {message}
+                        {error}
                     </Text>
                 )}
                 <TextField
                     label="name"
-                    inputState={nameState}
+                    inputState={[name, setName]}
                     keyboardType="default"
                     style={styles.inputs}
                     light
                 />
                 <TextField
                     label="major"
-                    inputState={majorState}
+                    inputState={[major, setMajor]}
                     keyboardType="default"
                     style={styles.inputs}
                     light
@@ -83,7 +80,7 @@ export default function CreateProfileScreen(props: Props) {
                 <View style={styles.group}>
                     <TextField
                         label="grad year"
-                        inputState={gradState}
+                        inputState={[grad, setGrad]}
                         keyboardType="number-pad"
                         style={styles.smallInputs}
                         light
@@ -91,7 +88,7 @@ export default function CreateProfileScreen(props: Props) {
                     <Spacer direction="row" size={16} />
                     <TextField
                         label="gender"
-                        inputState={genderState}
+                        inputState={[gender, setGender]}
                         keyboardType="default"
                         style={styles.smallInputs}
                         light
@@ -100,7 +97,7 @@ export default function CreateProfileScreen(props: Props) {
                 <Spacer direction="column" size={32} />
                 <Button
                     title="continue"
-                    onPress={() => onSubmit()}
+                    onPress={() => send("SUBMIT")}
                     color="purple"
                     style={styles.submit}
                     light
