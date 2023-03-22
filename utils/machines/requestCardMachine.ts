@@ -22,7 +22,7 @@ const RequestCardMachine = {
                 onDone: [
                     {
                         target: "Prompt",
-                        actions: assign({ requesterInfo: (_, event: any) => event.data }),
+                        actions: "assignRequesterInfo",
                     },
                 ],
                 onError: [
@@ -139,5 +139,6 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                 }`
             ),
         assignID: assign((_, event: any) => ({ userID: event.id })),
+        assignRequesterInfo: assign({ requesterInfo: (_, event: any) => event.data }),
     },
 });

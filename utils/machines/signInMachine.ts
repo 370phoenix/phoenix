@@ -10,31 +10,21 @@ const SignInMachine = {
             on: {
                 "CHECK PHONE": {
                     target: "Get Confirm",
-                    actions: assign({
-                        phone: (_, event: { phone: string }) => event.phone,
-                    }),
+                    actions: "assignPhone",
                 },
             },
         },
         "Get Confirm": {
             invoke: {
-                src: (context: { phone: string }) => getConfirm(context.phone),
+                src: "getConfirm",
                 id: "getConfirm",
                 onDone: {
                     target: "Input OTP",
-                    actions: assign({
-                        confirm: (
-                            _,
-                            event: DoneInvokeEvent<FirebaseAuthTypes.ConfirmationResult>
-                        ) => event.data,
-                        error: null,
-                    }),
+                    actions: "assignConfirm",
                 },
                 onError: {
                     target: "Input Phone",
-                    actions: assign({
-                        error: (_, event: ErrorExecutionEvent) => event.data.message,
-                    }),
+                    actions: "assignError",
                 },
             },
         },
@@ -42,12 +32,7 @@ const SignInMachine = {
             on: {
                 "CHECK OTP": {
                     target: "Submit Verification",
-                    actions: [
-                        assign({
-                            otp: (_, event: { otp: string }) => event.otp,
-                            error: null,
-                        }),
-                    ],
+                    actions: "assignOTP",
                 },
                 "CLOSE": {
                     target: "Input Phone",
@@ -56,19 +41,14 @@ const SignInMachine = {
         },
         "Submit Verification": {
             invoke: {
-                src: (context: {
-                    confirm: FirebaseAuthTypes.ConfirmationResult | null;
-                    otp: string;
-                }) => signIn(context.confirm!, context.otp),
+                src: "signIn",
                 id: "signIn",
                 onDone: {
                     target: "Complete",
                 },
                 onError: {
                     target: "Input OTP",
-                    actions: assign({
-                        error: (_, event: ErrorExecutionEvent) => event.data.message,
-                    }),
+                    actions: "assignError",
                 },
             },
         },
@@ -81,16 +61,38 @@ const SignInMachine = {
             phone: string;
             otp: string;
             confirm: FirebaseAuthTypes.ConfirmationResult | null;
-            error: string;
+            error: string | null;
         },
         events: {} as
             | { type: "CHECK PHONE"; phone: string }
             | { type: "CHECK OTP"; otp: string }
             | { type: "CLOSE" },
     },
-    context: { phone: "", otp: "", confirm: null, error: "" },
+    context: { phone: "", otp: "", confirm: null, error: null },
     predictableActionArguments: true,
     preserveActionOrder: true,
 };
 
-export const signInMachine = createMachine(SignInMachine, {});
+export const signInMachine = createMachine(SignInMachine, {
+    services: {
+        getConfirm: (context: { phone: string }) => getConfirm(context.phone),
+        signIn: (context: { confirm: FirebaseAuthTypes.ConfirmationResult | null; otp: string }) =>
+            signIn(context.confirm!, context.otp),
+    },
+    actions: {
+        assignPhone: assign({
+            phone: (context, event) => (event.type === "CHECK PHONE" ? event.phone : context.phone),
+        }),
+        assignConfirm: assign({
+            confirm: (_, event: any) => event.data,
+            error: null,
+        }),
+        assignError: assign({
+            error: (_, event: any) => event.data.message,
+        }),
+        assignOTP: assign({
+            otp: (_, event: any) => event.otp,
+            error: null,
+        }),
+    },
+});

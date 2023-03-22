@@ -12,7 +12,7 @@ const PostInfoMachine = {
             on: {
                 LOAD: {
                     target: "Loading",
-                    actions: assign({ postID: (_, event: any) => event.id }),
+                    actions: "assignID",
                 },
             },
         },
@@ -23,7 +23,7 @@ const PostInfoMachine = {
                 onDone: [
                     {
                         target: "Loaded",
-                        actions: assign({ post: (_, event: any) => event.data }),
+                        actions: "assignPost",
                     },
                 ],
                 onError: [
@@ -72,6 +72,8 @@ export const postInfoMachine = createMachine(PostInfoMachine, {
         },
     },
     actions: {
+        assignID: assign({ postID: (_, event: any) => event.id }),
+        assignPost: assign({ post: (_, event: any) => event.data }),
         logError: (_, event: any) => console.log(event.data),
     },
 });

@@ -10,7 +10,7 @@ const MultipleUserMachine = {
             on: {
                 LOAD: {
                     target: "Loading Riders",
-                    actions: assign((_, event: any) => ({ ids: event.ids })),
+                    actions: "assignIDs",
                 },
             },
         },
@@ -20,11 +20,11 @@ const MultipleUserMachine = {
                 id: "loadUsers",
                 onDone: {
                     target: "Idle",
-                    actions: assign({ riders: (_, event: any) => event.data }),
+                    actions: "assignRiders",
                 },
                 onError: {
                     target: "Failed",
-                    actions: assign({ error: (_, event: any) => event.data }),
+                    actions: "assignError",
                 },
             },
         },
@@ -56,6 +56,11 @@ const MultipleUserMachine = {
 };
 
 export const multipleUserMachine = createMachine(MultipleUserMachine, {
+    actions: {
+        assignIDs: assign((_, event: any) => ({ ids: event.ids })),
+        assignRiders: assign({ riders: (_, event: any) => event.data }),
+        assignError: assign({ error: (_, event: any) => event.data }),
+    },
     services: {
         loadUsers: (context) => getUsersOnce(context.ids ? context.ids : []),
     },
