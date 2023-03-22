@@ -10,11 +10,9 @@ const SignInMachine = {
             on: {
                 "CHECK PHONE": {
                     target: "Get Confirm",
-                    actions: [
-                        assign({
-                            phone: (_, event: { phone: string }) => event.phone,
-                        }),
-                    ],
+                    actions: assign({
+                        phone: (_, event: { phone: string }) => event.phone,
+                    }),
                 },
             },
         },
@@ -22,23 +20,22 @@ const SignInMachine = {
             invoke: {
                 src: (context: { phone: string }) => getConfirm(context.phone),
                 id: "getConfirm",
-                onDone: [
-                    {
-                        target: "Input OTP",
-                        actions: assign({
-                            confirm: (
-                                _,
-                                event: DoneInvokeEvent<FirebaseAuthTypes.ConfirmationResult>
-                            ) => event.data,
-                        }),
-                    },
-                ],
-                onError: [
-                    {
-                        target: "Input Phone",
-                        actions: assign({ error: (_, event: ErrorExecutionEvent) => event.data }),
-                    },
-                ],
+                onDone: {
+                    target: "Input OTP",
+                    actions: assign({
+                        confirm: (
+                            _,
+                            event: DoneInvokeEvent<FirebaseAuthTypes.ConfirmationResult>
+                        ) => event.data,
+                        error: null,
+                    }),
+                },
+                onError: {
+                    target: "Input Phone",
+                    actions: assign({
+                        error: (_, event: ErrorExecutionEvent) => event.data.message,
+                    }),
+                },
             },
         },
         "Input OTP": {
@@ -48,6 +45,7 @@ const SignInMachine = {
                     actions: [
                         assign({
                             otp: (_, event: { otp: string }) => event.otp,
+                            error: null,
                         }),
                     ],
                 },
@@ -63,17 +61,15 @@ const SignInMachine = {
                     otp: string;
                 }) => signIn(context.confirm!, context.otp),
                 id: "signIn",
-                onDone: [
-                    {
-                        target: "Complete",
-                    },
-                ],
-                onError: [
-                    {
-                        target: "Input OTP",
-                        actions: assign({ error: (_, event: ErrorExecutionEvent) => event.data }),
-                    },
-                ],
+                onDone: {
+                    target: "Complete",
+                },
+                onError: {
+                    target: "Input OTP",
+                    actions: assign({
+                        error: (_, event: ErrorExecutionEvent) => event.data.message,
+                    }),
+                },
             },
         },
         "Complete": {

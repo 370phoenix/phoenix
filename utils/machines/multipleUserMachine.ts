@@ -18,18 +18,14 @@ const MultipleUserMachine = {
             invoke: {
                 src: "loadUsers",
                 id: "loadUsers",
-                onDone: [
-                    {
-                        target: "Idle",
-                        actions: assign({ riders: (_, event: any) => event.data }),
-                    },
-                ],
-                onError: [
-                    {
-                        target: "Failed",
-                        actions: assign({ error: (_, event: any) => event.data }),
-                    },
-                ],
+                onDone: {
+                    target: "Idle",
+                    actions: assign({ riders: (_, event: any) => event.data }),
+                },
+                onError: {
+                    target: "Failed",
+                    actions: assign({ error: (_, event: any) => event.data }),
+                },
             },
         },
         "Idle": {

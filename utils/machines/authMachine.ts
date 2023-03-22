@@ -1,163 +1,177 @@
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
 import { UserID } from "../../constants/DataTypes";
-import { checkUserInfo, UserInfo } from "../auth";
-
-export type AuthMachineContext = {
-    user: UserID | null;
-    userInfo: UserInfo | null;
-    obj: UserID | UserInfo | null;
-};
+import { checkUserInfo, getUserUpdates, UserInfo } from "../auth";
 
 const AuthMachine = {
-    schema: {
-        context: {} as AuthMachineContext,
-        events: {} as
-            | { type: "Sign Out" }
-            | { type: "INFO CHANGED"; obj: UserID | UserInfo | null },
-        guards: {} as
-            | { type: "userInfoExists" }
-            | { type: "shouldCheckInfo" }
-            | { type: "objExists" }
-            | { type: "firstLoad" },
+    id: "New Authentication Machine",
+    invoke: {
+        src: "setUserListener",
+        id: "setUserListener",
     },
-    context: { user: null, userInfo: null, obj: null },
-    predictableActionArguments: true,
-    preserveActionOrder: true,
-    id: "Authentication Machine",
-    initial: "Initial",
+    initial: "Init",
     states: {
-        "Initial": {
-            always: {
-                target: "Checking Updates",
-            },
-        },
-        "Signed In": {
-            on: {
-                "Sign Out": {
-                    target: "Welcome Screen",
-                    actions: "clearInfo",
+        "Init": {
+            always: [
+                {
+                    target: "FB Signed In",
+                    cond: "userExists",
                 },
-                "INFO CHANGED": {
-                    target: "Checking Updates",
-                    actions: assign((_, event: any) => ({
-                        obj: event.obj,
-                    })),
+                {
+                    target: "FB Signed Out",
                 },
-            },
+            ],
         },
-        "Create Profile Screen": {
-            on: {
-                "INFO CHANGED": {
-                    target: "Checking Updates",
-                    actions: assign((_, event: any) => ({
-                        obj: event.obj,
-                    })),
-                },
+        "FB Signed In": {
+            invoke: {
+                src: "setUserInfoListener",
+                id: "setUserInfoListener",
             },
-        },
-        "Checking Updates": {
-            initial: "Start",
+            initial: "Init",
             states: {
-                "Checking User Info": {
-                    invoke: {
-                        id: "getUserInfo",
-                        src: (context: AuthMachineContext) =>
-                            checkUserInfo(context.user ? context.user : undefined),
-                        onDone: [
-                            {
-                                target: "#Authentication Machine.Signed In",
-                                cond: { type: "userInfoExists" },
-                                actions: assign(
-                                    (
-                                        _,
-                                        event: DoneInvokeEvent<[UserID, UserInfo | undefined]>
-                                    ) => ({
-                                        user: event.data[0],
-                                        userInfo: event.data[1],
-                                    })
-                                ),
-                            },
-                            {
-                                target: "#Authentication Machine.Create Profile Screen",
-                                actions: assign(
-                                    (
-                                        _,
-                                        event: DoneInvokeEvent<[UserID, UserInfo | undefined]>
-                                    ) => ({
-                                        user: event.data[0],
-                                    })
-                                ),
-                            },
-                        ],
-                        onError: {
-                            target: "Start",
-                        },
-                    },
-                },
-                "Start": {
+                "Init": {
                     always: [
+                        { target: "Waiting", cond: "noRunYet" },
                         {
-                            target: "Checking User Info",
-                            cond: { type: "shouldCheckInfo" },
-                            actions: [
-                                assign((context: any, _) => ({
-                                    user: context.obj as UserID,
-                                })),
-                            ],
+                            target: "Info Updated",
+                            cond: "userInfoExists",
                         },
                         {
-                            target: "#Authentication Machine.Welcome Screen",
-                            cond: { type: "objExists" },
-                            actions: [
-                                assign((context: any, _) => ({
-                                    userInfo: context.obj as UserInfo,
-                                })),
-                            ],
-                        },
-                        {
-                            target: "#Authentication Machine.Welcome Screen",
+                            target: "Needs Profile",
                         },
                     ],
                 },
+                "Waiting": {
+                    on: {
+                        "USER CHANGED": {
+                            target: "#New Authentication Machine.Init",
+                            actions: "assignUser",
+                        },
+                        "USER INFO CHANGED": {
+                            target: "Init",
+                            actions: "assignUserInfo",
+                        },
+                    },
+                },
+                "Info Updated": {
+                    on: {
+                        "USER INFO CHANGED": {
+                            target: "Init",
+                            actions: "assignUserInfo",
+                        },
+                        "USER CHANGED": {
+                            target: "#New Authentication Machine.Init",
+                            actions: "assignUser",
+                        },
+                        "SIGN OUT": {
+                            target: "#New Authentication Machine.Init",
+                            actions: "clearInfo",
+                        },
+                    },
+                },
+                "Needs Profile": {
+                    on: {
+                        "USER CHANGED": {
+                            target: "#New Authentication Machine.Init",
+                            actions: "assignUser",
+                        },
+                        "USER INFO CHANGED": {
+                            target: "Init",
+                            actions: "assignUserInfo",
+                        },
+                    },
+                },
             },
+            on: {},
         },
-        "Welcome Screen": {
+        "FB Signed Out": {
             on: {
-                "INFO CHANGED": {
-                    target: "Checking Updates",
-                    actions: assign((_, event: any) => ({
-                        obj: event.obj,
-                    })),
+                "USER CHANGED": {
+                    target: "Init",
+                    actions: "assignUser",
                 },
             },
         },
     },
+    context: { user: null, userInfo: null, ranOnce: false },
+    schema: {
+        context: {} as AuthMachineContext,
+        events: {} as AuthMachineEvents,
+    },
+    predictableActionArguments: true,
+    preserveActionOrder: true,
 };
 
-export const signedInSelector = (state: any) =>
-    state.context.user !== null && state.context.user !== undefined;
-export const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
+type AuthMachineContext = {
+    user: string | null;
+    userInfo: UserInfo | null;
+    ranOnce: boolean;
+};
+
+type AuthMachineEvents =
+    | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
+    | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
+    | { type: "SIGN OUT" };
+
+export const stateSelector = (state: any) => state;
+export const signedInSelector = (state: any) => state.matches("FB Signed In");
+export const needsInfoSelector = (state: any) => state.matches("FB Signed In.Needs Profile");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user as UserID) : null;
-
 export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 
 export const authMachine = createMachine(AuthMachine, {
+    services: {
+        setUserListener: () => (callback) => {
+            const authSubscriber = auth().onAuthStateChanged(async (user) => {
+                if (user) callback({ type: "USER CHANGED", user: user });
+                else callback({ type: "SIGN OUT" });
+            });
+
+            return authSubscriber;
+        },
+        setUserInfoListener: (context) => (callback) => {
+            if (!context.user) {
+                console.log("MISSING USER IN FB SIGNED IN");
+                return () => {};
+            }
+            const res = getUserUpdates(context.user, (data) => {
+                callback({ type: "USER INFO CHANGED", userInfo: data });
+            });
+
+            if (typeof res === "string") return () => {};
+
+            return res;
+        },
+    },
     actions: {
-        clearInfo: assign({ user: null, userInfo: null }),
+        assignUser: assign({
+            user: (context, event) =>
+                event.type === "USER CHANGED"
+                    ? event.user
+                        ? event.user.uid
+                        : context.user
+                    : context.user,
+        }),
+        assignUserInfo: assign({
+            ranOnce: true,
+            userInfo: (context, event) =>
+                event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
+        }),
+        clearInfo: assign({
+            user: null,
+            userInfo: null,
+            ranOnce: false,
+        }),
     },
     guards: {
-        userInfoExists: (_, event: any) => {
-            return event.data && event.data[1] !== undefined;
-        },
-        shouldCheckInfo: (context, _) => {
-            if (!context.obj) return true;
-            if (typeof context.obj != "string") return false;
-            return true;
-        },
-        objExists: (context, _) => context.obj !== undefined && context.obj !== null,
+        userExists: (context) => (context.user ? typeof context.user === "string" : false),
+        userInfoExists: (context) =>
+            context.userInfo ? typeof context.userInfo === "object" : false,
+        noRunYet: (context) => context.ranOnce == false,
     },
 });
 

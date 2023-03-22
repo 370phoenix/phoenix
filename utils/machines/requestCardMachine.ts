@@ -47,17 +47,13 @@ const RequestCardMachine = {
             invoke: {
                 src: "acceptUser",
                 id: "acceptUser",
-                onDone: [
-                    {
-                        target: "Complete",
-                    },
-                ],
-                onError: [
-                    {
-                        target: "Prompt",
-                        actions: "logError",
-                    },
-                ],
+                onDone: {
+                    target: "Complete",
+                },
+                onError: {
+                    target: "Prompt",
+                    actions: "logError",
+                },
             },
         },
         Rejecting: {

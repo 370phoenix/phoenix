@@ -32,6 +32,7 @@ import {
     needsInfoSelector,
     signedInSelector,
     userIDSelector,
+    userInfoSelector,
 } from "../utils/machines/authMachine";
 import { getUserUpdates } from "../utils/auth";
 
@@ -53,19 +54,6 @@ function RootNavigator() {
     const authService = React.useContext(AuthContext);
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
-    const userID = useSelector(authService, userIDSelector);
-
-    React.useEffect(() => {
-        if (!userID) return;
-
-        const subscriber = getUserUpdates(userID, (data) => {
-            authService.send("INFO CHANGED", { obj: data });
-        });
-
-        if (typeof subscriber === "string") return;
-
-        return subscriber;
-    }, []);
 
     return (
         <Stack.Navigator

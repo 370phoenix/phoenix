@@ -19,6 +19,8 @@ export default function SignInScreen({ navigation }: Props) {
     const [state, send] = useMachine(signInMachine);
     const { error, confirm } = state.context;
 
+    console.log(error);
+
     // Reset flow if user goes back
     const onGoBack = () => {
         setPhone("");
