@@ -16,12 +16,26 @@ export type UserInfo = {
     major: string;
     gradYear: number;
     gender: string;
-    chillIndex: number | null;
+    chillIndex: number | undefined;
     ridesCompleted: number;
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
     requests: [UserID, PostID][];
+};
+
+export type FBUserInfo = {
+    username: string;
+    phone: string;
+    major: string;
+    gradYear: number;
+    gender: string;
+    chillIndex: number | undefined;
+    ridesCompleted: number;
+    posts: { [key: number]: string } | undefined;
+    pending: { [key: number]: string } | undefined;
+    matches: { [key: number]: string } | undefined;
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
 };
 
 // MESSAGES //
@@ -64,18 +78,14 @@ type Clean<T> = {
  */
 export async function getConfirm(
     phoneNumber: string
-): Promise<SuccessMessage<FirebaseAuthTypes.ConfirmationResult> | ErrorMessage> {
-    try {
-        const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
+): Promise<FirebaseAuthTypes.ConfirmationResult> {
+    const fullNumber = "+1" + phoneNumber.replace(/\D/g, "");
 
-        if (fullNumber.length !== 12 || fullNumber.match(/\+\d*/g) === null)
-            throw new Error("Phone number incorrect format");
+    if (fullNumber.length !== 12 || fullNumber.match(/\+\d*/g) === null)
+        throw new Error("Phone number incorrect format");
 
-        const confirmation = await auth().signInWithPhoneNumber(fullNumber);
-        return { data: confirmation, type: MessageType.success };
-    } catch (e: any) {
-        return { message: `Error verifying phone number: ${e.message}`, type: MessageType.error };
-    }
+    const confirmation = await auth().signInWithPhoneNumber(fullNumber);
+    return confirmation;
 }
 
 /**
@@ -88,13 +98,9 @@ export async function getConfirm(
 export async function signIn(
     confirm: FirebaseAuthTypes.ConfirmationResult,
     verificationCode: string
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        await confirm.confirm(verificationCode);
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { message: `Error: ${e.message}`, type: MessageType.error };
-    }
+): Promise<true> {
+    await confirm.confirm(verificationCode);
+    return true;
 }
 
 ///////////////////////////////////////////
@@ -111,16 +117,36 @@ export async function signIn(
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function writeUser(
-    userID: string,
-    userInfo: UserInfo
+    userID: string | null,
+    userInfo: UserInfo | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
+        if (!userID || !userInfo) throw new Error("No User ID or Info.");
+
         const userRef = database().ref("users/" + userID);
         await userRef.set(cleanUndefined(userInfo));
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
+}
+
+function convertUserInfo(data: FBUserInfo): UserInfo {
+    const newRequests = data.requests
+        ? Object.values(data.requests).map((req) => {
+              const userID = req[0],
+                  postID = req[1];
+              return [userID, postID] as [string, string];
+          })
+        : [];
+
+    return {
+        ...data,
+        posts: data.posts ? Object.values(data.posts) : [],
+        pending: data.pending ? Object.values(data.pending) : [],
+        matches: data.matches ? Object.values(data.matches) : [],
+        requests: newRequests,
+    };
 }
 
 /**
@@ -131,21 +157,35 @@ export async function writeUser(
  * @returns (SuccessMessage<Unsubscribe> | ErrorMessage): An unsubscribe function
  */
 export function getUserUpdates(
-    user: FirebaseAuthTypes.User,
+    userID: UserID,
     onUpdate: (data: UserInfo) => void
-): SuccessMessage<Unsubscribe> | ErrorMessage {
+): Unsubscribe | string {
     try {
-        const userRef = database().ref("users/" + user.uid);
+        const userRef = database().ref("users/" + userID);
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                onUpdate(data);
+                onUpdate(convertUserInfo(data));
             }
         });
         const unsub = () => userRef.off("value", onChange);
-        return { message: "Listener attached.", type: MessageType.success, data: unsub };
+        return unsub;
     } catch (e: any) {
-        return { message: `Error ${e.message}`, type: MessageType.error };
+        return `Error ${e.message}`;
+    }
+}
+
+export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string> {
+    try {
+        const info = [];
+        for (const user of users) {
+            const res = await getUserOnce(user);
+            if (res.type !== MessageType.success) throw Error(res.message);
+            info.push(res.data);
+        }
+        return info;
+    } catch (e: any) {
+        return e.message;
     }
 }
 
@@ -155,8 +195,9 @@ export function getUserUpdates(
  * @param userID (UserID): The user to get the info of
  * @returns (SuccessMessage<UserInfo> | ErrorMessage | InfoMessage) Informs there is no data, or returns it if there is.
  */
-export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
+export async function getUserOnce(userID: UserID | null): Promise<Message<UserInfo>> {
     try {
+        if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
         if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
@@ -166,17 +207,31 @@ export async function getUserOnce(userID: UserID): Promise<Message<UserInfo>> {
     }
 }
 
+export async function checkUserInfo(
+    userID: UserID | undefined
+): Promise<[UserID, UserInfo | undefined] | string> {
+    try {
+        let id = userID ? userID : auth().currentUser?.uid;
+        if (!id) throw Error("No User ID");
+
+        const userRef = database().ref("users/" + id);
+        const snapshot = await userRef.once("value");
+        if (snapshot.exists()) return [id, snapshot.val()];
+        else return [id, undefined];
+    } catch (e: any) {
+        return `Error: ${e.message}`;
+    }
+}
+
 /**
  * Delete a user's account info in the db.
  *
  * @param user (User): The user who's info to delete.
  * @returns (SuccessMessage | ErrorMessage)
  */
-export async function deleteAccount(
-    user: FirebaseAuthTypes.User
-): Promise<SuccessMessage | ErrorMessage> {
+export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + user.uid);
+        const userRef = database().ref("users/" + userID);
         await userRef.remove();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -211,74 +266,57 @@ export function validateProfile({
     gradString,
     phone = null,
     userInfo = null,
-}: ValidateProfileParams): SuccessMessage<UserInfo> | ErrorMessage {
+}: ValidateProfileParams): UserInfo | string {
     try {
-        const noUserError: ErrorMessage = {
-            type: MessageType.error,
-            message: "Must supply either phone or previous user info.",
-        };
-        if (!(phone || userInfo)) return noUserError;
+        const noUserError = "Must supply either phone or previous user info.";
+        if (!(phone || userInfo)) throw new Error(noUserError);
 
         const filter = new Filter();
 
-        if (filter.isProfane(username))
-            return { type: MessageType.error, message: "Display name cannot be profane." };
+        if (filter.isProfane(username)) throw new Error("Display name cannot be profane.");
 
-        if (filter.isProfane(major))
-            return { type: MessageType.error, message: "Major cannot be profane." };
+        if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
 
         if (!Genders.includes(gender.toLowerCase()))
-            return {
-                type: MessageType.error,
-                message: "Gender not accepted. Please email us if we've made a mistake.",
-            };
+            throw new Error("Gender not accepted. Please email us if we've made a mistake.");
 
         if (gradString.match(/\D/g) !== null)
-            return {
-                type: MessageType.error,
-                message: "Please make sure grad year is all digits.",
-            };
+            throw new Error("Please make sure grad year is all digits.");
 
         const gradYear = Number(gradString);
         if (userInfo)
             // Changing Info
             return {
-                type: MessageType.success,
-                data: {
-                    username: username,
-                    major: major,
-                    gender: gender,
-                    gradYear: gradYear,
-                    phone: userInfo.phone,
-                    chillIndex: userInfo.chillIndex,
-                    ridesCompleted: userInfo.ridesCompleted,
-                    posts: userInfo.posts ? userInfo.posts : [],
-                    pending: userInfo.pending ? userInfo.pending : [],
-                    matches: userInfo.matches ? userInfo.matches : [],
-                    requests: userInfo.requests ? userInfo.requests : [],
-                },
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: userInfo.phone,
+                chillIndex: userInfo.chillIndex,
+                ridesCompleted: userInfo.ridesCompleted,
+                posts: userInfo.posts ? userInfo.posts : [],
+                pending: userInfo.pending ? userInfo.pending : [],
+                matches: userInfo.matches ? userInfo.matches : [],
+                requests: userInfo.requests ? userInfo.requests : [],
             };
         else if (phone) {
             // Inital Profile Setup
             return {
-                type: MessageType.success,
-                data: {
-                    username: username,
-                    major: major,
-                    gender: gender,
-                    gradYear: gradYear,
-                    phone: phone,
-                    chillIndex: null,
-                    ridesCompleted: 0,
-                    posts: [],
-                    pending: [],
-                    matches: [],
-                    requests: [],
-                },
+                chillIndex: undefined,
+                username: username,
+                major: major,
+                gender: gender,
+                gradYear: gradYear,
+                phone: phone,
+                ridesCompleted: 0,
+                posts: [],
+                pending: [],
+                matches: [],
+                requests: [],
             };
         } else return noUserError;
     } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
+        return `Error: ${e.message}`;
     }
 }
 

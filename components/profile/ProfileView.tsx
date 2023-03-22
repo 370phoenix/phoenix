@@ -1,4 +1,3 @@
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
@@ -6,16 +5,14 @@ import { UserInfo } from "../../utils/auth";
 import { View, Text, Spacer, Button } from "../shared/Themed";
 
 type Props = {
-    user: FirebaseAuthTypes.User | null | undefined;
     userInfo: UserInfo | null;
-    message: string | null;
 };
-export default function ProfileView({ user, userInfo, message }: Props) {
+export default function ProfileView({ userInfo }: Props) {
     const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
-            {user && userInfo ? (
+            {userInfo ? (
                 <>
                     <ProfileInfo label="DISPLAY NAME:" value={userInfo.username} />
                     <Spacer direction="column" size={8} />
@@ -27,7 +24,7 @@ export default function ProfileView({ user, userInfo, message }: Props) {
                     <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted)} />
                     <Spacer direction="column" size={32} />
                     <Button
-                        title="Change Account Info"
+                        title="Preferences"
                         onPress={() =>
                             navigation.navigate("ChangeInfo", {
                                 userInfo: userInfo,
@@ -37,9 +34,7 @@ export default function ProfileView({ user, userInfo, message }: Props) {
                     />
                 </>
             ) : (
-                <Text textStyle="header" styleSize="s" style={{ color: Colors.navy.p }}>
-                    {message}
-                </Text>
+                <></>
             )}
         </View>
     );

@@ -2626,6 +2626,14 @@
   resolved "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.7.9.tgz"
   integrity sha512-yceMpm/xd4W2a85iqZyO09gTnHvXF6pyiWjD2jcOJs7hRoZtNNOO1eJlhHj1ixA+xip2hOyGn+LgcvLCMo5zXA==
 
+"@xstate/react@^3.2.1":
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-3.2.1.tgz#ac7b78e8c1d6d3802dfb29a6499f18e48b3dfdb3"
+  integrity sha512-L/mqYRxyBWVdIdSaXBHacfvS8NKn3sTKbPb31aRADbE9spsJ1p+tXil0GVQHPlzrmjGeozquLrxuYGiXsFNU7g==
+  dependencies:
+    use-isomorphic-layout-effect "^1.0.0"
+    use-sync-external-store "^1.0.0"
+
 abab@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.6.tgz#41b80f2c871d19686216b82309231cfd3cb3d291"
@@ -9826,6 +9834,11 @@ url@^0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
+use-isomorphic-layout-effect@^1.0.0:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/use-isomorphic-layout-effect/-/use-isomorphic-layout-effect-1.1.2.tgz#497cefb13d863d687b08477d9e5a164ad8c1a6fb"
+  integrity sha512-49L8yCO3iGT/ZF9QttjwLF/ZD9Iwto5LnH5LmEdk/6cFmXddqi2ulF0edxTwjj+7mqvpVVGQWvbXZdn32wRSHA==
+
 use-latest-callback@^0.1.5:
   version "0.1.5"
   resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.1.5.tgz"
@@ -10143,6 +10156,11 @@ xmlchars@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/xmlchars/-/xmlchars-2.2.0.tgz#060fe1bcb7f9c76fe2a17db86a9bc3ab894210cb"
   integrity sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==
+
+xstate@^4.37.0:
+  version "4.37.0"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.37.0.tgz#2f253ccbfc2dc6954ff975b8102714bde9751726"
+  integrity sha512-YC+JCerRclKS9ixQTuw8l3vs3iFqWzNzOGR0ID5XsSlieMXIV9nNPE43h9CGr7VdxA1QYhMwhCZA0EdpOd17Bg==
 
 xtend@~4.0.1:
   version "4.0.2"

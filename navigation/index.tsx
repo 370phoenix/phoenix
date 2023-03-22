@@ -4,7 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 
-import { getUserOnce, MessageType } from "../utils/auth";
 import WelcomeScreen from "../screens/auth/WelcomeScreen";
 import SignInScreen from "../screens/auth/SignInScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -26,8 +25,16 @@ import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { ReactNativeFirebase } from "@react-native-firebase/app";
+import auth from "@react-native-firebase/auth";
+import { useSelector } from "@xstate/react";
+import {
+    AuthContext,
+    needsInfoSelector,
+    signedInSelector,
+    userIDSelector,
+    userInfoSelector,
+} from "../utils/machines/authMachine";
+import { getUserUpdates } from "../utils/auth";
 
 export default function Navigation() {
     return (
@@ -44,34 +51,9 @@ export default function Navigation() {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const [signedIn, setSignedIn] = React.useState(false);
-    const [needsInfo, setNeedsInfo] = React.useState(false);
-
-    React.useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                // User is signed in
-                try {
-                    const userInfo = await getUserOnce(user.uid);
-                    if (userInfo.type === MessageType.info) {
-                        setNeedsInfo(true);
-                        setSignedIn(true);
-                    } else {
-                        setNeedsInfo(false);
-                        setSignedIn(true);
-                    }
-                } catch (e: any) {
-                    console.log(e.message);
-                }
-            } else {
-                // User is signed out
-                setSignedIn(false);
-            }
-        });
-
-        // Stop listening to the updates when component unmounts
-        return subscriber;
-    }, []);
+    const authService = React.useContext(AuthContext);
+    const signedIn = useSelector(authService, signedInSelector);
+    const needsInfo = useSelector(authService, needsInfoSelector);
 
     return (
         <Stack.Navigator
@@ -84,7 +66,7 @@ function RootNavigator() {
             {signedIn ? (
                 needsInfo ? (
                     <Stack.Screen name="CreateProfile">
-                        {(props) => <CreateProfileScreen {...props} setNeedsInfo={setNeedsInfo} />}
+                        {(props) => <CreateProfileScreen {...props} />}
                     </Stack.Screen>
                 ) : (
                     <>

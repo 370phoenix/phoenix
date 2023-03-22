@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
@@ -8,11 +8,13 @@ import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
-import { MessageType, UserInfo, getUserOnce } from "../../utils/auth";
+import { MessageType, UserInfo } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { useMachine, useSelector } from "@xstate/react";
+import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -20,7 +22,8 @@ export default function DetailsModal({ route }: Props) {
     const post = route.params.post;
 
     const [message, setMessage] = useState<string | null>(null);
-    const currentUser = auth().currentUser?.uid;
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
@@ -30,12 +33,16 @@ export default function DetailsModal({ route }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!currentUser) return;
+                    if (!userID) return;
                     if (!post) return;
-                    if (post.riders?.includes(currentUser)) return;
-                    if (post.pending?.includes(currentUser)) return;
+                    if (post.riders?.includes(userID)) return;
+                    if (post.pending?.includes(userID)) return;
+                    const filled = post.riders
+                        ? post.riders.filter((val) => val != null).length + 1
+                        : 1;
+                    if (filled >= post.totalSpots) return;
 
-                    const res = await matchPost(currentUser, post);
+                    const res = await matchPost(userID, post);
                     if (res.type === MessageType.error) setMessage(res.message);
                 },
             },
@@ -67,10 +74,8 @@ export default function DetailsModal({ route }: Props) {
 }
 
 function MoreInfo({ post }: { post: PostType }) {
-    // const [matched, setMatched] = useState(false);
-    const [riders, setRiders] = useState<UserInfo[] | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
-    // const onChangeMatched = () => setMatched(!matched);
+    const [state, send] = useMachine(multipleUserMachine);
+    const { riders, error } = state.context;
 
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
@@ -78,31 +83,11 @@ function MoreInfo({ post }: { post: PostType }) {
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);
 
-    useEffect(() => {
-        async function fetchRiders() {
-            const ids = post.riders ? post.riders : [];
-            if (!ids.includes(post.user)) ids.push(post.user);
-            if (riders) return;
-            if (!ids) return;
-
-            const ridersInfo: UserInfo[] = [];
-            for (const id of ids) {
-                const res = await getUserOnce(id);
-                if (res.type !== MessageType.success) {
-                    setMessage(res.message);
-                    return;
-                }
-
-                const userInfo = res.data;
-                if (!userInfo) throw new Error("Could not find user info.");
-
-                ridersInfo.push(userInfo);
-            }
-
-            setRiders(ridersInfo);
-        }
-        fetchRiders();
-    }, [post, riders, setRiders, setMessage]);
+    if (state.matches("Start")) {
+        const ids = post.riders ? post.riders : [];
+        if (!ids.includes(post.user)) ids.push(post.user);
+        send("LOAD", { ids });
+    }
 
     return (
         <View style={styles.infoContainer}>
@@ -133,13 +118,10 @@ function MoreInfo({ post }: { post: PostType }) {
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
                 Pickup window: {startTime}-{endTime}
             </Text>
-            {post.riders ? (
-                <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                    {post.riders.filter((val) => val != null).length}/{post.totalSpots} spots filled
-                </Text>
-            ) : (
-                <></>
-            )}
+            <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
+                {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1}/
+                {post.totalSpots} spots filled
+            </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
                 {post.roundTrip ? (
@@ -158,7 +140,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
-            {riders && <UserList riders={riders} message={message} />}
+            {riders && <UserList riders={riders} message={error} />}
         </View>
     );
 }
