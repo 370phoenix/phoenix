@@ -42,7 +42,7 @@ export type ChangeInfoParamList = {
     userInfo: UserInfo;
 };
 
-export type CreateProfileParamList = {};
+export type CreateProfileParamList = object;
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
     RootStackParamList,

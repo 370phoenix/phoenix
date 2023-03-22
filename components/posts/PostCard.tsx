@@ -1,6 +1,5 @@
-import auth from "@react-native-firebase/auth";
-import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -12,6 +11,10 @@ import { UserInfo } from "../../utils/auth";
 import { convertLocation, convertDate, convertTime } from "../../utils/convertPostTypes";
 import { deletePost } from "../../utils/posts";
 import { Spacer, Text, View } from "../shared/Themed";
+import { useSelector } from "@xstate/react";
+import { useContext } from "react";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { MatchSublist } from "../matches/MatchList";
 
 type Props = {
     isProfile?: boolean;
@@ -19,11 +22,15 @@ type Props = {
     post: PostType;
 };
 export default function PostCard({ post, isProfile = false, userInfo = [null, null] }: Props) {
-    const currentUser = auth().currentUser;
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
+    const updatedUserInfo = useSelector(authService, userInfoSelector);
+
     // Don't show your own posts in the feed
-    if (!isProfile && post.user === currentUser?.uid) return <></>;
+    if (!isProfile && post.user === userID) return <></>;
     if (!post.dropoff) return <></>;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const navigation = useNavigation();
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
@@ -31,9 +38,20 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
 
+    const color = isProfile ? Colors.navy : Colors.purple;
+
+    let isMatched = false;
+    if (Array.isArray(updatedUserInfo?.matches))
+        isMatched =
+            userID === post.user || updatedUserInfo?.matches?.includes(post.postID) ? true : false;
+
     return (
         <Pressable
-            onPress={() => navigation.navigate("PostDetails", { post })}
+            onPress={() =>
+                isMatched
+                    ? navigation.navigate("MatchDetails", { post, list: MatchSublist.matches })
+                    : navigation.navigate("PostDetails", { post })
+            }
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -44,32 +62,37 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
             ]}
             key={post.postID}>
             <View style={styles.body}>
-                <Text textStyle="header" styleSize="s" style={styles.text}>
+                <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                     {pickup}
                 </Text>
                 <View style={styles.headerContainer}>
                     {post.roundTrip ? (
-                        <RoundTrip color={Colors.purple.p} height={20} />
+                        <RoundTrip color={color.p} height={20} />
                     ) : (
-                        <Right color={Colors.purple.p} height={20} />
+                        <Right color={color.p} height={20} />
                     )}
-                    <Text textStyle="header" styleSize="s" style={styles.text}>
+                    <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                         {dropoff}
                     </Text>
                 </View>
                 <Spacer direction="column" size={16} />
 
-                <Text textStyle="label" style={styles.text}>
+                <Text textStyle="label" style={{ color: color.p }}>
                     {fDate}
                 </Text>
                 {!isProfile && (
-                    <Text textStyle="body" styleSize="s" style={styles.text}>
+                    <Text textStyle="body" styleSize="s" style={{ color: color.p }}>
                         {fStartTime} - {fEndTime}
                     </Text>
                 )}
             </View>
             <Spacer direction={isProfile ? "column" : "row"} size={16} />
-            <RiderBadge post={post} isProfile={isProfile} userInfo={userInfo} />
+            <RiderBadge
+                post={post}
+                isProfile={isProfile}
+                userInfo={userInfo}
+                isMatched={isMatched ? isMatched : false}
+            />
         </Pressable>
     );
 }
@@ -77,9 +100,10 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
 type BadgeProps = {
     post: PostType;
     isProfile: boolean;
+    isMatched: boolean;
     userInfo: [UserID | null, UserInfo | null];
 };
-function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
+function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
     const total = post.totalSpots;
     const postRiders = post.riders ? post.riders.filter((val) => val != null) : [];
     const filled = postRiders.length + 1;
@@ -87,8 +111,13 @@ function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
     const riders = Array<number>(total);
     const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
 
+    const color = isProfile ? Colors.navy : Colors.purple;
+
     riders.fill(0);
-    riders.fill(2, 0, filled);
+    if (isMatched && !isProfile) {
+        riders.fill(2, 0, filled - 1);
+        riders[filled - 1] = 3;
+    } else riders.fill(2, 0, filled);
     riders.fill(1, filled, filled + pending);
 
     if (!isProfile) {
@@ -121,19 +150,20 @@ function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
 
     return (
         <>
-            {rows.map((row, index) => (
+            {rows.map((row, index_1) => (
                 <View
                     style={isProfile ? styles.riderBadgeProfile : styles.riderBadge}
-                    key={`row-${index}`}>
-                    {row.map((rider, index) => (
+                    key={`row-${index_1}`}>
+                    {row.map((rider, index_2) => (
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
-                                <Full
-                                    color={rider === 1 ? Colors.purple.m : Colors.purple.p}
-                                    height={20}
-                                />
+                                rider === 3 ? (
+                                    <Full color={color[1]} height={20} />
+                                ) : (
+                                    <Full color={rider === 1 ? color.m : color.p} height={20} />
+                                )
                             ) : (
-                                <Outline color={Colors.purple.p} height={20} />
+                                <Outline color={color.p} height={20} />
                             )}
                         </View>
                     ))}
@@ -146,9 +176,7 @@ function RiderBadge({ post, isProfile, userInfo }: BadgeProps) {
                                 style={({ pressed }) => [
                                     styles.trash,
                                     {
-                                        backgroundColor: pressed
-                                            ? Colors.purple.m
-                                            : Colors.purple.p,
+                                        backgroundColor: pressed ? color.m : color.p,
                                     },
                                 ]}>
                                 <Trash color={Colors.gray.w} width={16} />
@@ -179,9 +207,6 @@ const styles = StyleSheet.create({
     },
     body: { flex: 1, width: "100%" },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
-    text: {
-        color: Colors.purple.p,
-    },
     riderBadge: { height: 100, flexDirection: "column", justifyContent: "center" },
     riderBadgeProfile: {
         marginTop: -12,
@@ -202,5 +227,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    text: {},
 });
 

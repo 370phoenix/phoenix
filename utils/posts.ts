@@ -92,16 +92,24 @@ export async function fetchSomePosts(
     }
 }
 
-export function getAllPostUpdates(
-    onUpdate: (data: PostType) => void
-): SuccessMessage<Unsubscribe> | ErrorMessage {
+type PostUpdateParams = {
+    onChildChanged: (data: PostType) => void;
+    onChildAdded: (data: PostType) => void;
+    onChildRemoved: (data: PostType) => void;
+};
+
+export function getAllPostUpdates({
+    onChildAdded,
+    onChildChanged,
+    onChildRemoved,
+}: PostUpdateParams): SuccessMessage<Unsubscribe> | ErrorMessage {
     const postsRef = db.ref("posts");
     const onAdd = postsRef.on(
         "child_added",
         (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
-                onUpdate(data);
+                onChildAdded(data);
             }
         },
         (error) => {}
@@ -111,14 +119,21 @@ export function getAllPostUpdates(
         (snapshot) => {
             if (snapshot.exists()) {
                 const data: PostType = snapshot.val();
-                onUpdate(data);
+                onChildChanged(data);
             }
         },
         (error) => {}
     );
+    const onRemove = postsRef.on("child_removed", (snapshot) => {
+        if (snapshot.exists()) {
+            const data: PostType = snapshot.val();
+            onChildRemoved(data);
+        }
+    });
     const unsub = () => {
         postsRef.off("child_added", onAdd);
         postsRef.off("child_changed", onChange);
+        postsRef.off("child_removed", onRemove);
     };
     return { type: MessageType.success, data: unsub };
 }
@@ -179,10 +194,12 @@ export async function deletePost(
  */
 export async function createPost(
     post: NewPostType,
-    user: FirebaseAuthTypes.User | null
+    userID: UserID | null,
+    userInfo: UserInfo | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        if (!user) throw Error("No user signed in.");
+        if (!userID) throw Error("No user signed in.");
+        if (!userInfo) throw Error("No user info found.");
 
         const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
@@ -191,18 +208,12 @@ export async function createPost(
             ...post,
             postID,
         };
-        const res = await postRef.set(newPost);
-
-        const r1 = await getUserOnce(user.uid);
-        if (r1.type !== MessageType.success) throw Error(`Error fetching user data: ${r1.message}`);
-
-        const userInfo = r1.data;
-        if (!userInfo) throw new Error("Could not find user info.");
+        await postRef.set(newPost);
 
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
-        const r2 = await writeUser(user.uid, userInfo);
+        const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
         return { type: MessageType.success, data: undefined };
@@ -239,6 +250,7 @@ type ARParams = {
     isAccept: boolean;
     userInfo: UserInfo | null;
     requesterID: UserID;
+    requesterInfo: UserInfo | null;
     posterID: UserID;
     postID: PostID;
 };
@@ -258,16 +270,12 @@ export async function handleAcceptReject({
     isAccept,
     userInfo,
     requesterID,
+    requesterInfo,
     postID,
     posterID,
 }: ARParams): Promise<SuccessMessage | ErrorMessage> {
     try {
-        if (!userInfo) throw new Error("Missing User Info.");
-
-        // Get Requester Info
-        const r1 = await getUserOnce(requesterID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const requesterInfo = r1.data;
+        if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
 
         // Get post from DB
         const r3 = await fetchPost(postID);
