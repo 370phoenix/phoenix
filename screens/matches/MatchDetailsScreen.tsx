@@ -7,16 +7,18 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
-import { unmatchPost } from "../../utils/posts";
+import { cancelPendingMatch, unmatchPost } from "../../utils/posts";
 import { useMachine } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
+import { useState } from "react";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
     const currentUser = auth().currentUser?.uid;
     if (!currentUser || !route.params) return <></>;
     const { post, list } = route.params;
-    const pending = list === MatchSublist.pending;
+    const [pending, setPending] = useState(list === MatchSublist.pending);
+    const [matched, setMatched] = useState(post.riders?.includes(currentUser));
 
     const [state, send] = useMachine(multipleUserMachine);
     const { riders } = state.context;
@@ -38,6 +40,26 @@ export default function MatchDetailsScreen({ route }: Props) {
                     if (!post.riders?.includes(currentUser)) return;
 
                     const res = await unmatchPost(currentUser, post);
+                },
+            },
+        ]);
+    };
+
+    const onCancelPending = async () => {
+        Alert.alert("Confirm Cancel", "Are you sure you want to cancel your match request?", [
+            {
+                text: "Cancel",
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (currentUser === post.user) return;
+                    if (!currentUser) return;
+                    if (!post) return;
+                    if (!post.pending?.includes(currentUser)) return;
+
+                    const res = await cancelPendingMatch(currentUser, post);
+                    setPending(false);
                 },
             },
         ]);
@@ -78,7 +100,8 @@ export default function MatchDetailsScreen({ route }: Props) {
                         <ProfileInfo userInfo={profile} />
                     </View>
                 ))}
-            {currentUser !== post.user && <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />}
+            {currentUser !== post.user && !pending && <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />}
+            {pending && <Button title="Cancel Request" onPress={onCancelPending} color="red" style={styles.button} />}
             <Spacer direction="column" size={200} />
         </ScrollView>
     );
