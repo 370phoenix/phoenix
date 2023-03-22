@@ -22,6 +22,8 @@ import { PostType, Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
 import auth from "@react-native-firebase/auth";
 import validateData, { MessageType } from "../../utils/postValidation";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 
 // stores options for number picker form inputs
 

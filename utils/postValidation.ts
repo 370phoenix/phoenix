@@ -23,7 +23,7 @@ type ValidatePostParams = {
     endTime: Date;
     pickup: string | Coords;
     dropoff: string | Coords;
-    numSeats: Number;
+    numSeats: number;
     notes: string;
 }
 
