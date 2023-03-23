@@ -1,6 +1,6 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 
-import { Button, Text } from "./Themed";
+import { Spacer, Text } from "./Themed";
 import Colors from "../../constants/Colors";
 
 // Component for number pickers
@@ -15,24 +15,28 @@ export default function NumberPicker({
 }) {
     return (
         <View style={styles.numberPicker}>
-            <Button title="+" color="purple" clear onPress={handlePlus} />
-            <Text style={styles.item}>{count}</Text>
-            <Button title="-" color="purple" clear onPress={handleMinus} />
+            <TouchableOpacity onPress={handlePlus}>
+            <Text textStyle="label" styleSize="l">+</Text>
+            </TouchableOpacity>
+            <Spacer direction="row" size={24}/>
+            <Text textStyle="label" styleSize="l">{count}</Text>
+            <Spacer direction="row" size={24}/>
+            <TouchableOpacity onPress={handleMinus}>
+            <Text textStyle="label" styleSize="l">-</Text>
+            </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     numberPicker: {
-        backgroundColor: Colors.gray[4],
+        backgroundColor: Colors.navy[3],
         borderRadius: 48,
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        width: 80,
-    },
-    item: {
-        margin: 8,
+        width: 108,
+        height: 24
     },
 });

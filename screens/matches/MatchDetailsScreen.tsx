@@ -8,9 +8,9 @@ import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
 import { cancelPendingMatch, unmatchPost } from "../../utils/posts";
+import { useState } from "react";
 import { useMachine } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
-import { useState } from "react";
 
 type Props = NativeStackScreenProps<RootStackParamList, "MatchDetails">;
 export default function MatchDetailsScreen({ route }: Props) {
@@ -65,6 +65,9 @@ export default function MatchDetailsScreen({ route }: Props) {
         ]);
     };
 
+    const MatchButton = <Button title={"Match!"} onPress={handleMatch} color="purple" />;
+    const CancelButton = <Button title={"Cancel Request"} onPress={onCancelPending} color="red" />;
+
     return (
         <ScrollView directionalLockEnabled style={styles.container}>
             <Text textStyle="header" style={styles.mb16}>
@@ -100,8 +103,8 @@ export default function MatchDetailsScreen({ route }: Props) {
                         <ProfileInfo userInfo={profile} />
                     </View>
                 ))}
-            {currentUser !== post.user && !pending && <Button title="Unmatch" onPress={onUnmatch} color="red" style={styles.button} />}
-            {pending && <Button title="Cancel Request" onPress={onCancelPending} color="red" style={styles.button} />}
+            {currentUser !== post.user && !pending && MatchButton}
+            {pending && CancelButton}
             <Spacer direction="column" size={200} />
         </ScrollView>
     );

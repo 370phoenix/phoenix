@@ -9,7 +9,7 @@ const CreateProfileMachine = {
             on: {
                 ADVANCE: {
                     target: "Information Invalid",
-                    actions: assign({ prevInfo: (_, event: any) => event.prevInfo }),
+                    actions: "assignPrevInfo",
                 },
             },
         },
@@ -23,9 +23,7 @@ const CreateProfileMachine = {
         },
         "Validating Info": {
             invoke: {
-                src: async (context: any) => {
-                    return validateProfile({ ...context.rawInfo, userInfo: context.prevInfo });
-                },
+                src: "validateInfo",
                 id: "validateInfo",
                 onDone: [
                     {
@@ -35,7 +33,7 @@ const CreateProfileMachine = {
                     },
                     {
                         target: "Information Invalid",
-                        actions: assign({ error: (_, event: any) => event.data }),
+                        actions: "assignError",
                     },
                 ],
             },
@@ -53,8 +51,7 @@ const CreateProfileMachine = {
         },
         "Submitting": {
             invoke: {
-                src: (context: { userID: string | null; userInfo: UserInfo | null }) =>
-                    writeUser(context.userID, context.userInfo),
+                src: "writeUser",
                 id: "createProfile",
                 onDone: [
                     {
@@ -64,7 +61,7 @@ const CreateProfileMachine = {
                 onError: [
                     {
                         target: "Information Valid",
-                        actions: assign({ error: (_, event: any) => event.data }),
+                        actions: "assignError",
                     },
                 ],
             },
@@ -117,14 +114,23 @@ const CreateProfileMachine = {
 };
 
 export const createProfileMachine = createMachine(CreateProfileMachine, {
+    services: {
+        writeUser: (context: { userID: string | null; userInfo: UserInfo | null }) =>
+            writeUser(context.userID, context.userInfo),
+        validateInfo: async (context: any) => {
+            return validateProfile({ ...context.rawInfo, userInfo: context.prevInfo });
+        },
+    },
     actions: {
+        assignPrevInfo: assign({ prevInfo: (_, event: any) => event.prevInfo }),
         assignInfo: assign({
-            userInfo: (_, event: DoneInvokeEvent<UserInfo>) => event.data,
+            userInfo: (_, event: any) => event.data,
         }),
         assignStuff: assign({
             rawInfo: (_, event: any) => event.info,
             userID: (_, event: any) => event.userID,
         }),
+        assignError: assign({ error: (_, event: any) => event.data }),
     },
     guards: {
         isValid: (_, event: any) => typeof event.data !== "string",

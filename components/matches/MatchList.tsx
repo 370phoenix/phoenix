@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { FlatList, StyleSheet } from "react-native";
 
-import RequestCard from "./RequestCard";
 import MatchCard from "./MatchCard";
+import RequestCard from "./RequestCard";
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
 import { UserID } from "../../constants/DataTypes";

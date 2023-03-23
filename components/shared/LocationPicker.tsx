@@ -1,30 +1,27 @@
 import * as Location from "expo-location";
 import { useState } from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View } from "react-native";
 
-import { Button } from "./Themed";
+import { Button, TextField } from "./Themed";
 import Colors from "../../constants/Colors";
 
 export { Location };
 export default function LocationPicker({
     name,
-    setLocation,
     inputText,
     onChangeText,
 }: {
     name: string;
-    setLocation: any;
     inputText: string;
     onChangeText: any;
 }) {
     return (
         <View>
-            <TextInput
-                style={styles.input}
-                onChangeText={onChangeText}
-                value={inputText}
-                placeholder={`${name} location`}
-                placeholderTextColor={Colors.gray.b}
+            <TextField
+                label={name === "From" ? "Pickup" : "Dropoff"}
+                inputState={[inputText, onChangeText]}
+                placeholder={`${name}`}
+                placeholderTextColor={Colors.gray[2]}
             />
         </View>
     );
@@ -60,12 +57,5 @@ export function LocationButton({
             onChangeText(`${p.streetNumber} ${p.street}, ${p.city} ${p.region}, ${p.postalCode}`);
         });
     };
-    return <Button title="Use Current Location" color="navy" clear onPress={() => getLocation()} />;
+    return <Button title="Use Current Location" color="navy" short clear onPress={() => getLocation()}/>;
 }
-
-const styles = StyleSheet.create({
-    input: {
-        borderBottomWidth: 1,
-        padding: 8,
-    },
-});

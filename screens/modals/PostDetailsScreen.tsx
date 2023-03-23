@@ -2,7 +2,7 @@
 import auth from "@react-native-firebase/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
@@ -13,7 +13,7 @@ import { PostType } from "../../constants/DataTypes";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import { getUserOnce, MessageType, UserInfo } from "../../utils/auth";
 import { RootStackParamList } from "../../types";
-import { deletePost, matchPost } from "../../utils/posts";
+import { cancelPendingMatch, deletePost, matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
@@ -26,10 +26,11 @@ export default function DetailsModal({ route }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
     const currentUser = auth().currentUser?.uid;
-    let isMatched;
-    if (!currentUser) isMatched = false;
-    else isMatched = post.riders?.includes(currentUser) || post.pending?.includes(currentUser);
-    const [matched, setMatched] = useState(isMatched);
+    // let isMatched;
+    // if (!currentUser) isMatched = false;
+    // else isMatched = post.riders?.includes(currentUser);
+    // const [matched, setMatched] = useState(isMatched);
+    const [pending, setPending] = useState(currentUser && post.pending?.includes(currentUser));
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
@@ -52,7 +53,7 @@ export default function DetailsModal({ route }: Props) {
 
                     const res = await matchPost(userID, post);
                     if (res.type === MessageType.error) setMessage(res.message);
-                    else setMatched(true);
+                    else setPending(true);
                 },
             },
         ]);
@@ -82,10 +83,31 @@ export default function DetailsModal({ route }: Props) {
         ]);
     };
 
+    const handleCancel = async () => {
+        Alert.alert("Confirm Cancel", "Are you sure you want to cancel your match request?", [
+            {
+                text: "Cancel",
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (currentUser === post.user) return;
+                    if (!currentUser) return;
+                    if (!post) return;
+                    if (!post.pending?.includes(currentUser)) return;
+
+                    const res = await cancelPendingMatch(currentUser, post);
+                    if (res.type === MessageType.error) setMessage(res.message);
+                    else setPending(false);
+                },
+            },
+        ]);
+    };
+
     const headerHeight = useHeaderHeight();
 
     const MatchButton = <Button title={"Match!"} onPress={handleMatch} color="purple" />;
-    const UnmatchButton = <Button title={"Cancel Request"} onPress={handleMatch} color="red" />;
+    const CancelButton = <Button title={"Cancel Request"} onPress={handleCancel} color="red" />;
     const DeleteButton = <Button title="Delete Post" onPress={handleDelete} color="red" />;
 
     return (
@@ -105,7 +127,7 @@ export default function DetailsModal({ route }: Props) {
                     height: headerHeight + 16,
                     padding: 16,
                 }}>
-                {currentUser !== post.user && (matched ? UnmatchButton : MatchButton)}
+                {currentUser !== post.user && (pending ? CancelButton : MatchButton)}
                 {currentUser === post.user && DeleteButton}
                 <Spacer direction="column" size={24} />
             </View>

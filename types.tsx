@@ -6,9 +6,10 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { UserInfo } from "./utils/auth";
-import { PostType } from "./constants/DataTypes";
+
 import { MatchSublist } from "./components/matches/MatchList";
+import { PostType } from "./constants/DataTypes";
+import { UserInfo } from "./utils/auth";
 
 declare global {
     namespace ReactNavigation {

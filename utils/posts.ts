@@ -1,6 +1,6 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { firebase } from "@react-native-firebase/database";
-import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
+
 import {
     ErrorMessage,
     getUserOnce,
@@ -9,6 +9,7 @@ import {
     UserInfo,
     writeUser,
 } from "./auth";
+import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -81,6 +82,7 @@ export async function fetchSomePosts(
         const posts: PostType[] = [];
 
         for (const id of ids) {
+            if (!id) continue;
             const postRef = postsRef.child(id);
             const snapshot = await postRef.once("value");
             if (snapshot.exists()) posts.push(snapshot.val());

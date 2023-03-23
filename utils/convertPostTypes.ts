@@ -20,6 +20,7 @@ export function convertTime(date: number | Date) {
     minutes = minutes < 10 ? "0" + minutes :     minutes;
     let hours: string | number = tempDate.getHours();
     hours = hours > 12 ? hours - 12 : hours;
+    if(hours === 0) hours = 12;
     const ampm = tempDate.getHours() >= 12 ? "pm" : "am";
 
     const fTime = `${hours}:${minutes}${ampm}`;
