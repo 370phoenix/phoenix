@@ -10,5 +10,5 @@
         "skipLibCheck": true
     },
     "compileOnSave": true,
-    "inclue": ["src/index.ts"]
+    "include": ["src/index.ts"]
 }
