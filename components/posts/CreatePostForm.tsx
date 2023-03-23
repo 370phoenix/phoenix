@@ -1,11 +1,6 @@
 import { useContext, useState } from "react";
-import {
-    TouchableWithoutFeedback,
-    View,
-    Keyboard,
-    StyleSheet,
-    ScrollView,
-} from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
 import CustomSwitch from "../shared/CustomSwitch";
@@ -15,7 +10,6 @@ import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
 import { Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
@@ -24,7 +18,8 @@ import SuccessfulPost from "./SuccessfulPost";
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const authService:any = useContext(AuthContext);
+    const headerHeight = useHeaderHeight();
+    const authService: any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
     const userInfo = useSelector(authService, userInfoSelector);
@@ -65,25 +60,19 @@ export default function CreatePostForm() {
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
     //error message
-    const [message1, setMessage1] = useState<string | null>(null);
-    const [message2, setMessage2] = useState<string | null>(null);
-    const [message3, setMessage3] = useState<string | null>(null);
-
     const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-
         //uses validation function
         //errors are displayed as error messages below
         const valid = validateData({
-            startTime: startTime,
-            endTime: endTime,
-            pickup: pickup,
-            dropoff: dropoff,
+            startTime,
+            endTime,
+            pickup,
+            dropoff,
             numSeats,
-            notes: notes,
-
+            notes,
         });
 
         if (valid.type === MessageType.error) {
@@ -116,7 +105,6 @@ export default function CreatePostForm() {
     const TripDetails = (
         <>
             <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
-            {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
             <View>
                 <LocationButton
                     setLocation={setPickup}
@@ -125,7 +113,6 @@ export default function CreatePostForm() {
                 />
             </View>
             <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
-            {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
                 <Text textStyle="lineTitle">ROUND TRIP?</Text>
                 <Spacer direction="row" size={24} />
@@ -151,7 +138,6 @@ export default function CreatePostForm() {
                         end={endTime}
                         onChangeEnd={setEndTime}
                     />
-                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
 
                     <Spacer direction="column" size={16} />
                     <Text textStyle="label" styleSize="l">
@@ -179,12 +165,18 @@ export default function CreatePostForm() {
                         />
                     </View>
                     <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
+                    {message && (
+                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                            {message}
+                        </Text>
+                    )}
+                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
                     <Button
                         onPress={onSubmit}
                         color="navy"
                         title="Post"
-                        style={{ justifyContent: "flex-end" }}
+                        style={{ height: headerHeight + 32}}
                     />
                     <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
