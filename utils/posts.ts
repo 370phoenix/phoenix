@@ -440,11 +440,19 @@ export async function cancelPendingMatch(
         if(newPending.length === 1) newPending.shift();
         else newPending.splice(postIndex, 1);
         userInfo.matches = newPending;
-        
-        // update user to remove post
-        const r2 = await writeUser(userID, userInfo);
-        if (r2.type === MessageType.error) throw Error(r2.message);
 
+        // remove request from user.requests
+        const newRequests = userInfo.requests;
+        if(!newRequests) throw Error("Error fetching requests");
+        let reqIndex = -1;
+        // loop through requests and find matching postID
+        for(let i=0; i<newRequests.length; i++){
+            if(newRequests[i][1] === post.postID) reqIndex = i;
+        }
+        if(reqIndex === -1) throw Error("Request not found in user's requested rides");
+        else newRequests.splice(reqIndex, 1);
+        userInfo.requests = newRequests;
+        
         // remove userID from post.pending
         const newRiders = post.pending;
         if (!newRiders) throw Error("Error fetching users from post");
@@ -454,6 +462,11 @@ export async function cancelPendingMatch(
         newRiders.splice(userIndex, 1);
         post.pending = newRiders;
         
+
+        // update user to remove post
+        const r2 = await writeUser(userID, userInfo);
+        if (r2.type === MessageType.error) throw Error(r2.message);
+
         // update post to remove user
         const r3 = await writePostData(post);
         if (r3.type !== MessageType.success) throw new Error(r3.message);

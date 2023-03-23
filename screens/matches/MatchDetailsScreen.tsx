@@ -7,7 +7,7 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
-import { cancelPendingMatch, unmatchPost } from "../../utils/posts";
+import { cancelPendingMatch, matchPost, unmatchPost } from "../../utils/posts";
 import { useState } from "react";
 import { useMachine } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
@@ -60,6 +60,30 @@ export default function MatchDetailsScreen({ route }: Props) {
 
                     const res = await cancelPendingMatch(currentUser, post);
                     setPending(false);
+                },
+            },
+        ]);
+    };
+
+    const handleMatch = () => {
+        Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
+            {
+                text: "Cancel",
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (!currentUser) return;
+                    if (!post) return;
+                    if (post.riders?.includes(currentUser)) return;
+                    if (post.pending?.includes(currentUser)) return;
+                    const filled = post.riders
+                        ? post.riders.filter((val) => val != null).length + 1
+                        : 1;
+                    if (filled >= post.totalSpots) return;
+
+                    const res = await matchPost(currentUser, post);
+                    setPending(true);
                 },
             },
         ]);
