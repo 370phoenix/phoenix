@@ -104,7 +104,7 @@ export const profilePostMachine = createMachine(ProfilePostMachine, {
         assignUserPosts: assign((_, event: any) => ({
             userPosts: event.userPosts ? event.userPosts : [],
         })),
-        assignError: assign({ error: (_, event: any) => event.data }),
+        assignError: assign({ error: (_, event: any) => event.data.message }),
         removeExtras: assign((context) => {
             const { posts, userPosts } = context;
 

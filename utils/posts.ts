@@ -81,6 +81,7 @@ export async function fetchSomePosts(
         const posts: PostType[] = [];
 
         for (const id of ids) {
+            if (!id) continue;
             const postRef = postsRef.child(id);
             const snapshot = await postRef.once("value");
             if (snapshot.exists()) posts.push(snapshot.val());
