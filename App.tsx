@@ -1,19 +1,22 @@
 /* eslint-disable prettier/prettier */
 import auth from "@react-native-firebase/auth";
-import { useInterpret } from "@xstate/react";
 import "expo-dev-client";
 
+import { useInterpret, useSelector } from "@xstate/react";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import useCachedResources from "./hooks/useCachedResources";
 import Navigation from "./navigation";
-import { AuthContext, authMachine } from "./utils/machines/authMachine";
+import { AuthContext, authMachine, stateSelector } from "./utils/machines/authMachine";
 
 export default function App() {
     const isLoadingComplete = useCachedResources();
     const authService = useInterpret(authMachine);
+    const state = useSelector(authService, stateSelector);
+
+    console.log(state);
 
     if (!isLoadingComplete) {
         return null;
