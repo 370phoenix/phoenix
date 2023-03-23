@@ -45,13 +45,13 @@ const AuthMachine = {
                 },
                 "Waiting": {
                     on: {
-                        "USER CHANGED": {
-                            target: "#New Authentication Machine.Init",
-                            actions: "assignUser",
-                        },
                         "USER INFO CHANGED": {
                             target: "Init",
                             actions: "assignUserInfo",
+                        },
+                        "SIGN OUT": {
+                            target: "#New Authentication Machine.Init",
+                            actions: "clearInfo",
                         },
                     },
                 },
@@ -61,10 +61,6 @@ const AuthMachine = {
                             target: "Init",
                             actions: "assignUserInfo",
                         },
-                        "USER CHANGED": {
-                            target: "#New Authentication Machine.Init",
-                            actions: "assignUser",
-                        },
                         "SIGN OUT": {
                             target: "#New Authentication Machine.Init",
                             actions: "clearInfo",
@@ -73,9 +69,9 @@ const AuthMachine = {
                 },
                 "Needs Profile": {
                     on: {
-                        "USER CHANGED": {
+                        "SIGN OUT": {
                             target: "#New Authentication Machine.Init",
-                            actions: "assignUser",
+                            actions: "clearInfo",
                         },
                         "USER INFO CHANGED": {
                             target: "Init",
@@ -84,7 +80,6 @@ const AuthMachine = {
                     },
                 },
             },
-            on: {},
         },
         "FB Signed Out": {
             on: {
@@ -127,7 +122,7 @@ export const userInfoSelector = (state: any) =>
 export const authMachine = createMachine(AuthMachine, {
     services: {
         setUserListener: () => (callback) => {
-            const authSubscriber = auth().onAuthStateChanged(async (user) => {
+            const authSubscriber = auth().onAuthStateChanged((user) => {
                 if (user) callback({ type: "USER CHANGED", user: user });
                 else callback({ type: "SIGN OUT" });
             });
