@@ -23,6 +23,7 @@ import auth from "@react-native-firebase/auth";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
+import * as Location from "expo-location";
 
 // stores options for number picker form inputs
 
@@ -42,6 +43,10 @@ export default function CreatePostForm() {
     const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
 
+    const [pickupLocation, setPickupLocation] = useState<Location.LocationGeocodedLocation>();
+    const [dropoffLocation, setDropoffLocation] = useState<Location.LocationGeocodedLocation>();
+
+
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
@@ -58,11 +63,21 @@ export default function CreatePostForm() {
 
     const onChangePickup = (text: string) => {
         setPickupText(text);
-        setPickup(text);
+        geocodePickup;
+        //setPickup(text);
     };
     const onChangeDropoff = (text: string) => {
         setDropoffText(text);
+        //geocode;
         setDropoff(text);
+    };
+
+    const geocodePickup = async () => {
+        const geocodedLocation = await Location.geocodeAsync(pickupText);
+        console.log("Geocoded Address:");
+        console.log(geocodedLocation);
+        setPickupLocation(geocodedLocation);
+        console.log(pickup);
     };
 
     // change handler for round trip switch
