@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
+import auth from "@react-native-firebase/auth";
 import "expo-dev-client";
 
 import { useInterpret, useSelector } from "@xstate/react";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import useCachedResources from "./hooks/useCachedResources";

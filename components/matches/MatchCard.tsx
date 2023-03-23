@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "../shared/Themed";
@@ -6,7 +8,6 @@ import { convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
-import { useNavigation } from "@react-navigation/native";
 import { MatchSublist } from "./MatchList";
 import { useMachine } from "@xstate/react";
 import { postInfoMachine } from "../../utils/machines/postInfoMachine";

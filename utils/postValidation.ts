@@ -43,8 +43,8 @@ export default function validateData({
         if (!endTime)
             return { type: MessageType.error, message: "Enter an end time." }
 
-        if (startTime > endTime)
-            return { type: MessageType.error, message: "End time cannot occur before start time." }
+        // if (startTime > endTime)
+        //     return { type: MessageType.error, message: "End time cannot occur before start time." }
 
         const filter = new Filter();
 

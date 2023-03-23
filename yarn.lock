@@ -7462,6 +7462,11 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
+moment@~2.15.2:
+  version "2.15.2"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.15.2.tgz#1bfdedf6a6e345f322fe956d5df5bd08a8ce84dc"
+  integrity sha512-dv9NAmbJRSckFY2Dt3EcgoUGg85U4AaUvtJQ56k0QFumwqpOK3Huf0pYutSVgCFfN+DekvF4pW45PP9rf6ts7g==
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
@@ -8345,6 +8350,13 @@ react-native-gradle-plugin@^0.71.15:
   version "0.71.15"
   resolved "https://registry.yarnpkg.com/react-native-gradle-plugin/-/react-native-gradle-plugin-0.71.15.tgz#9e6b506f30729fe8eb086981702f4e3c891d2b13"
   integrity sha512-7S3pAuPaQJlhax6EZ4JMsDNpj05TfuzX9gPgWLrFfAIWIFLuJ6aDQYAZy2TEI9QJALPoWrj8LWaqP/DGYh14pw==
+
+react-native-modal-date-picker@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-modal-date-picker/-/react-native-modal-date-picker-1.0.3.tgz#f397ed4ab832341f55ce2fc60eddec97c81bbdb9"
+  integrity sha512-bbUbuPEZ17MsoU6pP9mWx7eECsJOB0PavldzflYXo5JDN1V+vwrwsUFAiRn7cPEM6mdz9JQQuFopXw4m6nXrZA==
+  dependencies:
+    moment "~2.15.2"
 
 react-native-modal-datetime-picker@^14.0.1:
   version "14.0.1"

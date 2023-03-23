@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
@@ -7,9 +8,9 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
+import { RootStackParamList } from "../../types";
 import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import { MessageType, UserInfo } from "../../utils/auth";
-import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";

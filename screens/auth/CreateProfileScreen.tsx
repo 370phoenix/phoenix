@@ -5,6 +5,7 @@ import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
+
 import { useHeaderHeight } from "@react-navigation/elements";
 import auth from "@react-native-firebase/auth";
 import { useMachine } from "@xstate/react";

@@ -1,15 +1,6 @@
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useState } from "react";
-import {
-    TouchableWithoutFeedback,
-    View,
-    Keyboard,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-} from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
 import CustomSwitch from "../shared/CustomSwitch";
@@ -19,16 +10,16 @@ import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
 import { Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import auth from "@react-native-firebase/auth";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
+import SuccessfulPost from "./SuccessfulPost";
 
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const height = useHeaderHeight();
-    const authService = useContext(AuthContext);
+    const headerHeight = useHeaderHeight();
+    const authService: any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
     const userInfo = useSelector(authService, userInfoSelector);
@@ -69,23 +60,19 @@ export default function CreatePostForm() {
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
     //error message
-    const [message1, setMessage1] = useState<string | null>(null);
-    const [message2, setMessage2] = useState<string | null>(null);
-    const [message3, setMessage3] = useState<string | null>(null);
+    const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-
         //uses validation function
         //errors are displayed as error messages below
         const valid = validateData({
-            startTime: startTime,
-            endTime: endTime,
-            pickup: pickup,
-            dropoff: dropoff,
+            startTime,
+            endTime,
+            pickup,
+            dropoff,
             numSeats,
-            notes: notes,
-
+            notes,
         });
 
         if (valid.type === MessageType.error) {
@@ -110,97 +97,98 @@ export default function CreatePostForm() {
 
             //Verify completion
             await createPost(post, userID, userInfo);
-
-            Alert.alert("Post Completed", "You may close this window");
+            setWriteComplete(true);
         }
     };
 
     // group contains location and round trip info
     const TripDetails = (
         <>
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-
-                From
-            </Text>
-            <LocationPicker
-                name="pickup"
-                setLocation={setPickup}
-                inputText={pickupText}
-                onChangeText={onChangePickup}
-            />
-            {message2 ? <Text style={styles.message}>{message2}</Text> : ""}
-            <LocationButton
-                setLocation={setPickup}
-                inputText={pickupText}
-                onChangeText={onChangePickup}
-            />
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                To
-            </Text>
-            <LocationPicker
-                name="dropoff"
-                setLocation={setDropoff}
-                inputText={dropoffText}
-                onChangeText={onChangeDropoff}
-            />
-            {message3 ? <Text style={styles.message}>{message3}</Text> : ""}
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                Round trip
-            </Text>
-            <View style={{ alignItems: "flex-start" }}>
-                <CustomSwitch
-                    isEnabled={isRoundtrip}
-                    setIsEnabled={setIsRoundtrip}
-                    toggleSwitch={roundtripSwitch}
+            <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
+            <View>
+                <LocationButton
+                    setLocation={setPickup}
+                    inputText={pickupText}
+                    onChangeText={onChangePickup}
                 />
+            </View>
+            <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
+                <Text textStyle="lineTitle">ROUND TRIP?</Text>
+                <Spacer direction="row" size={24} />
+                <CustomSwitch isEnabled={isRoundtrip} toggleSwitch={roundtripSwitch} />
             </View>
         </>
     );
 
-    return (
+    const Form = (
         <ScrollView>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.body}>
-                    <Text textStyle="header" styleSize="l" style={styles.label}>
+                    <Spacer direction="column" size={24} />
+                    <Text textStyle="header" styleSize="l">
                         Create Post
                     </Text>
+                    <Spacer direction="column" size={16} />
                     {TripDetails}
-
+                    <Spacer direction="column" size={16} />
                     <DateTimeGroup
                         start={startTime}
                         onChangeStart={setStartTime}
                         end={endTime}
                         onChangeEnd={setEndTime}
                     />
-                    {message1 ? <Text style={styles.message}>{message1}</Text> : ""}
 
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        How many free spots in the car?
+                    <Spacer direction="column" size={16} />
+                    <Text textStyle="label" styleSize="l">
+                        Notes for riders?
                     </Text>
-                    <NumberPicker
-                        count={numSeats}
-                        handlePlus={addNumSeats}
-                        handleMinus={deleteNumSeats}
+                    <Spacer direction="column" size={8} />
+                    <TextArea
+                        label=""
+                        inputState={[notes, setNotes]}
+                        placeholder="Type here..."
+                        placeholderTextColor={Colors.gray[2]}
                     />
-
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        Is there anything else your match needs to know?
-                    </Text>
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : undefined}
-                        keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]} />
-                        {message && (
-                            <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                                {message}
-                            </Text>
-                        )}
-                        <Button onPress={onSubmit} color="navy" title="Post" />
-                        <Spacer direction="column" size={128} style={{ flex: 1 }} />
-                    </KeyboardAvoidingView>
+                    <Spacer direction="column" size={16} />
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                        <NumberPicker
+                            count={numSeats}
+                            handlePlus={addNumSeats}
+                            handleMinus={deleteNumSeats}
+                        />
+                    </View>
+                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                    {message && (
+                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                            {message}
+                        </Text>
+                    )}
+                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+                    <Button
+                        onPress={onSubmit}
+                        color="navy"
+                        title="Post"
+                        style={{ height: headerHeight + 32}}
+                    />
+                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
             </TouchableWithoutFeedback>
         </ScrollView>
+    );
+
+    return (
+        <>
+            {writeComplete && <SuccessfulPost />}
+            {!writeComplete && Form}
+        </>
     );
 }
 
@@ -216,36 +204,21 @@ const DateTimeGroup = ({
     onChangeEnd: any;
 }) => {
     return (
-        <View>
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                When do you want a ride?
-            </Text>
-            {Platform.OS !== "ios" && (
-                <>
-                    <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        Between
-                    </Text>
-                    <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        And
-                    </Text>
-                    <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
-                </>
-            )}
-            {Platform.OS === "ios" && (
-                <>
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        Between
-                    </Text>
-                    <CustomDateTimePicker mode="datetime" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        And
-                    </Text>
-                    <CustomDateTimePicker mode="datetime" date={end} onConfirm={onChangeEnd} />
-                </>
-            )}
-        </View>
+        <>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text textStyle="lineTitle">DATE</Text>
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
+            </View>
+            <Spacer direction="column" size={16} />
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text textStyle="lineTitle">TIME</Text>
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
+            </View>
+        </>
     );
 };
 
@@ -254,12 +227,8 @@ const styles = StyleSheet.create({
         margin: 16,
         marginTop: 0,
         height: "100%",
-        justifyContent: "flex-end",
+        justifyContent: "flex-start",
         flexDirection: "column",
-    },
-    label: {
-        marginBottom: 8,
-        marginTop: 16,
     },
     message: {
         paddingVertical: 10,

@@ -1,5 +1,4 @@
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import auth from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
 import { UserID } from "../../constants/DataTypes";

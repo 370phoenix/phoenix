@@ -1,9 +1,9 @@
+import auth from "@react-native-firebase/auth";
 import { ScrollView, StyleSheet } from "react-native";
 
+import MatchList from "../../components/matches/MatchList";
 import { Text, View } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import MatchList from "../../components/matches/MatchList";
-import auth from "@react-native-firebase/auth";
 import { useContext } from "react";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";

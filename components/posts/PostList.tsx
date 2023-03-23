@@ -1,10 +1,9 @@
 import { useMachine } from "@xstate/react";
 import { FlatList } from "react-native";
 
+import PostCard from "./PostCard";
 import { postListMachine } from "../../utils/machines/postListMachine";
 import { View } from "../shared/Themed";
-
-import PostCard from "./PostCard";
 
 export default function PostList() {
     const [state, _] = useMachine(postListMachine);
