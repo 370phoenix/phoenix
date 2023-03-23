@@ -25,50 +25,22 @@ import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { createContext } from "react";
-import { useInterpret, useSelector } from "@xstate/react";
-import { AuthMachine } from "../utils/machines";
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from "xstate";
-import { getUserUpdates, UserInfo } from "../utils/auth";
-import { userIDSelector } from "../utils/machines/authMachine";
-
-const authMachine = createMachine(AuthMachine, {
-    guards: {
-        resultExists: (_, event: any) => event.data !== undefined && event.data !== null,
-        shouldCheckInfo: (context, _) => {
-            if (!context.obj) return false;
-            if ("major" in context.obj) return false;
-            return true;
-        },
-        objExists: (context, _) => context.obj !== undefined && context.obj !== null,
-    },
-    actions: {
-        assignUser: (context, _) => {
-            assign({ user: (context.obj as FirebaseAuthTypes.User)!.uid });
-        },
-        assignInfo: (context, _) => {
-            assign({ userInfo: (context.obj as UserInfo)! });
-        },
-    },
-});
-export const AuthContext = createContext({} as InterpreterFrom<typeof authMachine>);
+import auth from "@react-native-firebase/auth";
+import { useSelector } from "@xstate/react";
+import {
+    AuthContext,
+    needsInfoSelector,
+    signedInSelector,
+    userIDSelector,
+    userInfoSelector,
+} from "../utils/machines/authMachine";
+import { getUserUpdates } from "../utils/auth";
 
 export default function Navigation() {
-    const initialContext = {
-        user: null,
-        userInfo: null,
-        obj: auth().currentUser ?? null,
-    };
-    console.log(initialContext);
-    const authService = useInterpret(authMachine.withContext(initialContext));
-
     return (
-        <AuthContext.Provider value={authService}>
-            <NavigationContainer linking={LinkingConfiguration}>
-                <RootNavigator />
-            </NavigationContainer>
-        </AuthContext.Provider>
+        <NavigationContainer linking={LinkingConfiguration}>
+            <RootNavigator />
+        </NavigationContainer>
     );
 }
 
@@ -78,26 +50,10 @@ export default function Navigation() {
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const signedInSelector = (state: any) => state.matches("Signed In");
-const needsInfoSelector = (state: any) => state.matches("Create Profile Screen");
-
 function RootNavigator() {
     const authService = React.useContext(AuthContext);
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
-    const userID = useSelector(authService, userIDSelector);
-
-    React.useEffect(() => {
-        if (!userID) return;
-
-        const subscriber = getUserUpdates(userID, (data) => {
-            authService.send("INFO CHANGED", { obj: data });
-        });
-
-        if (typeof subscriber === "string") return;
-
-        return subscriber;
-    }, []);
 
     return (
         <Stack.Navigator

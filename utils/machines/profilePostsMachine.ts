@@ -14,9 +14,7 @@ const ProfilePostMachine = {
                     on: {
                         LOAD: {
                             target: "Loading New Posts",
-                            actions: assign((_, event: any) => ({
-                                userPosts: event.userPosts ? event.userPosts : [],
-                            })),
+                            actions: "assignUserPosts",
                         },
                     },
                 },
@@ -27,16 +25,13 @@ const ProfilePostMachine = {
                         onDone: [
                             {
                                 target: "#Profile Post Machine.Loaded",
-                                actions: [
-                                    assign({ posts: (_, event: any) => event.data }),
-                                    "removeExtras",
-                                ],
+                                actions: ["assignPosts", "removeExtras"],
                             },
                         ],
                         onError: [
                             {
                                 target: "#Profile Post Machine.Loaded",
-                                actions: assign({ error: (_, event: any) => event.data }),
+                                actions: "assignError",
                             },
                         ],
                     },
@@ -50,9 +45,7 @@ const ProfilePostMachine = {
             on: {
                 UPDATE: {
                     target: "Updating Posts.Loading New Posts",
-                    actions: assign((_, event: any) => ({
-                        userPosts: event.userPosts ? event.userPosts : [],
-                    })),
+                    actions: "assignUserPosts",
                 },
                 EXIT: {
                     target: "Complete",
@@ -107,6 +100,11 @@ export const profilePostMachine = createMachine(ProfilePostMachine, {
         },
     },
     actions: {
+        assignPosts: assign({ posts: (_, event: any) => event.data }),
+        assignUserPosts: assign((_, event: any) => ({
+            userPosts: event.userPosts ? event.userPosts : [],
+        })),
+        assignError: assign({ error: (_, event: any) => event.data.message }),
         removeExtras: assign((context) => {
             const { posts, userPosts } = context;
 

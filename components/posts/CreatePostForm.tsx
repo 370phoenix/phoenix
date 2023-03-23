@@ -15,6 +15,8 @@ import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
 import { Coords, NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
+import auth from "@react-native-firebase/auth";
+import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "./SuccessfulPost";
@@ -22,7 +24,7 @@ import SuccessfulPost from "./SuccessfulPost";
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const authService = useContext(AuthContext);
+    const authService:any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
     const userInfo = useSelector(authService, userInfoSelector);
@@ -39,6 +41,8 @@ export default function CreatePostForm() {
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
+
+    const [message, setMessage] = useState<string | null>(null);
 
     // contains constraints for modifying seats
     const addNumSeats = () => {
@@ -69,24 +73,26 @@ export default function CreatePostForm() {
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-        //validate;
-        let isValid = true;
 
-        if (startTime.getTime() === endTime.getTime()) {
-            isValid = false;
-            setMessage1("Error: Invalid time window");
-        }
-        if (pickupText === "") {
-            isValid = false;
-            setMessage2("Error: Invalid pickup location");
-        }
-        if (dropoffText === "") {
-            isValid = false;
-            setMessage3("Error: Invalid dropoff location");
+        //uses validation function
+        //errors are displayed as error messages below
+        const valid = validateData({
+            startTime: startTime,
+            endTime: endTime,
+            pickup: pickup,
+            dropoff: dropoff,
+            numSeats,
+            notes: notes,
+
+        });
+
+        if (valid.type === MessageType.error) {
+            setMessage(valid.message);
+            return;
         }
 
         // Push to database
-        if (isValid) {
+        if (valid.type === MessageType.success) {
             const post: NewPostType = {
                 pickup,
                 dropoff,
@@ -103,7 +109,6 @@ export default function CreatePostForm() {
             //Verify completion
             await createPost(post, userID, userInfo);
             setWriteComplete(true);
-
         }
     };
 
