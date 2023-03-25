@@ -43,7 +43,7 @@ export default function Dropdown({
     };
 
     return (
-        <>
+        <View style={{ zIndex: 100 }}>
             <View {...props} style={[styles.container, props.style]} ref={openRef}>
                 <Pressable
                     onPress={onPress}
@@ -67,29 +67,29 @@ export default function Dropdown({
                 </Pressable>
                 <Text
                     textStyle="label"
-                    styleSize="m"
+                    styleSize="s"
+                    allowFontScaling={false}
                     style={light ? styles.labelLight : styles.label}>
                     {label}
                 </Text>
-
-                {isOpen && (
-                    <FlatList
-                        style={[styles.dropdown, { top: top }, props.style]}
-                        data={options}
-                        keyExtractor={(_, index) => index.toString()}
-                        renderItem={({ item, index }) => (
-                            <ListItem
-                                item={item}
-                                index={index}
-                                onPress={(newIndex) =>
-                                    send({ type: "SELECTED CHANGED", selected: newIndex })
-                                }
-                            />
-                        )}
-                    />
-                )}
             </View>
-        </>
+            {isOpen && (
+                <FlatList
+                    style={[styles.dropdown, { top: top }, props.style]}
+                    data={options}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item, index }) => (
+                        <ListItem
+                            item={item}
+                            index={index}
+                            onPress={(newIndex) =>
+                                send({ type: "SELECTED CHANGED", selected: newIndex })
+                            }
+                        />
+                    )}
+                />
+            )}
+        </View>
     );
 }
 
@@ -114,7 +114,7 @@ function ListItem({ item, onPress, index }: ListItemProps) {
 }
 
 const styles = StyleSheet.create({
-    container: { alignItems: "flex-start", zIndex: 150 },
+    container: { alignItems: "flex-start" },
     selected: {
         flexDirection: "row",
         borderBottomWidth: 2,

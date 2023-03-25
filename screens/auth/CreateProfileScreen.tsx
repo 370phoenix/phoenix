@@ -92,18 +92,15 @@ export default function CreateProfileScreen(props: Props) {
                     light
                 />
                 <Spacer direction="row" size={16} />
-                <View style={styles.group}>
-                    <Dropdown
-                        light
-                        label="pronouns"
-                        style={styles.smallInputs}
-                        onChange={(newOne) => {
-                            setPronouns(newOne);
-                        }}
-                        options={Pronouns}
-                    />
-                </View>
-                <Spacer direction="column" size={32} />
+                <Dropdown
+                    light
+                    label="pronouns"
+                    style={styles.smallInputs}
+                    onChange={(newOne) => {
+                        setPronouns(newOne);
+                    }}
+                    options={Pronouns}
+                />
                 <Button
                     title="continue"
                     onPress={() => send("SUBMIT")}
@@ -135,7 +132,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     smallInputs: {
-        flex: 1,
+        width: "100%",
+        paddingBottom: 16,
     },
     headline: {
         textAlign: "center",
