@@ -91,6 +91,7 @@ export function Button({
     fontSize,
     title,
     onPress,
+    disabled,
     ...otherProps
 }: ButtonProps) {
     const [tempStyles, setTempStyles] = useState({});
@@ -172,8 +173,15 @@ export function Button({
             style={style}
             onPressIn={onPressIn}
             onPressOut={onPressOut}
+            disabled={disabled}
             {...otherProps}>
-            <View style={[buttonStyles.button, containerStyles, tempStyles]}>
+            <View
+                style={[
+                    buttonStyles.button,
+                    containerStyles,
+                    tempStyles,
+                    { backgroundColor: disabled ? highlight : bgColor },
+                ]}>
                 {leftIcon && (
                     <>
                         {leftIcon({
@@ -188,7 +196,12 @@ export function Button({
                 <Text
                     textStyle={clear ? "lineTitle" : "label"}
                     styleSize={clear ? undefined : "l"}
-                    style={[buttonStyles.text, textStyles, tempStyles]}>
+                    style={[
+                        buttonStyles.text,
+                        textStyles,
+                        tempStyles,
+                        { backgroundColor: disabled ? highlight : bgColor },
+                    ]}>
                     {text}
                 </Text>
                 {rightIcon && (

@@ -1,5 +1,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Alert, KeyboardAvoidingView, Linking, Platform, StyleSheet } from "react-native";
+import {
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    Pressable,
+    StyleSheet,
+} from "react-native";
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
 import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../../utils/auth";
@@ -9,6 +17,8 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
+import Dropdown from "../../components/shared/Dropdown";
+import Pronouns from "../../constants/Pronouns.json";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
@@ -25,9 +35,19 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [name, setName] = useState(userInfo ? userInfo.username : "");
     const [major, setMajor] = useState(userInfo ? userInfo.major : "");
     const [grad, setGrad] = useState(userInfo ? String(userInfo.gradYear) : "");
-    const [gender, setGender] = useState(userInfo ? userInfo.gender : "");
+    const [pronouns, setPronouns] = useState(
+        Pronouns[
+            userInfo
+                ? Pronouns.indexOf(userInfo.pronouns) != -1
+                    ? Pronouns.indexOf(userInfo.pronouns)
+                    : 0
+                : 0
+        ]
+    );
 
     const [message, setMessage] = useState<string | null>(null);
+
+    const allowChange = state.matches("Information Valid") && state.context.infoChanged;
 
     useEffect(() => {
         if (!userID || !userInfo) return;
@@ -37,11 +57,11 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 username: name.trim(),
                 major: major.trim(),
                 gradString: grad.trim(),
-                gender: gender.trim(),
                 phone: null,
+                pronouns,
             },
         });
-    }, [name, major, grad, gender, userID, send]);
+    }, [name, major, grad, userID, send, pronouns]);
 
     const onConfirm = async () => {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
@@ -69,7 +89,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     };
 
     return (
-        <View style={styles.container}>
+        <Pressable style={styles.container} onPress={() => Keyboard.dismiss()}>
             <KeyboardAvoidingView
                 style={styles.body}
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -81,10 +101,14 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 <TextField style={styles.input} label={"name"} inputState={[name, setName]} />
                 <TextField style={styles.input} label={"major"} inputState={[major, setMajor]} />
                 <TextField style={styles.input} label={"grad year"} inputState={[grad, setGrad]} />
-                <TextField
+                <Dropdown
+                    label="pronouns"
+                    onChange={(newOne) => {
+                        setPronouns(newOne);
+                    }}
+                    firstSelected={userInfo ? Pronouns.indexOf(userInfo.pronouns) : 0}
+                    options={Pronouns}
                     style={styles.input}
-                    label={"pronouns"}
-                    inputState={[gender, setGender]}
                 />
 
                 {message && (
@@ -96,7 +120,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 <Spacer direction="column" size={50} />
 
                 <Button
-                    disabled={!state.matches("Information Valid")}
+                    disabled={!allowChange}
                     onPress={() => onConfirm()}
                     title="Confirm?"
                     color="navy"
@@ -117,7 +141,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
 
                 <View style={{ flex: 1 }} />
             </KeyboardAvoidingView>
-        </View>
+        </Pressable>
     );
 }
 

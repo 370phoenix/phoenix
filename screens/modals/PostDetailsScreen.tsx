@@ -195,10 +195,10 @@ function UserDetails({ user, num }: { user: UserInfo; num: number }) {
             <Spacer direction="column" size={16} />
 
             <Text textStyle="label" styleSize="l">
-                Gender
+                Pronouns
             </Text>
             <Text textStyle="body" styleSize="s">
-                {user.gender}
+                {user.pronouns}
             </Text>
         </View>
     );

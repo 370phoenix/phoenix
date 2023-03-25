@@ -1,5 +1,5 @@
 import Filter from "bad-words";
-import Genders from "../constants/Genders.json";
+import Pronouns from "../constants/Pronouns.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
@@ -15,7 +15,7 @@ export type UserInfo = {
     phone: string;
     major: string;
     gradYear: number;
-    gender: string;
+    pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
     posts: PostID[] | undefined;
@@ -29,7 +29,7 @@ export type FBUserInfo = {
     phone: string;
     major: string;
     gradYear: number;
-    gender: string;
+    pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
     posts: { [key: number]: string } | undefined;
@@ -233,6 +233,7 @@ export async function deleteAccount(userID: UserID): Promise<SuccessMessage | Er
     try {
         const userRef = database().ref("users/" + userID);
         await userRef.remove();
+        await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -249,7 +250,7 @@ type ValidateProfileParams = {
     username: string;
     major: string;
     gradString: string;
-    gender: string;
+    pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
 };
@@ -262,7 +263,7 @@ type ValidateProfileParams = {
 export function validateProfile({
     username,
     major,
-    gender,
+    pronouns,
     gradString,
     phone = null,
     userInfo = null,
@@ -277,8 +278,8 @@ export function validateProfile({
 
         if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
 
-        if (!Genders.includes(gender.toLowerCase()))
-            throw new Error("Gender not accepted. Please email us if we've made a mistake.");
+        if (!Pronouns.includes(pronouns))
+            throw new Error("Pronouns not accepted. Please email us if we've made a mistake.");
 
         if (gradString.match(/\D/g) !== null)
             throw new Error("Please make sure grad year is all digits.");
@@ -289,7 +290,7 @@ export function validateProfile({
             return {
                 username: username,
                 major: major,
-                gender: gender,
+                pronouns: pronouns,
                 gradYear: gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
@@ -305,7 +306,7 @@ export function validateProfile({
                 chillIndex: undefined,
                 username: username,
                 major: major,
-                gender: gender,
+                pronouns: pronouns,
                 gradYear: gradYear,
                 phone: phone,
                 ridesCompleted: 0,
