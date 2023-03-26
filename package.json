@@ -13,6 +13,7 @@
         "@expo/config-plugins": "^6.0.0",
         "expo-modules-autolinking": "^1.1.0"
     },
+    "homepage": "https://github.com/370phoenix/phoenix",
     "dependencies": {
         "@expo/vector-icons": "^13.0.0",
         "@react-native-async-storage/async-storage": "~1.17.3",

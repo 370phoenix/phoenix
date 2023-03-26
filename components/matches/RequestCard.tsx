@@ -57,7 +57,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
                                 {requesterInfo.username}
                             </Text>
                             <Text textStyle="label" style={styles.subtext}>
-                                {requesterInfo.gender}
+                                {requesterInfo.pronouns}
                             </Text>
                         </View>
 

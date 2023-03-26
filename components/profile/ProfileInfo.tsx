@@ -25,7 +25,7 @@ export default function ProfileInfo({ userInfo }: Props) {
             </View>
             <InfoRow icon={GradCap} text={String(userInfo.gradYear)} />
             <InfoRow icon={Book} text={userInfo.major} />
-            <InfoRow icon={Gender} text={userInfo.gender} />
+            <InfoRow icon={Gender} text={userInfo.pronouns} />
         </View>
     );
 }

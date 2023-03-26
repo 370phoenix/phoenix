@@ -87,12 +87,12 @@ export async function getUserOnce(userID: string | null): Promise<UserInfo> {
     }
 }
 
-export type UserInfo = {
+type UserInfo = {
     username: string;
     phone: string;
     major: string;
     gradYear: number;
-    gender: string;
+    pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
     posts: string[] | undefined;
