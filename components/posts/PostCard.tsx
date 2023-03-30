@@ -27,11 +27,11 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const updatedUserInfo = useSelector(authService, userInfoSelector);
 
     // Don't show your own posts in the feed
+    const navigation = useNavigation();
     if (!isProfile && post.user === userID) return <></>;
     if (post.pending?.includes(userID!)) return <></>;
     if (!post.dropoff) return <></>;
 
-    const navigation = useNavigation();
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
     const fDate = convertDate(post.startTime);

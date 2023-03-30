@@ -35,6 +35,7 @@ const SuccessScreen = ({message} : SuccessScreenProps) => {
                     alignItems: "center",
                     height: "90%",
                     paddingHorizontal: 40,
+                    backgroundColor: Colors.gray[4]
                 }}>
                 <Animated.View
                     style={{

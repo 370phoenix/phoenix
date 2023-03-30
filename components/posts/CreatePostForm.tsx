@@ -13,7 +13,7 @@ import { createPost } from "../../utils/posts";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
-import SuccessfulPost from "../shared/SuccessfulPost";
+import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
 
@@ -85,7 +85,7 @@ export default function CreatePostForm() {
             const post: NewPostType = {
                 pickup,
                 dropoff,
-                totalSpots: numSeats+1,
+                totalSpots: numSeats,
                 notes,
                 startTime: startTime.getTime(),
                 endTime: endTime.getTime(),

@@ -16,7 +16,7 @@ import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
-import SuccessfulPost from "../../components/shared/SuccessfulPost";
+import SuccessfulPost from "../../components/shared/SuccessPage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route, navigation }: Props) {
@@ -43,7 +43,6 @@ export default function DetailsModal({ route, navigation }: Props) {
                     const filled = post.riders
                     ? post.riders.filter((val) => val != null).length + 1
                     : 1;
-                    console.log("success");
                     if (filled >= post.totalSpots) return;
                     
                     const res = await matchPost(userID, post);
@@ -51,6 +50,7 @@ export default function DetailsModal({ route, navigation }: Props) {
                     else {
                         setMatchComplete(true);
                         setTimeout(() => navigation.goBack(), 1000);
+                        // TODO: Send notification to alert poster of new request
                     }
                 },
             },
