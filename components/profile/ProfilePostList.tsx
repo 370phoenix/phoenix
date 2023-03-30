@@ -1,59 +1,37 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/auth";
 import PostCard from "../posts/PostCard";
 import { View, Text } from "../shared/Themed";
-import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
-import { useMachine, useSelector } from "@xstate/react";
-import { profilePostMachine } from "../../utils/machines/profilePostsMachine";
+import {
+    AuthContext,
+    userIDSelector,
+    userInfoSelector,
+    userPostsSelector,
+} from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 
-type Props = {
-    userInfo: UserInfo | null;
-};
-export default function ProfilePostList({ userInfo }: Props) {
+export default function ProfilePostList() {
     const authService = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
-    const [state, send] = useMachine(profilePostMachine);
-    const { error, posts } = state.context;
-
-    if (!userInfo) return <></>;
-
-    useEffect(() => {
-        if (state.matches("Updating Posts.Start")) send("LOAD", { userPosts: userInfo.posts });
-        else send("UPDATE", { userPosts: userInfo.posts });
-
-        () => {
-            send("EXIT");
-        };
-    }, [send, userInfo]);
+    const posts = useSelector(authService, userPostsSelector);
+    const userInfo = useSelector(authService, userInfoSelector);
 
     return (
         <View style={styles.container}>
             <Text textStyle="header" style={styles.header}>
                 Your Posts
             </Text>
-            {error && (
-                <Text textStyle="label" style={styles.error}>
-                    {error}
-                </Text>
-            )}
-            {posts && (
-                <FlatList
-                    showsVerticalScrollIndicator={false}
-                    style={styles.list}
-                    data={posts}
-                    renderItem={({ item }) => (
-                        <PostCard
-                            post={item}
-                            isProfile
-                            userInfo={[userID ? userID : "", userInfo]}
-                        />
-                    )}
-                    contentContainerStyle={{ paddingBottom: 50 }}
-                />
-            )}
+            <FlatList
+                showsVerticalScrollIndicator={false}
+                style={styles.list}
+                data={posts}
+                renderItem={({ item }) => (
+                    <PostCard post={item} isProfile userInfo={[userID ? userID : "", userInfo]} />
+                )}
+                contentContainerStyle={{ paddingBottom: 50 }}
+            />
         </View>
     );
 }
