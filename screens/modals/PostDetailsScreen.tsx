@@ -16,13 +16,15 @@ import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
+import SuccessfulPost from "../../components/shared/SuccessPage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
-export default function DetailsModal({ route }: Props) {
+export default function DetailsModal({ route, navigation }: Props) {
     if (!route.params) return <></>;
     const post = route.params.post;
 
     const [message, setMessage] = useState<string | null>(null);
+    const [matchComplete, setMatchComplete] = useState(false);
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
@@ -39,37 +41,50 @@ export default function DetailsModal({ route }: Props) {
                     if (post.riders?.includes(userID)) return;
                     if (post.pending?.includes(userID)) return;
                     const filled = post.riders
-                        ? post.riders.filter((val) => val != null).length + 1
-                        : 1;
+                    ? post.riders.filter((val) => val != null).length + 1
+                    : 1;
                     if (filled >= post.totalSpots) return;
-
+                    
                     const res = await matchPost(userID, post);
                     if (res.type === MessageType.error) setMessage(res.message);
+                    else {
+                        setMatchComplete(true);
+                        setTimeout(() => navigation.goBack(), 1000);
+                        // TODO: Send notification to alert poster of new request
+                    }
                 },
             },
         ]);
     };
 
     return (
+        // // <View>
         <View style={styles.infoContainer}>
-            <ScrollView directionalLockEnabled style={styles.container}>
-                {message && (
-                    <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                        {message}
-                    </Text>
-                )}
-                {post && <MoreInfo post={post} />}
-                <Spacer direction="column" size={32} />
-            </ScrollView>
-            <View
-                style={{
-                    backgroundColor: Colors.gray[4],
-                    height: useHeaderHeight() + 16,
-                    padding: 16,
-                }}>
-                <Button title="Match!" onPress={handleMatch} color="purple" />
-                <Spacer direction="column" size={24} />
-            </View>
+            {matchComplete && <SuccessfulPost message="MATCH REQUESTED!" />}
+            {!matchComplete && (
+                <>
+                    <ScrollView directionalLockEnabled style={styles.container}>
+                        {message && (
+                            <Text
+                                textStyle="label"
+                                style={{ color: Colors.red.p, textAlign: "center" }}>
+                                {message}
+                            </Text>
+                        )}
+                        {post && <MoreInfo post={post} />}
+                        <Spacer direction="column" size={32} />
+                    </ScrollView>
+                    <View
+                        style={{
+                            backgroundColor: Colors.gray[4],
+                            height: useHeaderHeight() + 16,
+                            padding: 16,
+                        }}>
+                        <Button title="Match!" onPress={handleMatch} color="purple"/>
+                        <Spacer direction="column" size={24} />
+                    </View>
+                </>
+            )}
         </View>
     );
 }
