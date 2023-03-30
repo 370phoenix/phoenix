@@ -27,14 +27,7 @@ import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
 import auth from "@react-native-firebase/auth";
 import { useSelector } from "@xstate/react";
-import {
-    AuthContext,
-    needsInfoSelector,
-    signedInSelector,
-    userIDSelector,
-    userInfoSelector,
-} from "../utils/machines/authMachine";
-import { getUserUpdates } from "../utils/auth";
+import { AuthContext, needsInfoSelector, signedInSelector } from "../utils/machines/authMachine";
 
 export default function Navigation() {
     return (
@@ -58,7 +51,7 @@ function RootNavigator() {
     return (
         <Stack.Navigator
             screenOptions={{
-                header: ({ navigation, route, options }) => {
+                header: ({ route, options }) => {
                     const title = getHeaderTitle(options, route.name);
                     return <Header title={title} options={options} />;
                 },

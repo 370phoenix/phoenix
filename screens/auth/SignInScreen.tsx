@@ -4,7 +4,6 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { Left } from "../../assets/icons/Chevron";
-import { getConfirm, MessageType, signIn } from "../../utils/auth";
 import { View, Text, Button, ValidationState, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";

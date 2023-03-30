@@ -1,29 +1,19 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import {
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Pressable,
-    Keyboard,
-} from "react-native";
+import { StyleSheet, Pressable, Keyboard } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { RootStackParamList } from "../../types";
 
-import { useHeaderHeight } from "@react-navigation/elements";
 import auth from "@react-native-firebase/auth";
 import { useMachine } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
 import Dropdown from "../../components/shared/Dropdown";
 import Pronouns from "../../constants/Pronouns.json";
+import { RootStackParamList } from "../../types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-type Props = NativeProps;
-export default function CreateProfileScreen(props: Props) {
-    const headerHeight = useHeaderHeight();
+type Props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
+export default function CreateProfileScreen({}: Props) {
     const user = auth().currentUser;
     const [name, setName] = useState("");
     const [major, setMajor] = useState("");

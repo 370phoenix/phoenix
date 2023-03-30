@@ -29,11 +29,9 @@ export default function LocationPicker({
 
 export function LocationButton({
     setLocation,
-    inputText,
     onChangeText,
 }: {
     setLocation: any;
-    inputText: string;
     onChangeText: any;
 }) {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -57,5 +55,13 @@ export function LocationButton({
             onChangeText(`${p.streetNumber} ${p.street}, ${p.city} ${p.region}, ${p.postalCode}`);
         });
     };
-    return <Button title="Use Current Location" color="navy" short clear onPress={() => getLocation()}/>;
+    return (
+        <Button
+            title="Use Current Location"
+            color="navy"
+            short
+            clear
+            onPress={() => getLocation()}
+        />
+    );
 }

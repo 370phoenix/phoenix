@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
@@ -13,7 +13,7 @@ import { convertDate, convertLocation, convertTime } from "../../utils/convertPo
 import { MessageType, UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 
