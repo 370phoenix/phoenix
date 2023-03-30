@@ -22,7 +22,9 @@ type ValidatePostParams = {
     startTime: Date;
     endTime: Date;
     pickup: string | Coords;
+    pickupCoords: number[];
     dropoff: string | Coords;
+    dropoffCoords: number[];
     numSeats: number;
     notes: string;
 }
@@ -31,7 +33,9 @@ export default function validateData({
     startTime,
     endTime,
     pickup,
+    pickupCoords,
     dropoff,
+    dropoffCoords,
     numSeats,
     notes,
 }: ValidatePostParams): SuccessMessage | ErrorMessage {
@@ -46,6 +50,13 @@ export default function validateData({
         if (startTime > endTime)
             return { type: MessageType.error, message: "End time cannot occur before start time." }
 
+
+        if (!pickupCoords) {
+            return { type: MessageType.error, message: "Pickup location invalid." }
+        }
+        if (!dropoffCoords) {
+            return { type: MessageType.error, message: "Dropoff location invalid." }
+        }
         const filter = new Filter();
 
         if (!pickup)

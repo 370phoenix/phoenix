@@ -1,5 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     TouchableWithoutFeedback,
     View,
@@ -40,18 +40,37 @@ export default function CreatePostForm() {
     // location state
     const [pickup, setPickup] = useState<Coords | string>("");
     const [pickupText, setPickupText] = useState("");
+    const [pickupCoords, setPCoords] = useState<number[]>();
     const [dropoff, setDropoff] = useState<Coords | string>("");
     const [dropoffText, setDropoffText] = useState("");
+    const [dropoffCoords, setDCoords] = useState<number[]>();
 
-    const [pickupLocation, setPickupLocation] = useState<Location.LocationGeocodedLocation>();
-    const [dropoffLocation, setDropoffLocation] = useState<Location.LocationGeocodedLocation>();
+    const [pickupLocation, setPickupLocation] = useState<number[]>();
+    const [dropoffLocation, setDropoffLocation] = useState<number[]>();
+    const [address, setAddress] = useState("");
+    const [address2, setAddress2] = useState("");
 
+    const [curLocation, setCurLocation] = useState<Location.LocationObject>();
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
 
     const [message, setMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setMessage('Permission to access location was denied');
+                return;
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+            setCurLocation(location);
+        })();
+    }, []);
 
     // contains constraints for modifying seats
     const addNumSeats = () => {
@@ -63,25 +82,82 @@ export default function CreatePostForm() {
 
     const onChangePickup = (text: string) => {
         setPickupText(text);
-        geocodePickup;
-        //setPickup(text);
+        setPickup(text);
     };
     const onChangeDropoff = (text: string) => {
         setDropoffText(text);
-        //geocode;
         setDropoff(text);
     };
 
-    const geocodePickup = async () => {
-        const geocodedLocation = await Location.geocodeAsync(pickupText);
-        console.log("Geocoded Address:");
-        console.log(geocodedLocation);
-        setPickupLocation(geocodedLocation);
-        console.log(pickup);
+    //need location permissions for android geocoding
+    const geocodePickup = async (pText: string) => {
+        const geocodedLocation = await Location.geocodeAsync(pText);
+        console.log(pText);
+        let lat: number = geocodedLocation[0].latitude;
+        let long: number = geocodedLocation[0].longitude;
+        var location: number[];
+        location = [lat, long];
+        setPickupLocation(location);
+    };
+
+    const geocodeDropoff = async (pText: string) => {
+        const geocodedLocation = await Location.geocodeAsync(pText);
+        console.log(pText);
+        let lat: number = geocodedLocation[0].latitude;
+        let long: number = geocodedLocation[0].longitude;
+        var location: number[];
+        location = [lat, long];
+        setDropoffLocation(location);
+    };
+
+    const reverseGeocodePickup = async (pCoords: number[]) => {
+
+        if (pCoords[0] != null && pCoords[1] != null) {
+            const reverseGeocodeAddress = await Location.reverseGeocodeAsync({
+                longitude: pCoords[1],
+                latitude: pCoords[0]
+            })
+            //console.log(reverseGeocodeAddress);
+            if (reverseGeocodeAddress != undefined) {
+                setAddress(`${reverseGeocodeAddress[0].streetNumber} ${reverseGeocodeAddress[0].street}, ${reverseGeocodeAddress[0].city} ${reverseGeocodeAddress[0].region}, ${reverseGeocodeAddress[0].postalCode}`);
+            }
+            else {
+                setMessage("famield to reverse geocode");
+                return;
+            }
+        }
+        else {
+            setMessage("reverse geocode function failed");
+            return;
+        }
+    };
+
+    const reverseGeocodeDropoff = async (pCoords: number[]) => {
+
+        if (pCoords[0] != null && pCoords[1] != null) {
+            const reverseGeocodeAddress = await Location.reverseGeocodeAsync({
+                longitude: pCoords[1],
+                latitude: pCoords[0]
+            })
+            //console.log(reverseGeocodeAddress);
+            if (reverseGeocodeAddress != undefined) {
+                setAddress2(`${reverseGeocodeAddress[0].streetNumber} ${reverseGeocodeAddress[0].street}, ${reverseGeocodeAddress[0].city} ${reverseGeocodeAddress[0].region}, ${reverseGeocodeAddress[0].postalCode}`);
+            }
+            else {
+                setMessage("famield to reverse geocode");
+                return;
+            }
+        }
+        else {
+            setMessage("reverse geocode function failed");
+            return;
+        }
     };
 
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
+
+
 
     //error message
     const [message1, setMessage1] = useState<string | null>(null);
@@ -91,13 +167,78 @@ export default function CreatePostForm() {
     // create object from form inputs on submit event
     const onSubmit = async () => {
 
+        await geocodePickup(pickupText);
+        console.log(pickupLocation);
+        setAddress("");
+
+        try {
+            if (pickupLocation != undefined)
+                await reverseGeocodePickup(pickupLocation);
+            else {
+                setMessage("Pickup location undefined");
+                return;
+            }
+        }
+        catch {
+            setMessage(" geocoding failed");
+            return;
+
+        }
+
+
+        if (address === "") {
+            setMessage("error reverse geocoding pickup, enter more specific address");
+            return;
+        }
+        setPickup(address);
+        console.log(pickup);
+
+        await geocodeDropoff(dropoffText);
+        setAddress2("");
+        try {
+            if (dropoffLocation != undefined)
+                await reverseGeocodeDropoff(dropoffLocation);
+            else {
+                setMessage("dropoff location undefined");
+                return;
+            }
+        }
+        catch {
+            setMessage(" geocoding failed");
+            return;
+
+        }
+
+        if (address === "") {
+            setMessage("error geocoding dropoff");
+            return;
+        }
+        setDropoff(address2);
+        console.log(pickup);
+        console.log(dropoff);
+        setPCoords(pickupLocation);
+        setDCoords(dropoffLocation);
+        //store coords in the data base as well
+
+
+
+        if (!pickupCoords) {
+            setMessage("Pickup coordinates do not exist");
+            return;
+        }
+        if (!dropoffCoords) {
+            setMessage("Dropoff coordinates do not exist");
+            return;
+        }
         //uses validation function
         //errors are displayed as error messages below
         const valid = validateData({
             startTime: startTime,
             endTime: endTime,
             pickup: pickup,
+            pickupCoords: pickupCoords,
             dropoff: dropoff,
+            dropoffCoords: dropoffCoords,
             numSeats,
             notes: notes,
 
@@ -112,7 +253,9 @@ export default function CreatePostForm() {
         if (valid.type === MessageType.success) {
             const post: NewPostType = {
                 pickup,
+                pickupCoords,
                 dropoff,
+                dropoffCoords,
                 totalSpots: numSeats,
                 notes,
                 startTime: startTime.getTime(),
@@ -124,9 +267,9 @@ export default function CreatePostForm() {
             };
 
             //Verify completion
-            await createPost(post, userID, userInfo);
+            //await createPost(post, userID, userInfo);
 
-            Alert.alert("Post Completed", "You may close this window");
+            //Alert.alert("Post Completed", "You may close this window");
         }
     };
 
