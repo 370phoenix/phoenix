@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
-import { deleteAccount, MessageType, UserInfo, validateProfile, writeUser } from "../../utils/auth";
+import { deleteAccount, MessageType } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useEffect, useState } from "react";

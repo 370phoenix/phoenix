@@ -153,7 +153,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                 <View
                     style={isProfile ? styles.riderBadgeProfile : styles.riderBadge}
                     key={`row-${index_1}`}>
-                    {row.map((rider, index_2) => (
+                    {row.map((rider) => (
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
                                 rider === 3 ? (

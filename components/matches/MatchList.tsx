@@ -5,8 +5,8 @@ import MatchCard from "./MatchCard";
 import RequestCard from "./RequestCard";
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { UserID } from "../../constants/DataTypes";
-import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine";
+import { PostType, UserID } from "../../constants/DataTypes";
+import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
 export default function MatchList({ userID }: Props) {
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
+    const userPosts = useSelector(authService, userPostsSelector) ?? [];
 
     if (!userInfo)
         return (
@@ -27,15 +28,13 @@ export default function MatchList({ userID }: Props) {
             </View>
         );
 
-    const { pending, matches: rawMatches, requests, posts: userPosts } = userInfo;
-    const matches =
-        userPosts && rawMatches
-            ? [...userPosts, ...rawMatches]
-            : userPosts
-            ? [...userPosts]
-            : rawMatches
-            ? [...rawMatches]
-            : [];
+    const { pending, matches } = userInfo;
+
+    const requests: [PostType, string][] = [];
+    for (const post of userPosts) {
+        if (post.pending)
+            requests.push(...post.pending.map((userID) => [post, userID] as [PostType, string]));
+    }
 
     return (
         <View style={{ marginTop: 20 }}>
@@ -43,15 +42,15 @@ export default function MatchList({ userID }: Props) {
                 Requests
             </Text>
             <FlatList
-                scrollEnabled={false}
                 data={requests}
+                scrollEnabled={false}
                 style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                     return (
                         <RequestCard
-                            requesterID={item[0]}
-                            postID={item[1]}
+                            post={item[0]}
+                            requesterID={item[1]}
                             userInfo={userInfo}
                             posterID={userID}
                         />
@@ -61,6 +60,15 @@ export default function MatchList({ userID }: Props) {
             <Text textStyle="header" styleSize="l" style={styles.title}>
                 Matches
             </Text>
+            <FlatList
+                scrollEnabled={false}
+                data={userPosts}
+                style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item }) => {
+                    return <MatchCard post={item} userID={userID} list={MatchSublist.matches} />;
+                }}
+            />
             <FlatList
                 scrollEnabled={false}
                 data={matches}
