@@ -1,7 +1,22 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { PostType } from "../../constants/DataTypes";
 
 admin.initializeApp();
+
+export const ridersChangedNotification = functions.database.ref("/posts/{postID}/riders")
+.onUpdate((change, context) => {
+    const {postID} = context.params;
+    const before = change.before;
+    const after = change.after;
+    
+    const beforePost = before.val();
+    const afterPost = after.val();
+    
+    // if(afterPost.length > beforePost.length){
+    //     sendMatchNotifications(postID);
+    // }
+})
 
 export const clearCompleted = functions.pubsub
     .schedule("0 0 * * *")
@@ -111,4 +126,28 @@ function cleanUndefined<T extends object>(obj: T): T {
         if (obj[k]) clean[k] = obj[k];
     }
     return clean as T;
+}
+
+
+
+//////////////////////////////////////////
+//////////////////////////////////////////
+/////////// NOTIFICATIONS ////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+
+/**
+ * Send push notifications for accepted/rejected requests when listener detects update
+ */
+export async function sendMatchNotifications(userID: string) {
+    try {
+        // for (let user of before.pending)
+            // if (after.matches.includes(user))
+                // get token for user
+                // send notification using token
+
+    } catch (e: any) {
+        console.warn(`Error: ${e}`);
+    }
+    
 }

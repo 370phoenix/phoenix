@@ -108,7 +108,6 @@ export default function CreatePostForm() {
             <View>
                 <LocationButton
                     setLocation={setPickup}
-                    inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
             </View>

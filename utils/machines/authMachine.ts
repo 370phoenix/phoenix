@@ -114,7 +114,7 @@ export const signedInSelector = (state: any) => state.matches("FB Signed In");
 export const needsInfoSelector = (state: any) =>
     ["FB Signed In.Needs Profile", "FB Signed In.Waiting"].some(state.matches);
 export const userIDSelector = (state: any) =>
-    state.context.user ? (state.context.user as UserID) : null;
+    state.context.user ? (state.context.user.uid as UserID) : null;
 export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 
