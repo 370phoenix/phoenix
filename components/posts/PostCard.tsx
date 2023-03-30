@@ -28,6 +28,7 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
 
     // Don't show your own posts in the feed
     if (!isProfile && post.user === userID) return <></>;
+    if (post.pending?.includes(userID!)) return <></>;
     if (!post.dropoff) return <></>;
 
     const navigation = useNavigation();

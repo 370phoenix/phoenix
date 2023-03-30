@@ -8,9 +8,13 @@ import {
 import { Car } from "../../assets/icons/Car";
 import { Dust } from "../../assets/icons/Dust";
 import Colors from "../../constants/Colors";
-import { Spacer, Text } from "../shared/Themed";
+import { Spacer, Text } from "./Themed";
 
-const SuccessfulPost = () => {
+type SuccessScreenProps = {
+    message: string
+}
+
+const SuccessScreen = ({message} : SuccessScreenProps) => {
     const animatedValue = new Animated.Value(0);
     const easing = Easing.elastic(1);
     useEffect(() => {
@@ -51,7 +55,7 @@ const SuccessfulPost = () => {
                 </Animated.View>
                 <Spacer direction="column" size={64} />
                 <Text textStyle="header" styleSize="m" style={{ color: Colors.purple.p }}>
-                    SUCCESSFULLY POSTED!
+                    {message}
                 </Text>
             </View>
             <View style={{ backgroundColor: Colors.gray[4], height: "10%" }} />
@@ -59,4 +63,4 @@ const SuccessfulPost = () => {
     );
 };
 
-export default SuccessfulPost;
+export default SuccessScreen;
