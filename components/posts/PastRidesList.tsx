@@ -2,14 +2,27 @@ import { FlatList } from "react-native";
 
 import PastPostsCard from "./PastPostsCard";
 import { View, Text } from "../shared/Themed";
-import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine";
-import { useSelector } from "@xstate/react";
+import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import { useMachine, useSelector } from "@xstate/react";
 import { useContext } from "react";
+import { multiplePostsMachine } from "../../utils/machines/multiplePostsMachine";
 
 export default function PastRidesList() {
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
-    const { userID } = userInfo;
+
+    if (!userInfo) {
+        console.error("No user info found");
+        return <></>;
+    }
+
+    const { completed } = userInfo;
+    const [state, send] = useMachine(multiplePostsMachine);
+    const { posts } = state.context;
+
+    if (state.matches("Start")) {
+        send({ type: "LOAD", postIDs: completed ?? [] });
+    }
 
     if (!userInfo)
         return (
@@ -22,20 +35,16 @@ export default function PastRidesList() {
             </View>
         );
 
-    const { posts: userPosts } = userInfo;
-    const completed = userPosts;
-    //const list1: MatchSublist;
-
     return (
         <View style={{ marginTop: 20, marginBottom: 200 }}>
-            {userPosts && userPosts.length !== 0 && (
+            {posts && posts.length !== 0 && (
                 <FlatList
                     scrollEnabled={false}
-                    data={completed}
+                    data={posts}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => {
-                        return <PastPostsCard postID={item} userID={userID} />;
+                        return <PastPostsCard post={item} />;
                     }}
                 />
             )}

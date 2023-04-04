@@ -1,33 +1,19 @@
 import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { StyleSheet, Pressable, Platform, Alert } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text, Spacer } from "../shared/Themed";
 import Colors from "../../constants/Colors";
 import { convertDate, convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
-import { Full } from "../../assets/icons/User";
-import { MatchSublist } from "../matches/MatchList";
-import { useMachine } from "@xstate/react";
-import { postInfoMachine } from "../../utils/machines/postInfoMachine";
-import { UserID } from "../../constants/DataTypes";
+import { PostType } from "../../constants/DataTypes";
 
 export type Props = {
-    postID: string;
-    userID: UserID;
+    post: PostType;
 };
 
-export default function PastPostsCard({ postID, userID }: Props) {
+export default function PastPostsCard({ post }: Props) {
     const navigation = useNavigation();
-    const [state, send] = useMachine(postInfoMachine);
-    const { post } = state.context;
-    const isMine = post ? post.user === userID : false;
-    const color = isMine ? Colors.navy.p : Colors.purple.p;
-
-    //const pickup = convertLocation(post.pickup);
-
-    if (state.matches("Start")) send("LOAD", { id: postID });
 
     if (!post) return <View />;
 
