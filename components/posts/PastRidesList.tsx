@@ -1,23 +1,15 @@
-import { useMachine } from "@xstate/react";
 import { FlatList } from "react-native";
 
-import { UserID } from "../../constants/DataTypes";
-import PostCard from "./PostCard";
-import MatchCard from "../matches/MatchCard";
 import PastPostsCard from "./PastPostsCard";
-import { postListMachine } from "../../utils/machines/postListMachine";
 import { View, Text } from "../shared/Themed";
 import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import { useContext } from "react";
 
-type Props = {
-    userID: UserID;
-};
-
-export default function PastRidesList({ userID }: Props) {
+export default function PastRidesList() {
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
+    const { userID } = userInfo;
 
     if (!userInfo)
         return (
