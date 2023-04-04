@@ -15,8 +15,10 @@ import { Button } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
 import Header from "./Header";
+import openBook from "../assets/icons/openBook";
 import Matches from "../assets/icons/Matches";
 import MatchesScreen from "../screens/matches/MatchesScreen";
+import PastRidesScreen from "../screens/PastRidesScreen";
 import { Left } from "../assets/icons/Chevron";
 import TabBar from "./TabBar";
 import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
@@ -116,6 +118,24 @@ function RootNavigator() {
                                 ),
                             })}
                         />
+                        <Stack.Screen
+                            name="PastRides"
+                            component={PastRidesScreen}
+                            options={({ navigation }) => ({
+                                title: "Past Rides",
+                                headerRight: () => (
+                                    <Button
+                                        title="Go back"
+                                        onPress={() => navigation.goBack()}
+                                        leftIcon={Left}
+                                        color="purple"
+                                        light
+                                        short
+                                        clear
+                                    />
+                                ),
+                            })}
+                        />
 
                         <Stack.Group
                             screenOptions={{
@@ -183,6 +203,19 @@ function BottomTabNavigator() {
                 component={ViewPostsScreen}
                 options={({ navigation }: RootTabScreenProps<"Feed">) => ({
                     tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
+                    headerLeft: () => (
+                        <Button
+                            title=""
+                            onPress={() => {
+                                navigation.navigate("PastRides");
+                            }}
+                            leftIcon={openBook}
+                            color="purple"
+                            light
+                            short
+                            clear
+                        />
+                    ),
                     headerRight: () => (
                         <Button
                             title=""

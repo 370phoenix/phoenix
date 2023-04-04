@@ -22,6 +22,7 @@ export type UserInfo = {
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
     requests: [UserID, PostID][];
+    completed: PostID[] | undefined;
 };
 
 export type FBUserInfo = {

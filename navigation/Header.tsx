@@ -17,6 +17,8 @@ export default function Header({ style, title, options }: HeaderProps) {
     const props = {
         tintColor: options.headerTintColor,
         canGoBack: true,
+        width: 30,
+        height: 30,
     };
 
     return (

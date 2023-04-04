@@ -28,6 +28,7 @@ export type RootStackParamList = {
     PostDetails: PostDetailsParamList | undefined;
     CreatePost: undefined;
     MatchDetails: MatchDetailsParamList | undefined;
+    PastRides: undefined;
 };
 
 export type MatchDetailsParamList = {
