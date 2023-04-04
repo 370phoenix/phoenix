@@ -13,7 +13,7 @@ import { createPost } from "../../utils/posts";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
-import SuccessfulPost from "./SuccessfulPost";
+import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
 
@@ -108,7 +108,6 @@ export default function CreatePostForm() {
             <View>
                 <LocationButton
                     setLocation={setPickup}
-                    inputText={pickupText}
                     onChangeText={onChangePickup}
                 />
             </View>
@@ -186,7 +185,7 @@ export default function CreatePostForm() {
 
     return (
         <>
-            {writeComplete && <SuccessfulPost />}
+            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!"/>}
             {!writeComplete && Form}
         </>
     );

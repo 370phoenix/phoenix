@@ -11,6 +11,7 @@ import { Unsubscribe } from "./posts";
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 export type UserInfo = {
+    userID: UserID;
     username: string;
     phone: string;
     major: string;
@@ -21,7 +22,6 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
-    requests: [UserID, PostID][];
     completed: PostID[] | undefined;
 };
 
@@ -36,7 +36,7 @@ export type FBUserInfo = {
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
-    requests: { [key: number]: { 0: string; 1: string } } | undefined;
+    completed: PostID[] | undefined;
 };
 
 // MESSAGES //
@@ -132,21 +132,13 @@ export async function writeUser(
     }
 }
 
-function convertUserInfo(data: FBUserInfo): UserInfo {
-    const newRequests = data.requests
-        ? Object.values(data.requests).map((req) => {
-              const userID = req[0],
-                  postID = req[1];
-              return [userID, postID] as [string, string];
-          })
-        : [];
-
+function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
     return {
         ...data,
+        userID,
         posts: data.posts ? Object.values(data.posts) : [],
         pending: data.pending ? Object.values(data.pending) : [],
         matches: data.matches ? Object.values(data.matches) : [],
-        requests: newRequests,
     };
 }
 
@@ -166,7 +158,9 @@ export function getUserUpdates(
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                onUpdate(convertUserInfo(data));
+                const key = snapshot.key;
+                if (!key) throw Error("No userID key");
+                onUpdate(convertUserInfo(key, data));
             }
         });
         const unsub = () => userRef.off("value", onChange);
@@ -254,6 +248,7 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
+    userID?: string | null;
 };
 /**
  * Checks to see if user info is valid, and returns a clean version.
@@ -266,6 +261,7 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
+    userID = null,
     phone = null,
     userInfo = null,
 }: ValidateProfileParams): UserInfo | string {
@@ -289,21 +285,23 @@ export function validateProfile({
         if (userInfo)
             // Changing Info
             return {
+                userID: userInfo.userID,
                 username: username,
                 major: major,
                 pronouns: pronouns,
                 gradYear: gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
-                ridesCompleted: userInfo.ridesCompleted,
+                ridesCompleted: userInfo.ridesCompleted ? userInfo.ridesCompleted : 0,
                 posts: userInfo.posts ? userInfo.posts : [],
                 pending: userInfo.pending ? userInfo.pending : [],
                 matches: userInfo.matches ? userInfo.matches : [],
-                requests: userInfo.requests ? userInfo.requests : [],
+                completed: userInfo.completed ? userInfo.completed : [],
             };
-        else if (phone) {
+        else if (phone && userID) {
             // Inital Profile Setup
             return {
+                userID,
                 chillIndex: undefined,
                 username: username,
                 major: major,
@@ -314,7 +312,7 @@ export function validateProfile({
                 posts: [],
                 pending: [],
                 matches: [],
-                requests: [],
+                completed: [],
             };
         } else return noUserError;
     } catch (e: any) {

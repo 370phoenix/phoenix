@@ -12,7 +12,7 @@ type HeaderOnly = {
 };
 export type HeaderProps = View["props"] & HeaderOnly;
 
-export default function Header({ style, title, options }: HeaderProps) {
+export default function Header({ options }: HeaderProps) {
     const { headerLeft, headerRight } = options;
     const props = {
         tintColor: options.headerTintColor,

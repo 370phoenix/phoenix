@@ -36,7 +36,7 @@ export default function Dropdown({
     const onPress = () => {
         if (isOpen) send("CLOSE");
         else if (openRef && openRef.current) {
-            openRef.current.measure((_fx, fy, _w, h, _px, py) => {
+            openRef.current.measure((_fx, fy, _w, h, _px, _py) => {
                 send({ type: "OPEN", top: h + fy - 15 });
             });
         }

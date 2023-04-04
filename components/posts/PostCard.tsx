@@ -27,10 +27,11 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     const updatedUserInfo = useSelector(authService, userInfoSelector);
 
     // Don't show your own posts in the feed
+    const navigation = useNavigation();
     if (!isProfile && post.user === userID) return <></>;
+    if (post.pending?.includes(userID!)) return <></>;
     if (!post.dropoff) return <></>;
 
-    const navigation = useNavigation();
     const pickup = convertLocation(post.pickup);
     const dropoff = convertLocation(post.dropoff);
     const fDate = convertDate(post.startTime);
@@ -153,7 +154,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                 <View
                     style={isProfile ? styles.riderBadgeProfile : styles.riderBadge}
                     key={`row-${index_1}`}>
-                    {row.map((rider, index_2) => (
+                    {row.map((rider) => (
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
                                 rider === 3 ? (
