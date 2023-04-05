@@ -25,3 +25,5 @@ ios/
 
 google-services.json
 GoogleService-Info.plist
+
+firebase-debug.log

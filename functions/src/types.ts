@@ -15,6 +15,7 @@ export type PostType = {
 };
 
 export type UserInfo = {
+    userID: string;
     username: string;
     phone: string;
     major: string;

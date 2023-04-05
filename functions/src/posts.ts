@@ -34,29 +34,54 @@ export async function removePosts() {
 async function moveToCompleted(post: PostType, userInfo: UserInfo) {
     try {
         const db = admin.database();
-        const { postID, user: userID } = post;
-        const { completed, ridesCompleted } = userInfo;
+        const { postID } = post;
 
         // Remove post from posts
         const postRef = db.ref("posts/" + postID);
         await postRef.remove();
 
+        // Update Users
+        const userRes = await updateUsers(post, userInfo);
+        if (typeof userRes === "string") throw Error(userRes);
+
+        // Add the post to completed
+        const completedRef = db.ref("completed/" + postID);
+        await completedRef.set(post);
+
+        return true;
+    } catch (e: any) {
+        return e.message;
+    }
+}
+
+async function updateUsers(post: PostType, userInfo: UserInfo) {
+    try {
+        const { postID } = post;
+        const { completed, ridesCompleted } = userInfo;
+
         // Update User Info
-        let newPosts = userInfo.posts ? userInfo.posts : [];
+        let newPosts = userInfo.posts ?? [];
         if (newPosts.length == 1) newPosts = [];
         else {
             const i = newPosts.indexOf(postID);
             if (i !== -1) newPosts.splice(i, 1);
         }
         userInfo.posts = newPosts;
-        userInfo.completed = completed ? [...completed, postID] : [postID];
-        userInfo.ridesCompleted = ridesCompleted ? ridesCompleted + 1 : 1;
-        const res = await writeUser(userID, userInfo);
-        if (typeof res === "string") throw Error(res);
 
-        // Add the post to completed
-        const completedRef = db.ref("completed/" + postID);
-        await completedRef.set(post);
+        // Collect all info
+        const allInfo: UserInfo[] = [userInfo];
+        for (const rider of post.riders ?? []) {
+            const riderInfo = await getUserOnce(rider);
+            allInfo.push(riderInfo);
+        }
+
+        // Update all users
+        for (const info of allInfo) {
+            info.completed = completed ? [...completed, postID] : [postID];
+            info.ridesCompleted = ridesCompleted ? ridesCompleted + 1 : 1;
+            const res = await writeUser(info.userID, userInfo);
+            if (typeof res === "string") throw Error(res);
+        }
 
         return true;
     } catch (e: any) {
@@ -84,7 +109,7 @@ export async function getUserOnce(userID: string | null): Promise<UserInfo> {
         const userRef = db.ref("users/" + userID);
         const snapshot = await userRef.once("value");
         console.log(snapshot.exists());
-        if (snapshot.exists()) return snapshot.val();
+        if (snapshot.exists()) return { userID: userID, ...snapshot.val() };
         throw Error("No info stored");
     } catch (e: any) {
         return e.message;
