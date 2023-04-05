@@ -22,6 +22,7 @@ export type UserInfo = {
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
     requests: [UserID, PostID][];
+    hasPushToken: boolean;
 };
 
 export type FBUserInfo = {
@@ -36,6 +37,7 @@ export type FBUserInfo = {
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
+    hasPushToken: boolean;
 };
 
 // MESSAGES //
@@ -299,6 +301,7 @@ export function validateProfile({
                 pending: userInfo.pending ? userInfo.pending : [],
                 matches: userInfo.matches ? userInfo.matches : [],
                 requests: userInfo.requests ? userInfo.requests : [],
+                hasPushToken: userInfo.hasPushToken,
             };
         else if (phone) {
             // Inital Profile Setup
@@ -314,6 +317,7 @@ export function validateProfile({
                 pending: [],
                 matches: [],
                 requests: [],
+                hasPushToken: false
             };
         } else return noUserError;
     } catch (e: any) {
