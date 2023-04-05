@@ -193,7 +193,8 @@ export async function getUserOnce(userID: UserID | null): Promise<Message<UserIn
         if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
-        if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
+        if (snapshot.exists())
+            return { data: { userID: userID, ...snapshot.val() }, type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
