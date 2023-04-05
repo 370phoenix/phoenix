@@ -26,4 +26,23 @@ ios/
 google-services.json
 GoogleService-Info.plist
 
-firebase-debug.log
+functions/firebase-debug.log
+functions/database-debug.log
+functions/pubsub-debug.log
+functions/functions-debug.log
+functions/firestore-debug.log
+functions/storage-debug.log
+functions/remote-config-debug.log
+functions/auth-debug.log
+functions/messaging-debug.log
+functions/performance-debug.log
+functions/crashlytics-debug.log
+functions/admob-debug.log
+functions/analytics-debug.log
+functions/app-debug.log
+functions/appinvite-debug.log
+functions/config-debug.log
+functions/crash-debug.log
+functions/ui-debug.log
+functions/lib/
+
