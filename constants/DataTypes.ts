@@ -9,9 +9,9 @@ export type Coords = {
 
 export type NewPostType = {
     pickup: Coords | string;
-    pickupCoords: number[];
+    pickupCoords: number[] | undefined;
     dropoff: Coords | string;
-    dropoffCoords: number[];
+    dropoffCoords: number[] | undefined;
     totalSpots: number;
     notes: string;
     startTime: number;

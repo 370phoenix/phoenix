@@ -38,10 +38,10 @@ export default function CreatePostForm() {
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
     // location state
-    const [pickup, setPickup] = useState<Coords | string>("");
+    const [pickup, setPickup] = useState<string>("");
     const [pickupText, setPickupText] = useState("");
     const [pickupCoords, setPCoords] = useState<number[]>();
-    const [dropoff, setDropoff] = useState<Coords | string>("");
+    const [dropoff, setDropoff] = useState<string>("");
     const [dropoffText, setDropoffText] = useState("");
     const [dropoffCoords, setDCoords] = useState<number[]>();
 
@@ -93,21 +93,33 @@ export default function CreatePostForm() {
     const geocodePickup = async (pText: string) => {
         const geocodedLocation = await Location.geocodeAsync(pText);
         console.log(pText);
+        console.log(geocodedLocation);
         let lat: number = geocodedLocation[0].latitude;
+        console.log(lat);
         let long: number = geocodedLocation[0].longitude;
+        console.log(long);
         var location: number[];
         location = [lat, long];
+        console.log(location);
+
         setPickupLocation(location);
+        console.log(pickupLocation);
+
+        //return location;
+
+        //return location;
+        //setPickupLocation(location);
     };
 
     const geocodeDropoff = async (pText: string) => {
         const geocodedLocation = await Location.geocodeAsync(pText);
-        console.log(pText);
+        //console.log(pText);
         let lat: number = geocodedLocation[0].latitude;
         let long: number = geocodedLocation[0].longitude;
         var location: number[];
         location = [lat, long];
         setDropoffLocation(location);
+
     };
 
     const reverseGeocodePickup = async (pCoords: number[]) => {
@@ -167,72 +179,102 @@ export default function CreatePostForm() {
     // create object from form inputs on submit event
     const onSubmit = async () => {
 
-        await geocodePickup(pickupText);
-        console.log(pickupLocation);
-        setAddress("");
+        //const location = await geocodePickup(pickupText);
+        //await geocodePickup(pickupText);
 
-        try {
-            if (pickupLocation != undefined)
-                await reverseGeocodePickup(pickupLocation);
-            else {
-                setMessage("Pickup location undefined");
-                return;
-            }
-        }
-        catch {
-            setMessage(" geocoding failed");
-            return;
-
-        }
+        //console.log("Pickup Coordinates: " + pickupLocation);
 
 
-        if (address === "") {
-            setMessage("error reverse geocoding pickup, enter more specific address");
-            return;
-        }
-        setPickup(address);
-        console.log(pickup);
+        //debugger;
+        //console.log(pickupLocation);
+        //setAddress("");
+        // if (pickupLocation != undefined)
+        //     await (reverseGeocodePickup(pickupLocation));
 
-        await geocodeDropoff(dropoffText);
-        setAddress2("");
-        try {
-            if (dropoffLocation != undefined)
-                await reverseGeocodeDropoff(dropoffLocation);
-            else {
-                setMessage("dropoff location undefined");
-                return;
-            }
-        }
-        catch {
-            setMessage(" geocoding failed");
-            return;
+        // setPickup(address);
 
-        }
+        // setAddress2("");
+        // await geocodeDropoff(dropoffText);
+        // if (dropoffLocation != undefined)
+        //     await (reverseGeocodePickup(dropoffLocation));
 
-        if (address === "") {
-            setMessage("error geocoding dropoff");
-            return;
-        }
-        setDropoff(address2);
-        console.log(pickup);
-        console.log(dropoff);
-        setPCoords(pickupLocation);
-        setDCoords(dropoffLocation);
-        //store coords in the data base as well
+        // setDropoff(address2);
+
+        // try {
+        //     if (pickupLocation != undefined)
+        //         await reverseGeocodePickup(pickupLocation);
+        //     else {
+        //         setMessage("Pickup location undefined");
+        //         return;
+        //     }
+        // }
+        // catch {
+        //     setMessage(" geocoding failed");
+        //     return;
+
+        // }
 
 
+        // if (address === "") {
+        //     setMessage("error reverse geocoding pickup, enter more specific address");
+        //     return;
+        // }
+        // setPickup(address);
+        // //console.log(pickup);
 
-        if (!pickupCoords) {
-            setMessage("Pickup coordinates do not exist");
-            return;
-        }
-        if (!dropoffCoords) {
-            setMessage("Dropoff coordinates do not exist");
-            return;
-        }
+        // await geocodeDropoff(dropoffText);
+        // console.log("Dropoff coordinates: " + dropoffCoords)
+        // setAddress2("");
+        // try {
+        //     if (dropoffLocation != undefined)
+        //         await reverseGeocodeDropoff(dropoffLocation);
+        //     else {
+        //         setMessage("dropoff location undefined");
+        //         return;
+        //     }
+        // }
+        // catch {
+        //     setMessage(" geocoding failed");
+        //     return;
+
+        // }
+
+        // if (address === "") {
+        //     setMessage("error geocoding dropoff");
+        //     return;
+        // }
+        // setDropoff(address2);
+        // //console.log(pickup);
+        // //console.log(dropoff);
+        // setPCoords(pickupLocation);
+        // setDCoords(dropoffLocation);
+        // //console.log(pickupLocation);
+        // //console.log(dropoffLocation);
+
+        // //store coords in the data base as well
+
+
+
+        // if (!pickupCoords) {
+        //     setMessage("Pickup coordinates do not exist");
+        //     return;
+        // }
+        // if (!dropoffCoords) {
+        //     setMessage("Dropoff coordinates do not exist");
+        //     return;
+        // }
+
+
+        //setDCoords([0.0, 0.0]);
+        //console.log(dropoffCoords);
+        //setPCoords([0.0, 0.0]);
+        //console.log(pickupCoords);
+
+
+
         //uses validation function
         //errors are displayed as error messages below
-        const valid = validateData({
+        const valid = await validateData({
             startTime: startTime,
             endTime: endTime,
             pickup: pickup,
@@ -243,6 +285,9 @@ export default function CreatePostForm() {
             notes: notes,
 
         });
+
+
+        debugger;
 
         if (valid.type === MessageType.error) {
             setMessage(valid.message);
@@ -353,7 +398,7 @@ export default function CreatePostForm() {
                                 {message}
                             </Text>
                         )}
-                        <Button onPress={onSubmit} color="navy" title="Post" />
+                        <Button onPress={() => onSubmit()} color="navy" title="Post" />
                         <Spacer direction="column" size={128} style={{ flex: 1 }} />
                     </KeyboardAvoidingView>
                 </View>
