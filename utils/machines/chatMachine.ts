@@ -11,6 +11,9 @@ import {
     ChatHeader,
     ChatMessage,
 } from "../chat";
+import { MessageType } from "../auth";
+import { unmatchPost } from "../posts";
+import { PostType } from "../../constants/DataTypes";
 
 const ChatMachine = {
     id: "Chat Machine",
@@ -173,6 +176,8 @@ const ChatMachine = {
     },
     context: {
         postID: "",
+        userID: "",
+        post: null,
         error: null,
         header: null,
         messages: [],
@@ -198,12 +203,17 @@ export const chatMachine = createMachine(ChatMachine, {
             if (typeof sent === "string") throw new Error(sent);
             return event.message;
         },
-        cacheMessages: (context, event) => {
+        cacheMessages: (context, _event) => {
             const { postID, messages, header } = context;
             return cacheMessages(postID, messages, header);
         },
-        unmatch: async (_context, _event) => {
-            // TODO: UNMATCH FUNCTIONALITY
+        unmatch: async (context, _event) => {
+            const { post, userID } = context;
+            if (!post) throw Error("No Post found");
+
+            const res = await unmatchPost(userID, post);
+            if (res.type === MessageType.error) throw new Error(res.message);
+            return true;
         },
     },
     actions: {
@@ -222,7 +232,9 @@ export const chatMachine = createMachine(ChatMachine, {
         assignInit: assign({
             navigation: (_, event: Check) => event.navigation,
             postID: (_, event: Check) => event.header.postID,
+            userID: (_, event: Check) => event.userID,
             header: (_, event: Check) => event.header,
+            post: (_, event: Check) => event.post,
         }),
         logError: (_, event: any) => console.error(event.data),
         exitView: (context) => context.navigation && context.navigation.goBack(),
@@ -230,26 +242,32 @@ export const chatMachine = createMachine(ChatMachine, {
     guards: {
         shouldSend: (_, event) => {
             const filter = new Filter();
-            return !filter.isProfane((event as TryMessage).message.message);
+            const message = (event as TryMessage).message.message;
+            if (message == "") return false;
+            return !filter.isProfane(message);
         },
         cacheFresh: (_, event: any) => event.data !== false,
     },
 });
 
 type ChatMachineContext = {
+    userID: string;
     postID: string;
+    post: PostType | null;
     messages: ChatMessage[];
     header: ChatHeader | null;
     error: string | null;
-    navigation: NativeStackNavigationProp<RootStackParamList, "MatchDetails", undefined> | null;
+    navigation: NativeStackNavigationProp<RootStackParamList, "ChatScreen", undefined> | null;
 };
 type TryMessage = { type: "TRY MESSAGE"; message: ChatMessage };
 type Cache = { type: "CACHE AND LEAVE" };
 type Unmatch = { type: "UNMATCH" };
 type Check = {
     type: "CHECK CACHE";
-    navigation: NativeStackNavigationProp<RootStackParamList, "MatchDetails", undefined>;
+    navigation: NativeStackNavigationProp<RootStackParamList, "ChatScreen", undefined>;
     header: ChatHeader;
+    post: PostType;
+    userID: string;
 };
 type Recieve = { type: "RECIEVE MESSAGE" };
 type Leave = { type: "LEAVE" };

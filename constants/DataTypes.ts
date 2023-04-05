@@ -8,8 +8,8 @@ export type Coords = {
 };
 
 export type NewPostType = {
-    pickup: Coords | string;
-    dropoff: Coords | string;
+    pickup: string;
+    dropoff: string;
     totalSpots: number;
     notes: string;
     startTime: number;
@@ -21,8 +21,8 @@ export type NewPostType = {
 };
 
 export type PostType = {
-    pickup: Coords | string;
-    dropoff: Coords | string;
+    pickup: string;
+    dropoff: string;
     postID: PostID;
     totalSpots: number;
     notes: string;

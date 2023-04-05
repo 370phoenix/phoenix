@@ -78,7 +78,8 @@ export async function loadMessages(postID: PostID) {
     const messages = await db.ref(`messages/${postID}`).once("value");
     if (!messages.exists()) return [];
 
-    const messageList = messages.val() as ChatMessage[];
+    const messageList = Object.values(messages.val()) as ChatMessage[];
+    messageList.sort((a, b) => a.timestamp - b.timestamp);
     return messageList;
 }
 

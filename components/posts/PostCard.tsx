@@ -11,10 +11,11 @@ import { convertLocation, convertDate, convertTime } from "../../utils/convertPo
 import { deletePost } from "../../utils/posts";
 import { Spacer, Text, View } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
-import { useSelector } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
 import { useContext } from "react";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { MatchSublist } from "../matches/MatchList";
+import { ChatHeader } from "../../utils/chat";
+import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 
 type Props = {
     isProfile?: boolean;
@@ -45,11 +46,18 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
         isMatched =
             userID === post.user || updatedUserInfo?.matches?.includes(post.postID) ? true : false;
 
+    let state, send, header: ChatHeader | null;
+    if (isMatched) {
+        [state, send] = useMachine(chatHeaderMachine);
+        if (state.matches("Start")) send({ type: "INIT", postID: post.postID });
+        header = state.context.header;
+    }
+
     return (
         <Pressable
             onPress={() =>
-                isMatched
-                    ? navigation.navigate("MatchDetails", { post, list: MatchSublist.matches })
+                isMatched && header
+                    ? navigation.navigate("ChatScreen", { post, header })
                     : navigation.navigate("PostDetails", { post })
             }
             style={({ pressed }) => [
