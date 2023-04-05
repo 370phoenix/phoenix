@@ -1,6 +1,16 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../types";
 import { assign, createMachine, DoneInvokeEvent } from "xstate";
+import Filter from "bad-words";
+
+import { RootStackParamList } from "../../types";
+import {
+    loadCache,
+    loadMessages,
+    sendMessage,
+    cacheMessages,
+    ChatHeader,
+    ChatMessage,
+} from "../chat";
 
 const ChatMachine = {
     id: "Chat Machine",
@@ -8,17 +18,10 @@ const ChatMachine = {
     states: {
         "Start": {
             on: {
-                "CHECK CACHE": [
-                    {
-                        target: "Loading Cache",
-                        cond: "cacheExistsAndIsFresh",
-                        actions: "assignInit",
-                    },
-                    {
-                        target: "Fetching Chat",
-                        actions: "assignInit",
-                    },
-                ],
+                "CHECK CACHE": {
+                    target: "Loading Cache",
+                    actions: "assignInit",
+                },
             },
         },
         "Loading Cache": {
@@ -29,6 +32,10 @@ const ChatMachine = {
                     {
                         target: "Chat",
                         actions: "assignMessages",
+                        cond: "cacheFresh",
+                    },
+                    {
+                        target: "Fetching Chat",
                     },
                 ],
                 onError: [
@@ -108,8 +115,8 @@ const ChatMachine = {
                 },
                 "Caching": {
                     invoke: {
-                        src: "cacheChat",
-                        id: "cacheChat",
+                        src: "cacheMessages",
+                        id: "cacheMessages",
                         onDone: [
                             {
                                 target: "Chat Complete",
@@ -165,7 +172,7 @@ const ChatMachine = {
         events: {} as ChatMachineEvents,
     },
     context: {
-        postID: null,
+        postID: "",
         error: null,
         header: null,
         messages: [],
@@ -177,11 +184,27 @@ const ChatMachine = {
 
 export const chatMachine = createMachine(ChatMachine, {
     services: {
-        loadMessages: async (context, event) => {},
-        loadCache: async (context, event) => {},
-        sendMessage: async (context, event) => {},
-        cacheMessages: async (context, event) => {},
-        unmatch: async (context, event) => {},
+        loadCache: (context, _) => {
+            const { postID, header } = context;
+            return loadCache(postID, header);
+        },
+        loadMessages: (context, _) => {
+            const { postID } = context;
+            return loadMessages(postID);
+        },
+        sendMessage: async (context, event) => {
+            if (event.type !== "TRY MESSAGE") throw new Error("Invalid Event Type");
+            const sent = await sendMessage(context.postID, event.message);
+            if (typeof sent === "string") throw new Error(sent);
+            return event.message;
+        },
+        cacheMessages: (context, event) => {
+            const { postID, messages, header } = context;
+            return cacheMessages(postID, messages, header);
+        },
+        unmatch: async (_context, _event) => {
+            // TODO: UNMATCH FUNCTIONALITY
+        },
     },
     actions: {
         addMessage: assign({
@@ -194,51 +217,40 @@ export const chatMachine = createMachine(ChatMachine, {
             messages: (_, event) => (event as DoneInvokeEvent<ChatMessage[]>).data,
         }),
         assignError: assign({
-            error: (_, event) => (event as any).data,
+            error: (_, event: any) => event.data,
         }),
         assignInit: assign({
             navigation: (_, event: Check) => event.navigation,
-            postID: (_, event: Check) => event.postID,
+            postID: (_, event: Check) => event.header.postID,
+            header: (_, event: Check) => event.header,
         }),
         logError: (_, event: any) => console.error(event.data),
         exitView: (context) => context.navigation && context.navigation.goBack(),
     },
     guards: {
-        shouldSend: (context) => false,
-        cacheExistsAndIsFresh: (context) => false,
+        shouldSend: (_, event) => {
+            const filter = new Filter();
+            return !filter.isProfane((event as TryMessage).message.message);
+        },
+        cacheFresh: (_, event: any) => event.data !== false,
     },
 });
 
 type ChatMachineContext = {
-    postID: string | null;
+    postID: string;
     messages: ChatMessage[];
     header: ChatHeader | null;
     error: string | null;
     navigation: NativeStackNavigationProp<RootStackParamList, "MatchDetails", undefined> | null;
 };
-type TryMessage = { type: "TRY MESSAGE" };
+type TryMessage = { type: "TRY MESSAGE"; message: ChatMessage };
 type Cache = { type: "CACHE AND LEAVE" };
 type Unmatch = { type: "UNMATCH" };
 type Check = {
     type: "CHECK CACHE";
     navigation: NativeStackNavigationProp<RootStackParamList, "MatchDetails", undefined>;
-    postID: string;
+    header: ChatHeader;
 };
 type Recieve = { type: "RECIEVE MESSAGE" };
 type Leave = { type: "LEAVE" };
 type ChatMachineEvents = TryMessage | Cache | Unmatch | Check | Recieve | Leave;
-
-export type ChatMessage = {
-    uid: string;
-    message: string;
-    timestamp: number;
-};
-export type ChatHeader = {
-    postID: string;
-    title: string;
-    displayNames: {
-        [uid: string]: string;
-    };
-    lastUpdated: number;
-    lastSender: string;
-};
