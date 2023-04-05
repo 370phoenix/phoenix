@@ -1,19 +1,20 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { PostType } from "../../constants/DataTypes";
+import { fetchPost } from "../../utils/posts" 
+import { MessageType } from "../../utils/auth";
+import { getMultiplePushTokens } from "../../utils/notifications";
 
 admin.initializeApp();
 
 export const ridersChangedNotification = functions.database.ref("/posts/{postID}/riders")
 .onUpdate((change, context) => {
     const {postID} = context.params;
-    const before = change.before;
-    const after = change.after;
+
+    const before = change.before.val();
+    const after = change.after.val();
     
-    const beforePost = before.val();
-    const afterPost = after.val();
-    
-    // if(afterPost.length > beforePost.length){
+    // if(after.length > before.length){
     //     sendMatchNotifications(postID);
     // }
 })
@@ -139,15 +140,44 @@ function cleanUndefined<T extends object>(obj: T): T {
 /**
  * Send push notifications for accepted/rejected requests when listener detects update
  */
-export async function sendMatchNotifications(userID: string) {
+export async function sendCancelNotifications(postID: string) {
     try {
-        // for (let user of before.pending)
-            // if (after.matches.includes(user))
-                // get token for user
-                // send notification using token
+        const r1 = await fetchPost(postID);
+        if(r1.type !== MessageType.success){
+            throw Error("Error fetching post data");
+        }
+        const post = r1.data;
+        // remaining riders matched with post should be notified of cancellation
+        const riders = post.riders;
+        if(!riders) return;
+        
+        // get tokens from user IDs
+        const tokens = await getMultiplePushTokens(riders);
+        // send notification to each user
+        for(const token of tokens){
+            makeCancelNotification(token);
+        }
 
     } catch (e: any) {
         console.warn(`Error: ${e}`);
     }
     
 }
+
+async function makeCancelNotification(expoPushToken: string) {
+    const message = {
+      to: expoPushToken,
+      title: 'Rider Canceled',
+      body: 'A rider has canceled their match with your ride!',
+    };
+  
+    await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+  }

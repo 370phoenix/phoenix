@@ -1,19 +1,20 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
-import { ErrorMessage, SuccessMessage, MessageType } from "../auth";
+import { ErrorMessage, SuccessMessage, MessageType } from "./auth";
 import { firebase } from "@react-native-firebase/database";
+import { ExpoPushToken } from "expo-notifications";
 
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
 /**
- * Register current user for push notifications
+ * Get push token for given user
  * 
- * @param userID the userID of the user getting notified
+ * @param userID
  * @returns ExpoPushToken for given user
  */
-export async function getPushToken(userID: string) {
+export async function getPushToken(userID: string) : Promise<any> {
     try {
         const snapshot = await db.ref("pushTokens/" + userID).once("value");
         const val = snapshot.val();
@@ -28,6 +29,21 @@ export async function getPushToken(userID: string) {
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
     }
+}
+
+/**
+ * Get push tokens for multiple users
+ * 
+ * @param users An array of userIDs
+ * @returns array of ExpoPushTokens for given users
+ */
+export async function getMultiplePushTokens(users: string[]) : Promise<string[]> {
+    const tokens: string[] = [];
+    for(const user of users){
+        const res = await getPushToken(user);
+        if(res.type === MessageType.success) tokens.push(res.data);
+    }
+    return tokens;
 }
 
 /**
