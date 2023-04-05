@@ -24,8 +24,10 @@ export async function removePosts() {
                 }
             }
         }
+        return true;
     } catch (e: any) {
-        console.log(`Error in DELETE POSTS: ${e.message}`);
+        console.error(`Error in DELETE POSTS: ${e.message}`);
+        return false;
     }
 }
 
