@@ -1,23 +1,36 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { PostType } from "../../constants/DataTypes";
-import { fetchPost } from "../../utils/posts" 
+import { fetchPost } from "../../utils/posts";
 import { MessageType } from "../../utils/auth";
-import { getMultiplePushTokens } from "../../utils/notifications";
+import { getMultiplePushTokens, getPushToken } from "../../utils/notifications";
 
 admin.initializeApp();
 
-export const ridersChangedNotification = functions.database.ref("/posts/{postID}/riders")
-.onUpdate((change, context) => {
-    const {postID} = context.params;
+export const ridersChangedNotification = functions.database
+    .ref("/posts/{postID}/riders")
+    .onUpdate((change, context) => {
+        const { postID } = context.params;
 
-    const before = change.before.val();
-    const after = change.after.val();
-    
-    // if(after.length > before.length){
-    //     sendMatchNotifications(postID);
-    // }
-})
+        // before = rider array before update, after = rider array after update
+        const before = change.before.val();
+        const after = change.after.val();
+
+        // more riders than before, someone has matched
+        if (after.length > before.length) {
+            // notify the person who has matched (userID which is in after but not before)
+            const newRiders = after.filter((x: string) => !before.includes(x));
+            for (const newRider of newRiders) {
+                sendAcceptNotification(postID, newRider);
+            }
+        }
+
+        // fewer riders than before, someone has cancelled
+        else if (after.length < before.length) {
+            sendCancelNotifications(postID);
+        }
+
+    });
 
 export const clearCompleted = functions.pubsub
     .schedule("0 0 * * *")
@@ -129,8 +142,6 @@ function cleanUndefined<T extends object>(obj: T): T {
     return clean as T;
 }
 
-
-
 //////////////////////////////////////////
 //////////////////////////////////////////
 /////////// NOTIFICATIONS ////////////////
@@ -138,46 +149,70 @@ function cleanUndefined<T extends object>(obj: T): T {
 //////////////////////////////////////////
 
 /**
- * Send push notifications for accepted/rejected requests when listener detects update
+ * Send push notifications for accepted requests when listener detects update
  */
 export async function sendCancelNotifications(postID: string) {
     try {
         const r1 = await fetchPost(postID);
-        if(r1.type !== MessageType.success){
+        if (r1.type !== MessageType.success) {
             throw Error("Error fetching post data");
         }
         const post = r1.data;
+        const dropoff = post.dropoff;
         // remaining riders matched with post should be notified of cancellation
         const riders = post.riders;
-        if(!riders) return;
-        
+        if (!riders) return;
+
         // get tokens from user IDs
         const tokens = await getMultiplePushTokens(riders);
         // send notification to each user
-        for(const token of tokens){
-            makeCancelNotification(token);
-        }
 
+        const title = "Rider Cancellation";
+        const body = `Someone canceled their match with your ride to ${dropoff}. To view more details, open the FareShare app.`;
+
+        for (const token of tokens) {
+            sendOneNotification(token, title, body);
+        }
     } catch (e: any) {
         console.warn(`Error: ${e}`);
     }
-    
 }
 
-async function makeCancelNotification(expoPushToken: string) {
+/**
+ * Send push notifications for accepted requests when listener detects update
+ */
+async function sendAcceptNotification(postID: string, userID: string) {
+    const r1 = await getPushToken(userID);
+    if (r1.type !== MessageType.success) throw Error("Error fetching push token");
+    const token = r1.data;
+
+    const r2 = await fetchPost(postID);
+    if (r2.type !== MessageType.success) throw Error("Error fetching post data");
+    const dropoff = r2.data.dropoff;
+
+    const title = "Match Request Accepted!";
+    const body = `Your matched on a ride to ${dropoff}! To view more details, open the FareShare app.`;
+
+    sendOneNotification(token, title, body);
+}
+
+/**
+ * Skeleton for sending push notification using Expo API
+ */
+async function sendOneNotification(expoPushToken: string, title: string, body: string) {
     const message = {
-      to: expoPushToken,
-      title: 'Rider Canceled',
-      body: 'A rider has canceled their match with your ride!',
+        to: expoPushToken,
+        title,
+        body,
     };
-  
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
+
+    await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            "Accept-encoding": "gzip, deflate",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
     });
-  }
+}
