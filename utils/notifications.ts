@@ -74,7 +74,6 @@ export async function registerForPushNotificationsAsync(userID: string) {
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
 
-        // TODO: write token to pushTokens object in database
         writePushTokenOnce(userID, token);
 
         const r2 = await getUserOnce(userID);
