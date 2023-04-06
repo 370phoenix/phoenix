@@ -113,7 +113,7 @@ const AuthMachine = {
                             },
                             on: {
                                 "USER INFO CHANGED": {
-                                    target: "Init",
+                                    target: "#New Authentication Machine.Init",
                                     actions: "assignUserInfo",
                                 },
                             },
@@ -145,7 +145,7 @@ const AuthMachine = {
         ranOnce: false,
         error: null,
         posts: null,
-        hasPushToken: null,
+        hasPushToken: false,
     },
     schema: {
         context: {} as AuthMachineContext,
@@ -161,7 +161,7 @@ type AuthMachineContext = {
     ranOnce: boolean;
     error: string | null;
     posts: PostType[] | null;
-    hasPushToken: boolean | null;
+    hasPushToken: boolean;
 };
 
 type AuthMachineEvents =
@@ -214,9 +214,9 @@ export const authMachine = createMachine(AuthMachine, {
             else return res.data;
         },
         setToken: async (context) => {
-            const { user } = context;
-            if (!user) throw Error("Missing User Information");
-            registerForPushNotificationsAsync(user.uid);
+            const { user, userInfo } = context;
+            if (!user || !userInfo) throw Error("Missing User Information");
+            await registerForPushNotificationsAsync(user.uid, userInfo);
         },
     },
     actions: {
@@ -243,9 +243,11 @@ export const authMachine = createMachine(AuthMachine, {
         }),
         updateUserInfoTokenSet: assign({
             hasPushToken: true,
-            userInfo: (context, event) =>
-                event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
-        }),
+            userInfo: (context, event: any) => {
+                if(event.type !== "USER INFO CHANGED" && context.userInfo) return {...context.userInfo, hasPushToken: true};
+                if(event.type === "USER INFO CHANGED" && !event.userInfo) return null;
+                return {...event.userInfo, hasPushToken: true};
+    }}),
         logError: (_, event: any) => console.error(event.data),
     },
     guards: {
@@ -253,7 +255,7 @@ export const authMachine = createMachine(AuthMachine, {
         userInfoExists: (context) => (context.userInfo ? true : false),
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
-        noTokenSet: (context) => context.hasPushToken === false,
+        noTokenSet: (context) => !context.hasPushToken,
     },
 });
 

@@ -3,9 +3,6 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
     StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
     Pressable,
     Keyboard,
 } from "react-native";
@@ -13,7 +10,6 @@ import { View, Button, Text, Spacer, TextField } from "../../components/shared/T
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 
-import { useHeaderHeight } from "@react-navigation/elements";
 import auth from "@react-native-firebase/auth";
 import { useMachine } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
@@ -23,7 +19,6 @@ import Pronouns from "../../constants/Pronouns.json";
 type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
 type Props = NativeProps;
 export default function CreateProfileScreen(props: Props) {
-    const headerHeight = useHeaderHeight();
     const user = auth().currentUser;
     const [name, setName] = useState("");
     const [major, setMajor] = useState("");

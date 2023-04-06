@@ -86,6 +86,7 @@ const CreateProfileMachine = {
                 gradString: string;
                 pronouns: string;
                 phone: string | null;
+                hasPushToken: boolean | null;
             } | null;
             userInfo: UserInfo | null;
             userID: string | null;

@@ -255,6 +255,7 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
+    hasPushToken?: boolean;
 };
 /**
  * Checks to see if user info is valid, and returns a clean version.
@@ -267,6 +268,7 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
+    hasPushToken = false,
     phone = null,
     userInfo = null,
 }: ValidateProfileParams): UserInfo | string {
@@ -290,10 +292,11 @@ export function validateProfile({
         if (userInfo)
             // Changing Info
             return {
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
+                username,
+                major,
+                hasPushToken,
+                pronouns,
+                gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
                 ridesCompleted: userInfo.ridesCompleted,
@@ -301,23 +304,22 @@ export function validateProfile({
                 pending: userInfo.pending ? userInfo.pending : [],
                 matches: userInfo.matches ? userInfo.matches : [],
                 requests: userInfo.requests ? userInfo.requests : [],
-                hasPushToken: userInfo.hasPushToken,
             };
         else if (phone) {
             // Inital Profile Setup
             return {
                 chillIndex: undefined,
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
-                phone: phone,
+                username,
+                major,
+                pronouns,
+                gradYear,
+                phone,
+                hasPushToken,
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
                 matches: [],
-                requests: [],
-                hasPushToken: false
+                requests: []
             };
         } else return noUserError;
     } catch (e: any) {

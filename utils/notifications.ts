@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
-import { ErrorMessage, SuccessMessage, MessageType, getUserOnce, writeUser } from "./auth";
+import { ErrorMessage, SuccessMessage, MessageType, getUserOnce, writeUser, UserInfo } from "./auth";
 import database, { firebase } from "@react-native-firebase/database";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
@@ -53,7 +53,7 @@ export async function getMultiplePushTokens(users: string[]): Promise<string[]> 
  *
  * @returns ExpoPushToken for current user
  */
-export async function registerForPushNotificationsAsync(userID: string) {
+export async function registerForPushNotificationsAsync(userID: string, userInfo: UserInfo) {
     let token;
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -75,17 +75,13 @@ export async function registerForPushNotificationsAsync(userID: string) {
         token = (await Notifications.getExpoPushTokenAsync()).data;
 
         // write userID and token pair to database
-        writePushTokenOnce(userID, token);
+        await writePushTokenOnce(userID, token);
 
         // update hasPushToken status in user
-        const r2 = await getUserOnce(userID);
-        if (r2.type !== MessageType.success) throw Error("Error fetching user info");
-        const userInfo = r2.data;
-        userInfo.hasPushToken = true;
+        const userRef = database().ref("users/" + userID + "/hasPushToken");
+        await userRef.set(true);
+        console.log("Success! User push token generated");
 
-        const r3 = await writeUser(userID, userInfo);
-        if (r3.type === MessageType.error)
-            throw Error("Error updating user information in database");
     } else {
         console.warn("Must use physical device for Push Notifications");
     }
@@ -100,7 +96,7 @@ export async function writePushTokenOnce(
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
         if (!userID || !pushToken) throw new Error("No User ID or Push Token.");
-
+        
         const userRef = database().ref("pushTokens/" + userID);
         await userRef.set(pushToken);
         return { type: MessageType.success, data: undefined };
