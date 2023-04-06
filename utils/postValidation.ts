@@ -1,6 +1,7 @@
+import { createIconSetFromFontello } from "@expo/vector-icons";
 import { Coords } from "../constants/DataTypes";
 import Filter from "bad-words";
-import Location from "expo-location";
+import * as Location from "expo-location";
 
 export enum MessageType {
     error,
@@ -30,12 +31,35 @@ type ValidatePostParams = {
 }
 
 async function geocodePickup(pText: string) {
-    const geocodedLocation = await Location.geocodeAsync(pText);
+    console.log(pText);
+    var geocodedLocation = await Location.geocodeAsync(pText);
+    console.log("geocoded");
     let lat: number = geocodedLocation[0].latitude;
     let long: number = geocodedLocation[0].longitude;
     let locCords = [lat, long];
     return locCords;
 }
+
+// const geocodePickup = async (pText: string) => {
+//     console.log(pText);
+//     const geocodedLocation = await Location.geocodeAsync(pText);
+//     console.log(pText);
+//     console.log(geocodedLocation);
+//     let lat: number = geocodedLocation[0].latitude;
+//     console.log(lat);
+//     let long: number = geocodedLocation[0].longitude;
+//     console.log(long);
+//     var location: number[];
+//     location = [lat, long];
+//     console.log(location);
+
+//     return location;
+// }
+
+//return location;
+
+//return location;
+//setPic
 
 async function geocodeDropoff(dText: string) {
     const geocodedLocation = await Location.geocodeAsync(dText);
@@ -68,15 +92,23 @@ export default async function validateData({
         if (startTime > endTime)
             return { type: MessageType.error, message: "End time cannot occur before start time." }
 
-        console.log("geocoding pickup");
-        pickupCoords = await geocodePickup(pickup);
-        console.log("Pickup Coords: " + pickupCoords);
+        // console.log("geocoding pickup");
+        // console.log(pickup);
+        // pickupCoords = await geocodePickup(pickup);
+        // console.log("Pickup Coords: " + pickupCoords);
 
-        dropoffCoords = await geocodeDropoff(dropoff);
-        console.log("Dropoff coords: " + dropoffCoords);
+        // dropoffCoords = await geocodeDropoff(dropoff);
+        // console.log("Dropoff coords: " + dropoffCoords);
 
+        if (pickupCoords == undefined) {
+            return { type: MessageType.error, message: "Pickup location geocoding invalid." }
+        }
         if (pickupCoords[0] == 0 && pickupCoords[1] == 0) {
             return { type: MessageType.error, message: "Pickup location invalid." }
+        }
+
+        if (dropoffCoords == undefined) {
+            return { type: MessageType.error, message: "Dropoff location geocoding invalid." }
         }
         if (dropoffCoords[0] == 0 && pickupCoords[1] == 0) {
             return { type: MessageType.error, message: "Dropoff location invalid." }
