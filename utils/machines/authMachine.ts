@@ -4,6 +4,7 @@ import { assign, createMachine, InterpreterFrom } from "xstate";
 import { UserID, PostType } from "../../constants/DataTypes";
 import { getUserUpdates, MessageType, UserInfo } from "../auth";
 import { fetchSomePosts } from "../posts";
+import { registerForPushNotificationsAsync } from "../notifications";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -213,8 +214,10 @@ export const authMachine = createMachine(AuthMachine, {
             else return res.data;
         },
         setToken: async (context) => {
-            // TODO: set push token, throw error if error
-        }
+            const { user } = context;
+            if (!user) throw Error("Missing User Information");
+            registerForPushNotificationsAsync(user.uid);
+        },
     },
     actions: {
         assignUser: assign({

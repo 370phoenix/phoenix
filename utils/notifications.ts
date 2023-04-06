@@ -63,7 +63,7 @@ export async function registerForPushNotificationsAsync(userID: string) {
             finalStatus = status;
         }
         if (finalStatus !== "granted") {
-            alert("Failed to get push token for push notification!");
+            console.warn("Failed to get push token for push notification!");
             return;
         }
         if (Platform.OS === "android") {
@@ -74,8 +74,10 @@ export async function registerForPushNotificationsAsync(userID: string) {
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
 
+        // write userID and token pair to database
         writePushTokenOnce(userID, token);
 
+        // update hasPushToken status in user
         const r2 = await getUserOnce(userID);
         if (r2.type !== MessageType.success) throw Error("Error fetching user info");
         const userInfo = r2.data;
@@ -85,7 +87,7 @@ export async function registerForPushNotificationsAsync(userID: string) {
         if (r3.type === MessageType.error)
             throw Error("Error updating user information in database");
     } else {
-        alert("Must use physical device for Push Notifications");
+        console.warn("Must use physical device for Push Notifications");
     }
 
     return token;
