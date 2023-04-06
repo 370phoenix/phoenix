@@ -147,13 +147,10 @@ export default function CreatePostForm() {
     const onSubmit = async () => {
 
         let loc = await geocodeAddress(pickup);
-        console.log(loc);
         let pickupCoords = loc;
 
         let locD = await geocodeAddress(dropoff)
         let dropoffCoords = locD;
-        console.log(pickupCoords);
-        console.log(dropoffCoords);
 
         //uses validation function
         //errors are displayed as error messages below
