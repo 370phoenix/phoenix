@@ -8,7 +8,7 @@ import NumberPicker from "../shared/NumberPicker";
 import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
-import { Coords, NewPostType } from "../../constants/DataTypes";
+import { NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
 import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
@@ -17,7 +17,7 @@ import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
 
-export default function CreatePostForm() {
+export default function CreatePostForm({ navigation }: { navigation: any }) {
     const headerHeight = useHeaderHeight();
     const authService: any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
@@ -36,6 +36,7 @@ export default function CreatePostForm() {
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [numSeats, setNumSeats] = useState(1);
     const [notes, setNotes] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const [message, setMessage] = useState<string | null>(null);
 
@@ -64,40 +65,45 @@ export default function CreatePostForm() {
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-        //uses validation function
-        //errors are displayed as error messages below
-        const valid = validateData({
-            startTime,
-            endTime,
-            pickup,
-            dropoff,
-            numSeats,
-            notes,
-        });
-
-        if (valid.type === MessageType.error) {
-            setMessage(valid.message);
-            return;
-        }
-
-        // Push to database
-        if (valid.type === MessageType.success) {
-            const post: NewPostType = {
+        if (!submitting) {
+            setSubmitting(true);
+            //uses validation function
+            //errors are displayed as error messages below
+            const valid = validateData({
+                startTime,
+                endTime,
                 pickup,
                 dropoff,
-                totalSpots: numSeats + 1,
+                numSeats,
                 notes,
-                startTime: startTime.getTime(),
-                endTime: endTime.getTime(),
-                roundTrip: isRoundtrip,
-                user: userID,
-                riders: [],
-                pending: [],
-            };
+            });
 
-            //Verify completion
-            await createPost(post, userID, userInfo);
-            setWriteComplete(true);
+            if (valid.type === MessageType.error) {
+                setMessage(valid.message);
+                setSubmitting(false);
+                return;
+            }
+
+            // Push to database
+            if (valid.type === MessageType.success) {
+                const post: NewPostType = {
+                    pickup,
+                    dropoff,
+                    totalSpots: numSeats + 1,
+                    notes,
+                    startTime: startTime.getTime(),
+                    endTime: endTime.getTime(),
+                    roundTrip: isRoundtrip,
+                    user: userID,
+                    riders: [],
+                    pending: [],
+                };
+
+                //Verify completion
+                await createPost(post, userID, userInfo);
+                setWriteComplete(true);
+                setTimeout(() => navigation.goBack(), 500);
+            }
         }
     };
 
@@ -119,64 +125,63 @@ export default function CreatePostForm() {
 
     const Form = (
         <ScrollView>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.body}>
-                    <Spacer direction="column" size={24} />
-                    <Text textStyle="header" styleSize="l">
-                        Create Post
-                    </Text>
-                    <Spacer direction="column" size={16} />
-                    {TripDetails}
-                    <Spacer direction="column" size={16} />
-                    <DateTimeGroup
-                        start={startTime}
-                        onChangeStart={setStartTime}
-                        end={endTime}
-                        onChangeEnd={setEndTime}
-                    />
+            <View style={styles.body}>
+                <Spacer direction="column" size={24} />
+                <Text textStyle="header" styleSize="l">
+                    Create Post
+                </Text>
+                <Spacer direction="column" size={16} />
+                {TripDetails}
+                <Spacer direction="column" size={16} />
+                <DateTimeGroup
+                    start={startTime}
+                    onChangeStart={setStartTime}
+                    end={endTime}
+                    onChangeEnd={setEndTime}
+                />
 
-                    <Spacer direction="column" size={16} />
-                    <Text textStyle="label" styleSize="l">
-                        Notes for riders?
-                    </Text>
-                    <Spacer direction="column" size={8} />
-                    <TextArea
-                        label=""
-                        inputState={[notes, setNotes]}
-                        placeholder="Type here..."
-                        placeholderTextColor={Colors.gray[2]}
+                <Spacer direction="column" size={16} />
+                <Text textStyle="label" styleSize="l">
+                    Notes for riders?
+                </Text>
+                <Spacer direction="column" size={8} />
+                <TextArea
+                    label=""
+                    inputState={[notes, setNotes]}
+                    placeholder="Type here..."
+                    placeholderTextColor={Colors.gray[2]}
+                />
+                <Spacer direction="column" size={16} />
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}>
+                    <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                    <NumberPicker
+                        count={numSeats}
+                        handlePlus={addNumSeats}
+                        handleMinus={deleteNumSeats}
                     />
-                    <Spacer direction="column" size={16} />
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}>
-                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
-                        <NumberPicker
-                            count={numSeats}
-                            handlePlus={addNumSeats}
-                            handleMinus={deleteNumSeats}
-                        />
-                    </View>
-                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                    {message && (
-                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                            {message}
-                        </Text>
-                    )}
-                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
-                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
-                    <Button
-                        onPress={onSubmit}
-                        color="navy"
-                        title="Post"
-                        style={{ height: headerHeight + 32 }}
-                    />
-                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
-            </TouchableWithoutFeedback>
+                <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                {message && (
+                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                        {message}
+                    </Text>
+                )}
+                {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+                <Button
+                    disabled={submitting}
+                    onPress={onSubmit}
+                    color="navy"
+                    title="Post"
+                    style={{ height: headerHeight + 32 }}
+                />
+                <Spacer direction="column" size={128} style={{ flex: 1 }} />
+            </View>
         </ScrollView>
     );
 

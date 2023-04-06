@@ -18,8 +18,9 @@ import { ChatMessage } from "../../utils/chat";
 type Props = {
     sendMessage: (message: ChatMessage) => void;
     userID: string;
+    scrollToEnd: () => void;
 };
-export default function ChatInput({ sendMessage, userID }: Props) {
+export default function ChatInput({ sendMessage, userID, scrollToEnd }: Props) {
     enableLayoutAnimation();
     const [text, onChangeText] = useState("");
     const [margin, setMargin] = useState(20);
@@ -30,7 +31,8 @@ export default function ChatInput({ sendMessage, userID }: Props) {
         setFocused(true);
         LayoutAnimation.configureNext(LayoutAnimation.create(200, "linear", "scaleXY"));
         setMargin(height);
-        if (height === 0) setTimeout(() => Keyboard.dismiss(), 20);
+        if (height === 0 && Platform.OS === "ios") setTimeout(() => Keyboard.dismiss(), 20);
+        if (scrollToEnd) setTimeout(() => scrollToEnd(), 100);
     };
     const onBlur = () => {
         setFocused(false);
@@ -44,6 +46,8 @@ export default function ChatInput({ sendMessage, userID }: Props) {
             timestamp: new Date().getTime(),
             uid: userID,
         });
+        onChangeText("");
+        if (scrollToEnd) setTimeout(() => scrollToEnd(), 200);
     };
 
     return (

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useContext, useEffect } from "react";
-import { StyleSheet, ScrollView, View, Pressable, Keyboard } from "react-native";
+import { useContext, useEffect, useRef } from "react";
+import { StyleSheet, Animated, FlatList, View, Pressable, Keyboard, Easing } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMachine, useSelector } from "@xstate/react";
 
@@ -39,7 +39,10 @@ export default function ChatScreen({ route, navigation }: Props) {
             headerLeft: () => (
                 <Button
                     title="Go back"
-                    onPress={() => send({ type: "CACHE AND LEAVE" })}
+                    onPress={() => {
+                        if (state.can("CACHE AND LEAVE")) send({ type: "CACHE AND LEAVE" });
+                        navigation.goBack();
+                    }}
                     leftIcon={Left}
                     color="purple"
                     light
@@ -51,13 +54,21 @@ export default function ChatScreen({ route, navigation }: Props) {
     }, []);
 
     return (
-        <Pressable style={styles.container} onPress={() => Keyboard.dismiss()}>
-            <Messages messages={messages} userID={userID} displayNames={header.displayNames} />
-            <ChatInput
+        <View style={styles.container}>
+            {error && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.error} textStyle="body" styleSize="m">
+                        {error}
+                    </Text>
+                </View>
+            )}
+            <Messages
+                messages={messages}
                 userID={userID}
+                displayNames={header.displayNames}
                 sendMessage={(message) => send({ type: "TRY MESSAGE", message })}
             />
-        </Pressable>
+        </View>
     );
 }
 
@@ -65,20 +76,31 @@ type MessagesProps = {
     messages: ChatMessage[];
     userID: string;
     displayNames: { [key: string]: string };
+    sendMessage: (message: ChatMessage) => void;
 };
-function Messages({ messages, userID, displayNames }: MessagesProps) {
+function Messages({ messages, userID, displayNames, sendMessage }: MessagesProps) {
+    const listRef = useRef<FlatList<ChatMessage>>(null);
+
     return (
-        <ScrollView style={styles.messages}>
-            {messages.length > 0 &&
-                messages.map((message) => (
-                    <Message
-                        key={message.timestamp.toString()}
-                        message={message}
-                        userID={userID}
-                        displayNames={displayNames}
-                    />
-                ))}
-        </ScrollView>
+        <>
+            <FlatList
+                ref={listRef}
+                alwaysBounceVertical={true}
+                showsVerticalScrollIndicator={false}
+                style={styles.messages}
+                data={messages}
+                renderItem={({ item }) => (
+                    <Message message={item} userID={userID} displayNames={displayNames} />
+                )}
+            />
+            <ChatInput
+                scrollToEnd={() =>
+                    listRef.current && listRef.current.scrollToEnd({ animated: true })
+                }
+                userID={userID}
+                sendMessage={sendMessage}
+            />
+        </>
     );
 }
 
@@ -92,8 +114,19 @@ function Message({
     displayNames: { [key: string]: string };
 }) {
     const isMine = userID === message.uid;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            easing: Easing.ease,
+            duration: 400,
+            useNativeDriver: true,
+        }).start();
+    }, [fadeAnim]);
+
     return (
-        <View style={styles.messageRow}>
+        <Animated.View style={{ ...styles.messageRow, opacity: fadeAnim }}>
             {isMine && <View style={{ flex: 1 }} />}
             <View style={styles.messageBubble}>
                 {!isMine && (
@@ -112,7 +145,7 @@ function Message({
                 </View>
             </View>
             {!isMine && <View style={{ flex: 1 }} />}
-        </View>
+        </Animated.View>
     );
 }
 
@@ -154,5 +187,13 @@ const styles = StyleSheet.create({
     },
     text: {
         color: Colors.gray.b,
+    },
+    errorContainer: {
+        flex: 1,
+        padding: 16,
+        justifyContent: "center",
+    },
+    error: {
+        color: Colors.red.p,
     },
 });

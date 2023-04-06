@@ -161,7 +161,9 @@ export function getUserUpdates(
                 onUpdate(convertUserInfo(key, data));
             }
         });
-        const unsub = () => userRef.off("value", onChange);
+        const unsub = () => {
+            userRef.off("value", onChange);
+        };
         return unsub;
     } catch (e: any) {
         return `Error ${e.message}`;

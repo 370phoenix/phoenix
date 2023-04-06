@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useMachine, useSelector } from "@xstate/react";
 import React, { useContext, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 
@@ -14,7 +15,6 @@ import { MessageType, UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
-import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import SuccessfulPost from "../../components/shared/SuccessPage";
 
@@ -41,10 +41,10 @@ export default function DetailsModal({ route, navigation }: Props) {
                     if (post.riders?.includes(userID)) return;
                     if (post.pending?.includes(userID)) return;
                     const filled = post.riders
-                    ? post.riders.filter((val) => val != null).length + 1
-                    : 1;
+                        ? post.riders.filter((val) => val != null).length + 1
+                        : 1;
                     if (filled >= post.totalSpots) return;
-                    
+
                     const res = await matchPost(userID, post);
                     if (res.type === MessageType.error) setMessage(res.message);
                     else {
@@ -80,7 +80,7 @@ export default function DetailsModal({ route, navigation }: Props) {
                             height: useHeaderHeight() + 16,
                             padding: 16,
                         }}>
-                        <Button title="Match!" onPress={handleMatch} color="purple"/>
+                        <Button title="Match!" onPress={handleMatch} color="purple" />
                         <Spacer direction="column" size={24} />
                     </View>
                 </>

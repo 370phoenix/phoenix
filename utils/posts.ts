@@ -238,7 +238,7 @@ export async function createPost(
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
-        console.log(`Error in Write user Data: ${e.message}`);
+        console.error("Error in create post: " + e.message);
         return { message: "Error: " + e.message, type: MessageType.error };
     }
 }
@@ -323,13 +323,14 @@ export async function handleAcceptReject({
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
 
-        // Add to chat if accept
         if (isAccept) {
+            console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
             await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
         }
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
 }
