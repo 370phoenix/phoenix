@@ -74,6 +74,8 @@ export async function registerForPushNotificationsAsync(userID: string, userInfo
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
 
+        if(!token) throw Error("Error getting push token");
+
         // write userID and token pair to database
         await writePushTokenOnce(userID, token);
 

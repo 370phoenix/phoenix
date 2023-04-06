@@ -1,11 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import {
-    StyleSheet,
-    Pressable,
-    Keyboard,
-} from "react-native";
+import { StyleSheet, Pressable, Keyboard } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";

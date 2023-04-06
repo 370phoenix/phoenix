@@ -235,6 +235,8 @@ export async function deleteAccount(userID: UserID): Promise<SuccessMessage | Er
     try {
         const userRef = database().ref("users/" + userID);
         await userRef.remove();
+        const pushTokenRef = database().ref("pushTokens/" + userID);
+        await pushTokenRef.remove();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
