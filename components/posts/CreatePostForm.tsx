@@ -24,6 +24,7 @@ import validateData, { MessageType } from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import * as Location from "expo-location";
+import geocodeAddress from "../../utils/geocode";
 
 // stores options for number picker form inputs
 
@@ -40,11 +41,11 @@ export default function CreatePostForm() {
     // location state
     const [pickup, setPickup] = useState<string>("");
     const [pickupText, setPickupText] = useState("");
-    const [pickupCoords, setPCoords] = useState<number[]>();
     const [dropoff, setDropoff] = useState<string>("");
     const [dropoffText, setDropoffText] = useState("");
-    const [dropoffCoords, setDCoords] = useState<number[]>();
 
+
+    //used in reverse geocode functions
     const [pickupLocation, setPickupLocation] = useState<number[]>();
     const [dropoffLocation, setDropoffLocation] = useState<number[]>();
     const [address, setAddress] = useState("");
@@ -89,39 +90,7 @@ export default function CreatePostForm() {
         setDropoff(text);
     };
 
-    //need location permissions for android geocoding
-    const geocodePickup = async (pText: string) => {
-        const geocodedLocation = await Location.geocodeAsync(pText);
-        console.log(pText);
-        console.log(geocodedLocation);
-        let lat: number = geocodedLocation[0].latitude;
-        console.log(lat);
-        let long: number = geocodedLocation[0].longitude;
-        console.log(long);
-        var location: number[];
-        location = [lat, long];
-        console.log(location);
-
-        setPickupLocation(location);
-        console.log(pickupLocation);
-
-        //return location;
-
-        //return location;
-        //setPickupLocation(location);
-    };
-
-    const geocodeDropoff = async (pText: string) => {
-        const geocodedLocation = await Location.geocodeAsync(pText);
-        //console.log(pText);
-        let lat: number = geocodedLocation[0].latitude;
-        let long: number = geocodedLocation[0].longitude;
-        var location: number[];
-        location = [lat, long];
-        setDropoffLocation(location);
-
-    };
-
+    //unused reverse geocode, not sure if we want this in app
     const reverseGeocodePickup = async (pCoords: number[]) => {
 
         if (pCoords[0] != null && pCoords[1] != null) {
@@ -129,7 +98,6 @@ export default function CreatePostForm() {
                 longitude: pCoords[1],
                 latitude: pCoords[0]
             })
-            //console.log(reverseGeocodeAddress);
             if (reverseGeocodeAddress != undefined) {
                 setAddress(`${reverseGeocodeAddress[0].streetNumber} ${reverseGeocodeAddress[0].street}, ${reverseGeocodeAddress[0].city} ${reverseGeocodeAddress[0].region}, ${reverseGeocodeAddress[0].postalCode}`);
             }
@@ -151,7 +119,6 @@ export default function CreatePostForm() {
                 longitude: pCoords[1],
                 latitude: pCoords[0]
             })
-            //console.log(reverseGeocodeAddress);
             if (reverseGeocodeAddress != undefined) {
                 setAddress2(`${reverseGeocodeAddress[0].streetNumber} ${reverseGeocodeAddress[0].street}, ${reverseGeocodeAddress[0].city} ${reverseGeocodeAddress[0].region}, ${reverseGeocodeAddress[0].postalCode}`);
             }
@@ -179,98 +146,14 @@ export default function CreatePostForm() {
     // create object from form inputs on submit event
     const onSubmit = async () => {
 
-        //const location = await geocodePickup(pickupText);
-        //await geocodePickup(pickupText);
+        let loc = await geocodeAddress(pickup);
+        console.log(loc);
+        let pickupCoords = loc;
 
-        //console.log("Pickup Coordinates: " + pickupLocation);
-
-
-        //debugger;
-        //console.log(pickupLocation);
-        //setAddress("");
-        // if (pickupLocation != undefined)
-        //     await (reverseGeocodePickup(pickupLocation));
-
-        // setPickup(address);
-
-        // setAddress2("");
-        // await geocodeDropoff(dropoffText);
-        // if (dropoffLocation != undefined)
-        //     await (reverseGeocodePickup(dropoffLocation));
-
-        // setDropoff(address2);
-
-        // try {
-        //     if (pickupLocation != undefined)
-        //         await reverseGeocodePickup(pickupLocation);
-        //     else {
-        //         setMessage("Pickup location undefined");
-        //         return;
-        //     }
-        // }
-        // catch {
-        //     setMessage(" geocoding failed");
-        //     return;
-
-        // }
-
-
-        // if (address === "") {
-        //     setMessage("error reverse geocoding pickup, enter more specific address");
-        //     return;
-        // }
-        // setPickup(address);
-        // //console.log(pickup);
-
-        // await geocodeDropoff(dropoffText);
-        // console.log("Dropoff coordinates: " + dropoffCoords)
-        // setAddress2("");
-        // try {
-        //     if (dropoffLocation != undefined)
-        //         await reverseGeocodeDropoff(dropoffLocation);
-        //     else {
-        //         setMessage("dropoff location undefined");
-        //         return;
-        //     }
-        // }
-        // catch {
-        //     setMessage(" geocoding failed");
-        //     return;
-
-        // }
-
-        // if (address === "") {
-        //     setMessage("error geocoding dropoff");
-        //     return;
-        // }
-        // setDropoff(address2);
-        // //console.log(pickup);
-        // //console.log(dropoff);
-        // setPCoords(pickupLocation);
-        // setDCoords(dropoffLocation);
-        // //console.log(pickupLocation);
-        // //console.log(dropoffLocation);
-
-        // //store coords in the data base as well
-
-
-
-        // if (!pickupCoords) {
-        //     setMessage("Pickup coordinates do not exist");
-        //     return;
-        // }
-        // if (!dropoffCoords) {
-        //     setMessage("Dropoff coordinates do not exist");
-        //     return;
-        // }
-
-
-        //setDCoords([0.0, 0.0]);
-        //console.log(dropoffCoords);
-        //setPCoords([0.0, 0.0]);
-        //console.log(pickupCoords);
-
-
+        let locD = await geocodeAddress(dropoff)
+        let dropoffCoords = locD;
+        console.log(pickupCoords);
+        console.log(dropoffCoords);
 
         //uses validation function
         //errors are displayed as error messages below
@@ -287,7 +170,6 @@ export default function CreatePostForm() {
         });
 
 
-        debugger;
 
         if (valid.type === MessageType.error) {
             setMessage(valid.message);
@@ -312,9 +194,9 @@ export default function CreatePostForm() {
             };
 
             //Verify completion
-            //await createPost(post, userID, userInfo);
+            await createPost(post, userID, userInfo);
 
-            //Alert.alert("Post Completed", "You may close this window");
+            Alert.alert("Post Completed", "You may close this window");
         }
     };
 
