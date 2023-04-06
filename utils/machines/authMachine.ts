@@ -69,6 +69,10 @@ const AuthMachine = {
                         "Start": {
                             always: [
                                 {
+                                    target: "Set Token in DB",
+                                    cond: "noTokenSet",
+                                },
+                                {
                                     target: "Loading User Posts",
                                     cond: "postsChanged",
                                 },
@@ -208,6 +212,9 @@ export const authMachine = createMachine(AuthMachine, {
             if (res.type === MessageType.error) throw Error(res.message);
             else return res.data;
         },
+        setToken: async (context) => {
+            // TODO: set push token, throw error if error
+        }
     },
     actions: {
         assignUser: assign({
@@ -231,7 +238,7 @@ export const authMachine = createMachine(AuthMachine, {
         assignPosts: assign({
             posts: (_, event: any) => event.data,
         }),
-        assignToken: assign({
+        updateUserInfoTokenSet: assign({
             hasPushToken: true,
             userInfo: (context, event) =>
                 event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
@@ -241,8 +248,9 @@ export const authMachine = createMachine(AuthMachine, {
     guards: {
         userExists: (context) => (context.user ? true : false),
         userInfoExists: (context) => (context.userInfo ? true : false),
-        noRunYet: (context) => context.ranOnce == false,
+        noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
+        noTokenSet: (context) => context.hasPushToken === false,
     },
 });
 
