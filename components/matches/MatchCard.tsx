@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Pressable } from "react-native";
 
@@ -8,7 +9,6 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
-import { postInfoMachine } from "../../utils/machines/postInfoMachine";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 import { UserID, PostType } from "../../constants/DataTypes";
 

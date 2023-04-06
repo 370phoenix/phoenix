@@ -160,9 +160,11 @@ export async function deletePost(
     userInfo: UserInfo
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
+        // Remove Post ref
         const postRef = db.ref("posts/" + id);
         await postRef.remove();
 
+        // Update User Info
         let newPosts = userInfo.posts ? userInfo.posts : [];
         if (newPosts.length == 1) newPosts = [];
         else {
@@ -173,6 +175,12 @@ export async function deletePost(
 
         const res = await writeUser(userId, userInfo);
         if (res.type === MessageType.error) throw Error(res.message);
+
+        // Remove Chat Header
+        await db.ref("chats/" + id).remove();
+
+        // Remove Messages
+        await db.ref("messages/" + id).remove();
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -314,6 +322,11 @@ export async function handleAcceptReject({
         if (isAccept) post.riders = post.riders ? [...post.riders, requesterID] : [requesterID];
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
+
+        // Add to chat if accept
+        if (isAccept) {
+            await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+        }
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {

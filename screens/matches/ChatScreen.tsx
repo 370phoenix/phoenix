@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useContext, useEffect } from "react";
-import { StyleSheet, View, Pressable, Keyboard } from "react-native";
+import { StyleSheet, ScrollView, View, Pressable, Keyboard } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMachine, useSelector } from "@xstate/react";
 
@@ -25,6 +25,14 @@ export default function ChatScreen({ route, navigation }: Props) {
     const [state, send] = useMachine(chatMachine);
     if (state.matches("Start")) send({ type: "CHECK CACHE", header, navigation, post, userID });
     const { messages, error } = state.context;
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("blur", () => {
+            if (state.can("CACHE AND LEAVE")) send({ type: "CACHE AND LEAVE" });
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         navigation.setOptions({
@@ -60,7 +68,7 @@ type MessagesProps = {
 };
 function Messages({ messages, userID, displayNames }: MessagesProps) {
     return (
-        <View style={styles.messages}>
+        <ScrollView style={styles.messages}>
             {messages.length > 0 &&
                 messages.map((message) => (
                     <Message
@@ -70,7 +78,7 @@ function Messages({ messages, userID, displayNames }: MessagesProps) {
                         displayNames={displayNames}
                     />
                 ))}
-        </View>
+        </ScrollView>
     );
 }
 

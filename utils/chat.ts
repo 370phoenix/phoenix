@@ -46,6 +46,7 @@ export async function loadCache(postID: PostID, header: ChatHeader | null) {
     const stringed = await AsyncStorage.getItem(postID);
     if (!stringed) return false;
     const messageCache = JSON.parse(stringed) as MessageCache;
+    console.log(messageCache);
 
     // Check cache freshness
     if (!header.lastMessage) return [];
@@ -85,8 +86,12 @@ export async function loadMessages(postID: PostID) {
 
 export async function sendMessage(postID: PostID, message: ChatMessage) {
     try {
+        // Add message to database
         await db.ref(`messages/${postID}`).push().set(message);
-        return true;
+
+        // Update last message
+        await db.ref(`chats/${postID}`).update({ lastMessage: message });
+        return message;
     } catch (error: any) {
         return error.message;
     }

@@ -28,9 +28,9 @@ export default function CreatePostForm() {
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
     // location state
-    const [pickup, setPickup] = useState<Coords | string>("");
+    const [pickup, setPickup] = useState<string>("");
     const [pickupText, setPickupText] = useState("");
-    const [dropoff, setDropoff] = useState<Coords | string>("");
+    const [dropoff, setDropoff] = useState<string>("");
     const [dropoffText, setDropoffText] = useState("");
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
@@ -41,10 +41,10 @@ export default function CreatePostForm() {
 
     // contains constraints for modifying seats
     const addNumSeats = () => {
-        if (numSeats < 6) setNumSeats(numSeats + 1);
+        if (numSeats < 5) setNumSeats((numSeats) => numSeats + 1);
     };
     const deleteNumSeats = () => {
-        if (numSeats > 1) setNumSeats(numSeats - 1);
+        if (numSeats > 1) setNumSeats((numSeats) => numSeats - 1);
     };
 
     const onChangePickup = (text: string) => {
@@ -85,7 +85,7 @@ export default function CreatePostForm() {
             const post: NewPostType = {
                 pickup,
                 dropoff,
-                totalSpots: numSeats,
+                totalSpots: numSeats + 1,
                 notes,
                 startTime: startTime.getTime(),
                 endTime: endTime.getTime(),
@@ -106,10 +106,7 @@ export default function CreatePostForm() {
         <>
             <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
             <View>
-                <LocationButton
-                    setLocation={setPickup}
-                    onChangeText={onChangePickup}
-                />
+                <LocationButton setLocation={setPickup} onChangeText={onChangePickup} />
             </View>
             <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
@@ -175,7 +172,7 @@ export default function CreatePostForm() {
                         onPress={onSubmit}
                         color="navy"
                         title="Post"
-                        style={{ height: headerHeight + 32}}
+                        style={{ height: headerHeight + 32 }}
                     />
                     <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
@@ -185,7 +182,7 @@ export default function CreatePostForm() {
 
     return (
         <>
-            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!"/>}
+            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!" />}
             {!writeComplete && Form}
         </>
     );

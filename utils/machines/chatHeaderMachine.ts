@@ -11,27 +11,34 @@ const ChatHeaderMachine = {
         "Start": {
             on: {
                 INIT: {
-                    target: "Loading Header",
+                    target: "Listeners On",
                     actions: "assignInit",
                 },
             },
         },
-        "Loading Header": {
+        "Listeners On": {
             invoke: {
                 id: "loadHeader",
                 src: "loadHeader",
-                onDone: {
-                    target: "Loaded",
-                    actions: "assignHeader",
-                },
-                onError: {
+            },
+            on: {
+                ERROR: {
                     target: "Error",
                     actions: "assignError",
                 },
+                UPDATE: {
+                    target: "Listeners On",
+                    actions: "assignHeader",
+                },
+                LEAVE: {
+                    target: "Off",
+                },
             },
         },
-        "Loaded": {},
-        "Error": {},
+        "Off": {
+            type: "final" as "final",
+        },
+        "Error": { type: "final" as "final" },
     },
     context: {
         header: null,
@@ -40,30 +47,43 @@ const ChatHeaderMachine = {
     },
     schema: {
         context: {} as { header: ChatHeader | null; postID: string; error: string | null },
-        events: {} as { type: "INIT"; postID: string },
+        events: {} as Init | Error | Leave | Update,
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
 };
+type Init = { type: "INIT"; postID: string };
+type Update = { type: "UPDATE"; data: ChatHeader };
+type Error = { type: "ERROR"; error: string };
+type Leave = { type: "LEAVE" };
 
 export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
     services: {
-        loadHeader: async (context) => {
+        loadHeader: (context) => (callback) => {
             const { postID } = context;
-            const snapshot = await db.ref(`chats/${postID}`).once("value");
-            if (snapshot.exists()) return snapshot.val();
-            else throw new Error("Chat does not exist");
+            const res = db.ref(`chats/${postID}`).on("value", (snapshot) => {
+                if (snapshot.exists()) {
+                    const header = snapshot.val();
+                    callback({ type: "UPDATE", data: header });
+                } else {
+                    callback({ type: "ERROR", error: "Chat does not exist" });
+                }
+            });
+
+            return () => {
+                db.ref(`chats/${postID}`).off("value", res);
+            };
         },
     },
     actions: {
         assignInit: assign({
-            postID: (_, event) => event.postID,
+            postID: (_, event) => (event as Init).postID,
         }),
         assignHeader: assign({
-            header: (_, event: any) => (event as DoneInvokeEvent<ChatHeader>).data,
+            header: (_, event) => (event as Update).data,
         }),
         assignError: assign({
-            error: (_, event: any) => event.data,
+            error: (_, event) => (event as Error).error,
         }),
     },
 });
