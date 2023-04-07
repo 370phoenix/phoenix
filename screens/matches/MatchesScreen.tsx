@@ -1,4 +1,3 @@
-import auth from "@react-native-firebase/auth";
 import { ScrollView, StyleSheet } from "react-native";
 
 import MatchList from "../../components/matches/MatchList";

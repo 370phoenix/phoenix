@@ -1,9 +1,13 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+<<<<<<< HEAD
 import { PostType } from "../../constants/DataTypes";
 import { fetchPost } from "../../utils/posts";
 import { MessageType } from "../../utils/auth";
 import { getMultiplePushTokens, getPushToken } from "../../utils/notifications";
+=======
+import { removePosts } from "./posts";
+>>>>>>> main
 
 admin.initializeApp();
 
@@ -35,32 +39,22 @@ export const ridersChangedNotification = functions.database
 export const clearCompleted = functions.pubsub
     .schedule("0 0 * * *")
     .timeZone("America/New_York")
-    .onRun(async (context) => {
-        await deletePosts();
-        console.log("COMPLETED");
+    .onRun(async () => {
+        const res = await removePosts();
+        if (res) console.log("Posts removed");
+        else console.error("Error removing posts");
     });
 
-async function deletePosts() {
-    try {
-        const db = admin.database();
-        const currentDate = Date.now();
-
-        const snapshot = await db.ref("posts").get();
-
-        if (snapshot.exists()) {
-            const posts: any[] = Object.values(snapshot.val());
-
-            for (const post of posts) {
-                console.log(post.endTime, currentDate);
-                if (post.endTime < currentDate) {
-                    const userInfo = await getUserOnce(post.user);
-                    await deletePost(post.postID, post.user, userInfo);
-                }
-            }
-        }
-    } catch (e: any) {
-        console.log(`Error in DELETE POSTS: ${e.message}`);
+export const clearOnDemand = functions.https.onRequest(async (_req, res) => {
+    const r1 = await removePosts();
+    if (r1) {
+        console.log("Posts removed");
+        res.status(200).send("Posts removed");
+    } else {
+        console.error("Error removing posts");
+        res.status(500).send("Error removing posts");
     }
+<<<<<<< HEAD
 }
 
 async function deletePost(postID: string, userID: string, userInfo: UserInfo) {
@@ -216,3 +210,6 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
         body: JSON.stringify(message),
     });
 }
+=======
+});
+>>>>>>> main

@@ -1,5 +1,5 @@
 import { assign, createMachine } from "xstate";
-import { UserID } from "../../constants/DataTypes";
+import { PostType, UserID } from "../../constants/DataTypes";
 import { getUserOnce, MessageType, UserInfo } from "../auth";
 import { handleAcceptReject } from "../posts";
 
@@ -87,8 +87,8 @@ const RequestCardMachine = {
         },
         events: {} as
             | { type: "LOAD INFO"; id: string }
-            | { type: "ACCEPT"; postID: string; posterID: string; userInfo: UserInfo }
-            | { type: "REJECT"; postID: string; posterID: string; userInfo: UserInfo },
+            | { type: "ACCEPT"; post: PostType; posterID: string; userInfo: UserInfo }
+            | { type: "REJECT"; post: PostType; posterID: string; userInfo: UserInfo },
     },
     context: { requesterInfo: null, userID: null },
     predictableActionArguments: true,
@@ -109,7 +109,7 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     userInfo: event.userInfo,
                     requesterID: context.userID,
                     requesterInfo: context.requesterInfo,
-                    postID: event.postID,
+                    post: event.post,
                     posterID: event.posterID,
                 });
                 if (r1.type !== MessageType.success) throw Error(r1.message);
@@ -123,7 +123,7 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     userInfo: event.userInfo,
                     requesterID: context.userID,
                     requesterInfo: context.requesterInfo,
-                    postID: event.postID,
+                    post: event.post,
                     posterID: event.posterID,
                 });
                 if (r1.type !== MessageType.success) throw Error(r1.message);

@@ -1,4 +1,4 @@
-import { assign, createMachine, ErrorExecutionEvent } from "xstate";
+import { assign, createMachine } from "xstate";
 import { PostID, PostType } from "../../constants/DataTypes";
 import { MessageType } from "../auth";
 import { fetchPost } from "../posts";

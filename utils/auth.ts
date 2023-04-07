@@ -11,6 +11,7 @@ import { Unsubscribe } from "./posts";
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 export type UserInfo = {
+    userID: UserID;
     username: string;
     phone: string;
     major: string;
@@ -21,7 +22,7 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
-    requests: [UserID, PostID][];
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
     hasPushToken: boolean;
 };
 
@@ -133,21 +134,13 @@ export async function writeUser(
     }
 }
 
-function convertUserInfo(data: FBUserInfo): UserInfo {
-    const newRequests = data.requests
-        ? Object.values(data.requests).map((req) => {
-              const userID = req[0],
-                  postID = req[1];
-              return [userID, postID] as [string, string];
-          })
-        : [];
-
+function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
     return {
         ...data,
+        userID,
         posts: data.posts ? Object.values(data.posts) : [],
         pending: data.pending ? Object.values(data.pending) : [],
         matches: data.matches ? Object.values(data.matches) : [],
-        requests: newRequests,
     };
 }
 
@@ -167,7 +160,9 @@ export function getUserUpdates(
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                onUpdate(convertUserInfo(data));
+                const key = snapshot.key;
+                if (!key) throw Error("No userID key");
+                onUpdate(convertUserInfo(key, data));
             }
         });
         const unsub = () => userRef.off("value", onChange);
@@ -202,7 +197,8 @@ export async function getUserOnce(userID: UserID | null): Promise<Message<UserIn
         if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
-        if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
+        if (snapshot.exists())
+            return { data: { userID: userID, ...snapshot.val() }, type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
@@ -258,6 +254,7 @@ type ValidateProfileParams = {
     phone?: string | null;
     userInfo?: UserInfo | null;
     hasPushToken?: boolean;
+    userID?: string | null;
 };
 /**
  * Checks to see if user info is valid, and returns a clean version.
@@ -271,6 +268,7 @@ export function validateProfile({
     pronouns,
     gradString,
     hasPushToken = false,
+    userID = null,
     phone = null,
     userInfo = null,
 }: ValidateProfileParams): UserInfo | string {
@@ -299,6 +297,7 @@ export function validateProfile({
                 hasPushToken,
                 pronouns,
                 gradYear,
+                userID: userInfo.userID,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
                 ridesCompleted: userInfo.ridesCompleted,
@@ -307,9 +306,10 @@ export function validateProfile({
                 matches: userInfo.matches ? userInfo.matches : [],
                 requests: userInfo.requests ? userInfo.requests : [],
             };
-        else if (phone) {
+        else if (phone && userID) {
             // Inital Profile Setup
             return {
+                userID,
                 chillIndex: undefined,
                 username,
                 major,
