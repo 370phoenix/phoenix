@@ -1,5 +1,3 @@
-import { Coords } from "../constants/DataTypes";
-
 export function convertDate(date: number | Date) {
     let tempDate;
     if (typeof date === "number") tempDate = new Date(date);
@@ -26,7 +24,3 @@ export function convertTime(date: number | Date) {
     return fTime;
 }
 
-export function convertLocation(location: string | Coords) {
-    // TODO: Convert coords to string, string to coords with geocoding
-    return typeof location === "string" ? location : "Could not parse date from location";
-}
