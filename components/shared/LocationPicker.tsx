@@ -44,7 +44,7 @@ export function LocationButton({
 
         let location: Location.LocationObject | null = await Location.getLastKnownPositionAsync();
         if (location == null) location = await Location.getCurrentPositionAsync();
-        setLocation(location);
+        setLocation(location.coords.latitude, location.coords.longitude);
 
         const place = await Location.reverseGeocodeAsync({
             latitude: location.coords.latitude,

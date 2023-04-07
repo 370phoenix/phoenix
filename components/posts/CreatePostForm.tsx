@@ -29,7 +29,9 @@ export default function CreatePostForm() {
     const [endTime, setEndTime] = useState(new Date());
     // location state
     const [pickup, setPickup] = useState("");
+    const [pickupCoords, setPickupCoords] = useState<number[] | undefined>(undefined);
     const [dropoff, setDropoff] = useState("");
+    const [dropoffCoords, setDropoffCoords] = useState<number[] | undefined>(undefined);
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);
@@ -63,8 +65,8 @@ export default function CreatePostForm() {
         const post: NewPostType = {
             pickup,
             dropoff,
-            pickupCoords: undefined,
-            dropoffCoords: undefined,
+            pickupCoords,
+            dropoffCoords,
             user: userID,
             riders: [],
             pending: [],
@@ -89,10 +91,7 @@ export default function CreatePostForm() {
         <>
             <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
             <View>
-                <LocationButton
-                    setLocation={setPickup}
-                    onChangeText={onChangePickup}
-                />
+                <LocationButton setLocation={setPickupCoords} onChangeText={onChangePickup} />
             </View>
             <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
@@ -158,7 +157,7 @@ export default function CreatePostForm() {
                         onPress={onSubmit}
                         color="navy"
                         title="Post"
-                        style={{ height: headerHeight + 32}}
+                        style={{ height: headerHeight + 32 }}
                     />
                     <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
@@ -168,7 +167,7 @@ export default function CreatePostForm() {
 
     return (
         <>
-            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!"/>}
+            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!" />}
             {!writeComplete && Form}
         </>
     );
