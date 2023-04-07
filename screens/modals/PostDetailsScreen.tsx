@@ -8,12 +8,8 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
-<<<<<<< HEAD
-import { convertDate, convertTime } from "../../utils/convertPostTypes";
-=======
 import { RootStackParamList } from "../../types";
-import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
->>>>>>> main
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { MessageType, UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";

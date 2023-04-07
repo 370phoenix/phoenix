@@ -23,12 +23,15 @@ type ValidatePostParams = {
 
 export default async function validateData({ post }: ValidatePostParams): Promise<NewPostType> {
     const { startTime, endTime, pickup, dropoff, notes } = post;
+    const filter = new Filter();
     if (!pickup) throw Error("Enter a pickup location.");
-
+    if (filter.isProfane(pickup)) throw Error("Pickup location cannot be profane.");
+    
     const pickupCoords = await geocodeAddress(pickup);
     if (!pickupCoords) throw Error("Pickup location not found. Please enter a valid address.");
-
+    
     if (!dropoff) throw Error("Enter a dropoff location.");
+    if (filter.isProfane(dropoff)) throw Error("Dropoff location cannot be profane.");
     const dropoffCoords = await geocodeAddress(dropoff);
     if (!dropoffCoords) throw Error("Dropoff location not found. Please enter a valid address.");
 
@@ -40,9 +43,8 @@ export default async function validateData({ post }: ValidatePostParams): Promis
 
     if (startTime > endTime) throw Error("End time cannot occur before start time.");
 
-    const filter = new Filter();
 
-    if (filter.isProfane(notes)) throw Error("Notes can not be profane.");
+    if (filter.isProfane(notes)) throw Error("Notes cannot be profane.");
 
     const validatedPost: NewPostType = {
         ...post,
