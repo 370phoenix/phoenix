@@ -3,7 +3,6 @@ import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
@@ -43,7 +42,7 @@ export default function MatchCard({ postID = null, list, userID, post = null }: 
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        {convertLocation(post.pickup)}
+                        post.pickup
                     </Text>
                 </View>
                 <View style={styles.bodyContainer}>
@@ -53,7 +52,7 @@ export default function MatchCard({ postID = null, list, userID, post = null }: 
                         <Right color={color} height={20} />
                     )}
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        {convertLocation(post.dropoff)}
+                        post.dropoff
                     </Text>
                 </View>
             </View>

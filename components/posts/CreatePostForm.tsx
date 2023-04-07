@@ -8,9 +8,9 @@ import NumberPicker from "../shared/NumberPicker";
 import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
-import { Coords, NewPostType } from "../../constants/DataTypes";
+import { NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import validateData, { MessageType } from "../../utils/postValidation";
+import validateData from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
@@ -28,34 +28,29 @@ export default function CreatePostForm() {
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
     // location state
-    const [pickup, setPickup] = useState<Coords | string>("");
-    const [pickupText, setPickupText] = useState("");
-    const [dropoff, setDropoff] = useState<Coords | string>("");
-    const [dropoffText, setDropoffText] = useState("");
+    const [pickup, setPickup] = useState("");
+    const [dropoff, setDropoff] = useState("");
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
-    const [numSeats, setNumSeats] = useState(1);
+    const [totalSpots, setTotalSpots] = useState(1);
     const [notes, setNotes] = useState("");
 
     const [message, setMessage] = useState<string | null>(null);
 
     // contains constraints for modifying seats
-    const addNumSeats = () => {
-        if (numSeats < 6) setNumSeats(numSeats + 1);
+    const addTotalSpots = () => {
+        if (totalSpots < 6) setTotalSpots(totalSpots + 1);
     };
-    const deleteNumSeats = () => {
-        if (numSeats > 1) setNumSeats(numSeats - 1);
+    const deleteTotalSpots = () => {
+        if (totalSpots > 1) setTotalSpots(totalSpots - 1);
     };
 
-    const onChangePickup = (text: string) => {
-        setPickupText(text);
+    const onChangePickup = (text: any) => {
         setPickup(text);
     };
-    const onChangeDropoff = (text: string) => {
-        setDropoffText(text);
+    const onChangeDropoff = (text: any) => {
         setDropoff(text);
     };
-
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
@@ -65,53 +60,41 @@ export default function CreatePostForm() {
     // create object from form inputs on submit event
     const onSubmit = async () => {
         //uses validation function
-        //errors are displayed as error messages below
-        const valid = validateData({
-            startTime,
-            endTime,
+        const post: NewPostType = {
             pickup,
             dropoff,
-            numSeats,
+            pickupCoords: undefined,
+            dropoffCoords: undefined,
+            user: userID,
+            riders: [],
+            pending: [],
+            totalSpots,
             notes,
-        });
-
-        if (valid.type === MessageType.error) {
-            setMessage(valid.message);
-            return;
-        }
-
-        // Push to database
-        if (valid.type === MessageType.success) {
-            const post: NewPostType = {
-                pickup,
-                dropoff,
-                totalSpots: numSeats,
-                notes,
-                startTime: startTime.getTime(),
-                endTime: endTime.getTime(),
-                roundTrip: isRoundtrip,
-                user: userID,
-                riders: [],
-                pending: [],
-            };
-
-            //Verify completion
-            await createPost(post, userID, userInfo);
+            roundTrip: isRoundtrip,
+            startTime: startTime.getTime(),
+            endTime: endTime.getTime(),
+        };
+        //errors are displayed as error messages below
+        try {
+            const validatedPost = await validateData({ post });
+            await createPost(validatedPost, userID, userInfo);
             setWriteComplete(true);
+        } catch (e: any) {
+            setMessage(e.message);
         }
     };
 
     // group contains location and round trip info
     const TripDetails = (
         <>
-            <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
+            <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
             <View>
                 <LocationButton
                     setLocation={setPickup}
                     onChangeText={onChangePickup}
                 />
             </View>
-            <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
+            <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
                 <Text textStyle="lineTitle">ROUND TRIP?</Text>
                 <Spacer direction="row" size={24} />
@@ -158,9 +141,9 @@ export default function CreatePostForm() {
                         }}>
                         <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
                         <NumberPicker
-                            count={numSeats}
-                            handlePlus={addNumSeats}
-                            handleMinus={deleteNumSeats}
+                            count={totalSpots}
+                            handlePlus={addTotalSpots}
+                            handleMinus={deleteTotalSpots}
                         />
                     </View>
                     <Spacer direction="column" size={16} style={{ flex: 1 }} />

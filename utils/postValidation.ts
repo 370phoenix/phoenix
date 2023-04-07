@@ -1,6 +1,6 @@
-import { Coords } from "../constants/DataTypes";
 import Filter from "bad-words";
-
+import geocodeAddress from "./geocode";
+import { NewPostType } from "../constants/DataTypes";
 
 export enum MessageType {
     error,
@@ -10,59 +10,51 @@ export enum MessageType {
 export type SuccessMessage = {
     message?: string;
     type: MessageType.success;
-}
+};
 
 export type ErrorMessage = {
     message: string;
     type: MessageType.error;
-}
-
+};
 
 type ValidatePostParams = {
-    startTime: Date;
-    endTime: Date;
-    pickup: string | Coords;
-    dropoff: string | Coords;
-    numSeats: number;
-    notes: string;
-}
+    post: NewPostType;
+};
 
-export default function validateData({
-    startTime,
-    endTime,
-    pickup,
-    dropoff,
-    numSeats,
-    notes,
-}: ValidatePostParams): SuccessMessage | ErrorMessage {
-    //checks each case and returns error or success message
-    try {
-        if (!startTime)
-            return { type: MessageType.error, message: "Enter a start time." }
+export default async function validateData({ post }: ValidatePostParams): Promise<NewPostType> {
+    const { startTime, endTime, pickup, dropoff, notes } = post;
+    const filter = new Filter();
+    if (!pickup) throw Error("Enter a pickup location.");
+    if (filter.isProfane(pickup)) throw Error("Pickup location cannot be profane.");
+    
+    const pickupCoords = await geocodeAddress(pickup);
+    if (!pickupCoords) throw Error("Pickup location not found. Please enter a valid address.");
+    
+    if (!dropoff) throw Error("Enter a dropoff location.");
+    if (filter.isProfane(dropoff)) throw Error("Dropoff location cannot be profane.");
+    const dropoffCoords = await geocodeAddress(dropoff);
+    if (!dropoffCoords) throw Error("Dropoff location not found. Please enter a valid address.");
 
-        if (!endTime)
-            return { type: MessageType.error, message: "Enter an end time." }
+    if (pickup === dropoff)
+        throw Error("Enter a dropoff location that is different from the pickup location.");
+    if (!startTime) throw Error("Enter a start time.");
 
-        // if (startTime > endTime)
-        //     return { type: MessageType.error, message: "End time cannot occur before start time." }
+    if (!endTime) throw Error("Enter an end time.");
 
-        const filter = new Filter();
+    if (startTime > endTime) throw Error("End time cannot occur before start time.");
 
-        if (!pickup)
-            return { type: MessageType.error, message: "Enter a pickup location." }
 
-        if (!dropoff)
-            return { type: MessageType.error, message: "Enter a dropoff location." }
+    if (filter.isProfane(notes)) throw Error("Notes cannot be profane.");
 
-        if (pickup == dropoff)
-            return { type: MessageType.error, message: "Enter a dropoff location that is different from the pickup location." }
-        if (filter.isProfane(notes))
-            return { type: MessageType.error, message: "Notes can not be profane." }
-        return { type: MessageType.success }
-
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
-    // Check each argument for edge cases and write descriptive error messages
-
+    const validatedPost: NewPostType = {
+        ...post,
+        pickup,
+        dropoff,
+        startTime,
+        endTime,
+        notes,
+        pickupCoords,
+        dropoffCoords,
+    };
+    return validatedPost;
 }
