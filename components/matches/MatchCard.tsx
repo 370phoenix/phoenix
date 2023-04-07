@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "../shared/Themed";
@@ -5,32 +6,33 @@ import Colors from "../../constants/Colors";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
-import { useNavigation } from "@react-navigation/native";
 import { MatchSublist } from "./MatchList";
 import { useMachine } from "@xstate/react";
 import { postInfoMachine } from "../../utils/machines/postInfoMachine";
-import { UserID } from "../../constants/DataTypes";
+import { UserID, PostType } from "../../constants/DataTypes";
 
 export type Props = {
-    postID: string;
+    post?: PostType | null;
+    postID?: string | null;
     list: MatchSublist;
     userID: UserID;
 };
 
-export default function MatchCard({ postID, list, userID }: Props) {
+export default function MatchCard({ postID = null, list, userID, post = null }: Props) {
     const navigation = useNavigation();
-    const [state, send] = useMachine(postInfoMachine);
-    const { post } = state.context;
+    if (!post) {
+        const [state, send] = useMachine(postInfoMachine);
+        post = state.context.post;
+        if (state.matches("Start")) send("LOAD", { id: postID });
+    }
     const isMine = post ? post.user === userID : false;
     const color = isMine ? Colors.navy.p : Colors.purple.p;
-
-    if (state.matches("Start")) send("LOAD", { id: postID });
 
     if (!post) return <View />;
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("MatchDetails", { post: post, list: list })} //pass the post info
+            onPress={() => navigation.navigate("MatchDetails", { post: post!, list: list })} // Okay to override with ! because of early return
             style={({ pressed }) => [
                 styles.cardContainer,
                 {

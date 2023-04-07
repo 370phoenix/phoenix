@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { View, Text, Spacer } from "../shared/Themed";
+import { View, Text } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import GradCap from "../../assets/icons/GradCap";
@@ -11,8 +11,6 @@ type Props = {
     userInfo: UserInfo;
 };
 export default function ProfileInfo({ userInfo }: Props) {
-    const iconSize = 30;
-    const iconColor = Colors.gray.w;
     return (
         <View style={styles.container}>
             <View style={{ marginBottom: 12 }}>
@@ -25,7 +23,7 @@ export default function ProfileInfo({ userInfo }: Props) {
             </View>
             <InfoRow icon={GradCap} text={String(userInfo.gradYear)} />
             <InfoRow icon={Book} text={userInfo.major} />
-            <InfoRow icon={Gender} text={userInfo.gender} />
+            <InfoRow icon={Gender} text={userInfo.pronouns} />
         </View>
     );
 }

@@ -7,7 +7,7 @@ import { Full } from "../assets/icons/User";
 import { View, Text } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 
-export default function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
+export default function TabBar({ state, navigation }: BottomTabBarProps) {
     const activeColor = Colors.navy["p"];
     const passiveColor = Colors.navy["1"];
     const activePressedColor = Colors.navy["m"];
@@ -21,7 +21,6 @@ export default function TabBar({ state, descriptors, navigation, insets }: Botto
     return (
         <View style={styles.container}>
             {state.routes.map((route, index) => {
-                const { options } = descriptors[route.key];
                 const isFocused = state.index == index;
                 const label = route.name.toUpperCase();
 

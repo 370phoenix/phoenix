@@ -20,7 +20,7 @@ export default function ProfileScreen({}: props) {
             <View style={styles.body}>
                 <ProfileView userInfo={userInfo} />
                 <Spacer direction="column" size={16} />
-                <ProfilePostList userInfo={userInfo} />
+                <ProfilePostList />
             </View>
         </View>
     );

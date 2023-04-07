@@ -5,31 +5,36 @@ import Colors from "../../constants/Colors";
 import { UserInfo } from "../../utils/auth";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
-import { UserID } from "../../constants/DataTypes";
+import { PostType, UserID } from "../../constants/DataTypes";
 import { useMachine } from "@xstate/react";
 import { requestCardMachine } from "../../utils/machines/requestCardMachine";
 
 export type Props = {
     requesterID: UserID;
     posterID: UserID;
-    postID: string;
     userInfo: UserInfo | null;
+    post: PostType;
 };
-export default function RequestCard({ requesterID, posterID, postID, userInfo }: Props) {
+export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
     const [state, send] = useMachine(requestCardMachine);
     const { requesterInfo } = state.context;
+    let shouldRender = true;
 
     if (state.matches("Start")) send("LOAD INFO", { id: requesterID });
 
-    const handleButton = async (isAccept: boolean) => {
+    const handleButton = (isAccept: boolean) => {
         Alert.alert(
             "Confirm?",
             `Are you sure you would like to ${isAccept ? "accept" : "reject"} this rider?`,
             [
                 {
                     text: "Confirm",
-                    onPress: () =>
-                        send(isAccept ? "ACCEPT" : "REJECT", { postID, posterID, userInfo }),
+                    onPress: () => {
+                        send(isAccept ? "ACCEPT" : "REJECT", { post, posterID, userInfo });
+                        shouldRender = false;
+                        // TODO: Send notification to alert requester of accepted/rejected ride
+                        // TODO: If accept, notification to alert matched riders of new match
+                    },
                 },
                 {
                     text: "Cancel",
@@ -37,6 +42,8 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
             ]
         );
     };
+
+    if (!shouldRender) return <></>;
 
     if (["Start", "Loading"].some(state.matches))
         return (
@@ -57,7 +64,7 @@ export default function RequestCard({ requesterID, posterID, postID, userInfo }:
                                 {requesterInfo.username}
                             </Text>
                             <Text textStyle="label" style={styles.subtext}>
-                                {requesterInfo.gender}
+                                {requesterInfo.pronouns}
                             </Text>
                         </View>
 

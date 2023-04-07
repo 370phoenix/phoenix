@@ -1,15 +1,6 @@
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useState } from "react";
-import {
-    TouchableWithoutFeedback,
-    View,
-    Keyboard,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-} from "react-native";
+import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
 import CustomSwitch from "../shared/CustomSwitch";
@@ -22,12 +13,13 @@ import { createPost } from "../../utils/posts";
 import validateData from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
+import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
 
 export default function CreatePostForm() {
-    const height = useHeaderHeight();
-    const authService = useContext(AuthContext);
+    const headerHeight = useHeaderHeight();
+    const authService: any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
     const userInfo = useSelector(authService, userInfoSelector);
@@ -62,6 +54,9 @@ export default function CreatePostForm() {
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
+    //error message
+    const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
+
     // create object from form inputs on submit event
     const onSubmit = async () => {
         //uses validation function
@@ -83,7 +78,7 @@ export default function CreatePostForm() {
         try {
             const validatedPost = await validateData({ post });
             await createPost(validatedPost, userID, userInfo);
-            Alert.alert("Post Completed", "You may close this window");
+            setWriteComplete(true);
         } catch (e: any) {
             setMessage(e.message);
         }
@@ -92,51 +87,33 @@ export default function CreatePostForm() {
     // group contains location and round trip info
     const TripDetails = (
         <>
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                From
-            </Text>
-            <LocationPicker
-                name="pickup"
-                setLocation={setPickup}
-                inputText={pickup}
-                onChangeText={onChangePickup}
-            />
-            <LocationButton
-                setLocation={setPickup}
-                inputText={pickup}
-                onChangeText={onChangePickup}
-            />
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                To
-            </Text>
-            <LocationPicker
-                name="dropoff"
-                setLocation={setDropoff}
-                inputText={dropoff}
-                onChangeText={onChangeDropoff}
-            />
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                Round trip
-            </Text>
-            <View style={{ alignItems: "flex-start" }}>
-                <CustomSwitch
-                    isEnabled={isRoundtrip}
-                    setIsEnabled={setIsRoundtrip}
-                    toggleSwitch={roundtripSwitch}
+            <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
+            <View>
+                <LocationButton
+                    setLocation={setPickup}
+                    onChangeText={onChangePickup}
                 />
+            </View>
+            <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
+                <Text textStyle="lineTitle">ROUND TRIP?</Text>
+                <Spacer direction="row" size={24} />
+                <CustomSwitch isEnabled={isRoundtrip} toggleSwitch={roundtripSwitch} />
             </View>
         </>
     );
 
-    return (
+    const Form = (
         <ScrollView>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.body}>
-                    <Text textStyle="header" styleSize="l" style={styles.label}>
+                    <Spacer direction="column" size={24} />
+                    <Text textStyle="header" styleSize="l">
                         Create Post
                     </Text>
+                    <Spacer direction="column" size={16} />
                     {TripDetails}
-
+                    <Spacer direction="column" size={16} />
                     <DateTimeGroup
                         start={startTime}
                         onChangeStart={setStartTime}
@@ -144,33 +121,56 @@ export default function CreatePostForm() {
                         onChangeEnd={setEndTime}
                     />
 
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        How many free spots in the car?
+                    <Spacer direction="column" size={16} />
+                    <Text textStyle="label" styleSize="l">
+                        Notes for riders?
                     </Text>
-                    <NumberPicker
-                        count={totalSpots}
-                        handlePlus={addTotalSpots}
-                        handleMinus={deleteTotalSpots}
+                    <Spacer direction="column" size={8} />
+                    <TextArea
+                        label=""
+                        inputState={[notes, setNotes]}
+                        placeholder="Type here..."
+                        placeholderTextColor={Colors.gray[2]}
                     />
-
-                    <Text textStyle="label" styleSize="l" style={styles.label}>
-                        Is there anything else your match needs to know?
-                    </Text>
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : undefined}
-                        keyboardVerticalOffset={height}>
-                        <TextArea label="Notes" inputState={[notes, setNotes]} />
-                        {message && (
-                            <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                                {message}
-                            </Text>
-                        )}
-                        <Button onPress={onSubmit} color="navy" title="Post" />
-                        <Spacer direction="column" size={128} style={{ flex: 1 }} />
-                    </KeyboardAvoidingView>
+                    <Spacer direction="column" size={16} />
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                        <NumberPicker
+                            count={totalSpots}
+                            handlePlus={addTotalSpots}
+                            handleMinus={deleteTotalSpots}
+                        />
+                    </View>
+                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                    {message && (
+                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                            {message}
+                        </Text>
+                    )}
+                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+                    <Button
+                        onPress={onSubmit}
+                        color="navy"
+                        title="Post"
+                        style={{ height: headerHeight + 32}}
+                    />
+                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
             </TouchableWithoutFeedback>
         </ScrollView>
+    );
+
+    return (
+        <>
+            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!"/>}
+            {!writeComplete && Form}
+        </>
     );
 }
 
@@ -186,36 +186,21 @@ const DateTimeGroup = ({
     onChangeEnd: any;
 }) => {
     return (
-        <View>
-            <Text textStyle="label" styleSize="l" style={styles.label}>
-                When do you want a ride?
-            </Text>
-            {Platform.OS !== "ios" && (
-                <>
-                    <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        Between
-                    </Text>
-                    <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        And
-                    </Text>
-                    <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
-                </>
-            )}
-            {Platform.OS === "ios" && (
-                <>
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        Between
-                    </Text>
-                    <CustomDateTimePicker mode="datetime" date={start} onConfirm={onChangeStart} />
-                    <Text textStyle="label" styleSize="m" style={styles.label}>
-                        And
-                    </Text>
-                    <CustomDateTimePicker mode="datetime" date={end} onConfirm={onChangeEnd} />
-                </>
-            )}
-        </View>
+        <>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text textStyle="lineTitle">DATE</Text>
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
+            </View>
+            <Spacer direction="column" size={16} />
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text textStyle="lineTitle">TIME</Text>
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
+                <Spacer direction="row" size={8} />
+                <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
+            </View>
+        </>
     );
 };
 
@@ -224,12 +209,8 @@ const styles = StyleSheet.create({
         margin: 16,
         marginTop: 0,
         height: "100%",
-        justifyContent: "flex-end",
+        justifyContent: "flex-start",
         flexDirection: "column",
-    },
-    label: {
-        marginBottom: 8,
-        marginTop: 16,
     },
     message: {
         paddingVertical: 10,

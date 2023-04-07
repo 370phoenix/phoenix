@@ -5,11 +5,9 @@ import Colors from "../../constants/Colors";
 
 const CustomSwitch = ({
     isEnabled,
-    setIsEnabled,
     toggleSwitch,
 }: {
     isEnabled: boolean;
-    setIsEnabled: any;
     toggleSwitch: any;
 }) => {
     return (
@@ -17,7 +15,7 @@ const CustomSwitch = ({
             <Switch
                 trackColor={{ false: Colors.navy.p, true: Colors.navy.p }}
                 thumbColor={Colors.gray[5]}
-                ios_backgroundColor={Colors.gray[5]}
+                ios_backgroundColor={Colors.gray[3]}
                 onValueChange={toggleSwitch}
                 value={isEnabled}
             />

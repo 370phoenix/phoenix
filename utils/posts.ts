@@ -1,6 +1,5 @@
-import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { firebase } from "@react-native-firebase/database";
-import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
+
 import {
     ErrorMessage,
     getUserOnce,
@@ -9,6 +8,7 @@ import {
     UserInfo,
     writeUser,
 } from "./auth";
+import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -113,7 +113,7 @@ export function getAllPostUpdates({
                 onChildAdded(data);
             }
         },
-        (error) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
     const onChange = postsRef.on(
         "child_changed",
@@ -123,7 +123,7 @@ export function getAllPostUpdates({
                 onChildChanged(data);
             }
         },
-        (error) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
     const onRemove = postsRef.on("child_removed", (snapshot) => {
         if (snapshot.exists()) {
@@ -253,7 +253,7 @@ type ARParams = {
     requesterID: UserID;
     requesterInfo: UserInfo | null;
     posterID: UserID;
-    postID: PostID;
+    post: PostType;
 };
 /**
  * Handle a user accepting or denying a match request.
@@ -272,16 +272,12 @@ export async function handleAcceptReject({
     userInfo,
     requesterID,
     requesterInfo,
-    postID,
-    posterID,
+    post,
 }: ARParams): Promise<SuccessMessage | ErrorMessage> {
     try {
         if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
 
-        // Get post from DB
-        const r3 = await fetchPost(postID);
-        if (r3.type === MessageType.error) throw new Error(r3.message);
-        const post = r3.data;
+        const { postID } = post;
 
         // Update Requester Info
         // Remove from requester pending for accept or deny
@@ -308,13 +304,6 @@ export async function handleAcceptReject({
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
 
-        // Update Poster Info
-        // Remove from requests for accept or deny
-        const k = findRequestIndex(userInfo.requests, [requesterID, postID]);
-        if (k !== -1) userInfo.requests.splice(k, 1);
-        const r5 = await writeUser(posterID, userInfo);
-        if (r5.type === MessageType.error) throw new Error(r5.message);
-
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
@@ -333,12 +322,6 @@ export async function matchPost(
     post: PostType
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        // Get Poster Info
-        const posterID = post.user;
-        const r1 = await getUserOnce(posterID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const posterInfo = r1.data;
-
         // Get Requester Info
         const r2 = await getUserOnce(userID);
         if (r2.type !== MessageType.success) throw new Error(r2.message);
@@ -350,13 +333,6 @@ export async function matchPost(
             : [post.postID];
         const r3 = await writeUser(userID, requesterInfo);
         if (r3.type !== MessageType.success) throw new Error(r3.message);
-
-        // Update Poster to have request
-        posterInfo.requests = posterInfo.requests
-            ? [...posterInfo.requests, [userID, post.postID]]
-            : [[userID, post.postID]];
-        const r4 = await writeUser(posterID, posterInfo);
-        if (r4.type !== MessageType.success) throw new Error(r4.message);
 
         // Update Post Info to have pending
         post.pending = post.pending ? [...post.pending, userID] : [userID];
@@ -374,6 +350,101 @@ export async function matchPost(
 ///////////// HELPERS /////////////////////
 ///////////////////////////////////////////
 ///////////////////////////////////////////
+
+
+/**
+ * Initiates a request for a user to unmatch from a post after pressing the unmatch button.
+ *
+ * @param userID (UserID): The ID of the user requesting to unmatch from the ride.
+ * @param post (PostType): The post the user is trying to unmatch from.
+ * @returns (SuccessMessage | ErrorMessage)
+ */
+export async function unmatchPost(
+    userID: UserID,
+    post: PostType
+): Promise<SuccessMessage | ErrorMessage> {
+    try {
+        // remove postID from user.matches
+        const r1 = await getUserOnce(userID);
+        if (r1.type !== MessageType.success) throw new Error(r1.message);
+        const userInfo = r1.data;
+        const newMatches = userInfo.matches;
+        if (!userInfo || !newMatches) throw Error("Error fetching user info");
+        const postIndex = newMatches.indexOf(post.postID);
+        if (postIndex === -1) throw Error("Post not found in user matches");
+        if(newMatches.length === 1) newMatches.shift();
+        else newMatches.splice(postIndex, 1);
+        userInfo.matches = newMatches;
+        
+        // update user to remove post
+        const r2 = await writeUser(userID, userInfo);
+        if (r2.type === MessageType.error) throw Error(r2.message);
+
+        // remove userID from post.riders
+        const newRiders = post.riders;
+        if (!newRiders) throw Error("Error fetching users from post");
+        const userIndex = newRiders.indexOf(userID);
+        if (userIndex === -1) throw Error("User not found in post riders");
+        if(newRiders.length === 1) newRiders.shift();
+        newRiders.splice(userIndex, 1);
+        post.riders = newRiders;
+        
+        // update post to remove user
+        const r3 = await writePostData(post);
+        if (r3.type !== MessageType.success) throw new Error(r3.message);
+        
+        return { type: MessageType.success, data: undefined };
+    } catch (e: any) {
+        return { type: MessageType.error, message: `Error: ${e.message}` };
+    }
+}
+
+/**
+ * Initiates a request for a user to cancel pending match request from a post.
+ *
+ * @param userID (UserID): The ID of the user requesting to cancel a match request.
+ * @param post (PostType): The post the user is trying to cancel a match request for.
+ * @returns (SuccessMessage | ErrorMessage)
+ */
+export async function cancelPendingMatch(
+    userID: UserID,
+    post: PostType
+): Promise<SuccessMessage | ErrorMessage> {
+    try {
+        // remove postID from user.matches
+        const r1 = await getUserOnce(userID);
+        if (r1.type !== MessageType.success) throw new Error(r1.message);
+        const userInfo = r1.data;
+        const newPending = userInfo.pending;
+        if (!userInfo || !newPending) throw Error("Error fetching user info");
+        const postIndex = newPending.indexOf(post.postID);
+        if (postIndex === -1) throw Error("Post not found in user's pending rides");
+        if(newPending.length === 1) newPending.shift();
+        else newPending.splice(postIndex, 1);
+        userInfo.matches = newPending;
+
+        // remove userID from post.pending
+        const newRiders = post.pending;
+        if (!newRiders) throw Error("Error fetching users from post");
+        const userIndex = newRiders.indexOf(userID);
+        if (userIndex === -1) throw Error("User not found in post riders");
+        if(newRiders.length === 1) newRiders.shift();
+        newRiders.splice(userIndex, 1);
+        post.pending = newRiders;
+
+        // update user to remove post
+        const r3 = await writeUser(userID, userInfo);
+        if (r3.type === MessageType.error) throw Error(r3.message);
+
+        // update post to remove user
+        const r5 = await writePostData(post);
+        if (r5.type !== MessageType.success) throw new Error(r5.message);
+        
+        return { type: MessageType.success, data: undefined };
+    } catch (e: any) {
+        return { type: MessageType.error, message: `Error: ${e.message}` };
+    }
+}
 
 /**
  * Helper function that identifies a request in the request array.

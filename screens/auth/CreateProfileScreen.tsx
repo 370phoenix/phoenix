@@ -1,24 +1,24 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, Pressable, Keyboard } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { RootStackParamList } from "../../types";
-import { useHeaderHeight } from "@react-navigation/elements";
+
 import auth from "@react-native-firebase/auth";
 import { useMachine } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
+import Dropdown from "../../components/shared/Dropdown";
+import Pronouns from "../../constants/Pronouns.json";
+import { RootStackParamList } from "../../types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-type NativeProps = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-type Props = NativeProps;
-export default function CreateProfileScreen(props: Props) {
-    const headerHeight = useHeaderHeight();
+type Props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
+export default function CreateProfileScreen({}: Props) {
     const user = auth().currentUser;
     const [name, setName] = useState("");
     const [major, setMajor] = useState("");
     const [grad, setGrad] = useState("");
-    const [gender, setGender] = useState("");
+    const [pronouns, setPronouns] = useState(Pronouns[0]);
 
     const [state, send] = useMachine(createProfileMachine);
     const { error } = state.context;
@@ -34,24 +34,21 @@ export default function CreateProfileScreen(props: Props) {
                 username: name.trim(),
                 major: major.trim(),
                 gradString: grad.trim(),
-                gender: gender.trim(),
                 phone: user.phoneNumber,
+                pronouns,
             },
         });
-    }, [name, major, grad, gender, user, send]);
+    }, [name, major, grad, pronouns, user, send]);
 
     return (
-        <View style={styles.container}>
+        <Pressable style={styles.container} onPress={() => Keyboard.dismiss()}>
             <StatusBar style="light" />
-            <KeyboardAvoidingView
-                style={styles.body}
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-                keyboardVerticalOffset={headerHeight}>
-                <Spacer direction="column" size={96} />
+            <View style={styles.body}>
+                <Spacer direction="column" size={72} />
                 <Text textStyle="header" styleSize="l" style={styles.headline}>
                     Thank you for joining FareShare!
                 </Text>
-                <Spacer direction="column" size={96} />
+                <Spacer direction="column" size={72} />
                 <Text
                     textStyle="header"
                     styleSize="s"
@@ -77,24 +74,23 @@ export default function CreateProfileScreen(props: Props) {
                     style={styles.inputs}
                     light
                 />
-                <View style={styles.group}>
-                    <TextField
-                        label="grad year"
-                        inputState={[grad, setGrad]}
-                        keyboardType="number-pad"
-                        style={styles.smallInputs}
-                        light
-                    />
-                    <Spacer direction="row" size={16} />
-                    <TextField
-                        label="gender"
-                        inputState={[gender, setGender]}
-                        keyboardType="default"
-                        style={styles.smallInputs}
-                        light
-                    />
-                </View>
-                <Spacer direction="column" size={32} />
+                <TextField
+                    label="grad year"
+                    inputState={[grad, setGrad]}
+                    keyboardType="number-pad"
+                    style={styles.inputs}
+                    light
+                />
+                <Spacer direction="row" size={16} />
+                <Dropdown
+                    light
+                    label="pronouns"
+                    style={styles.smallInputs}
+                    onChange={(newOne) => {
+                        setPronouns(newOne);
+                    }}
+                    options={Pronouns}
+                />
                 <Button
                     title="continue"
                     onPress={() => send("SUBMIT")}
@@ -103,8 +99,8 @@ export default function CreateProfileScreen(props: Props) {
                     light
                 />
                 <View style={{ flex: 1 }} />
-            </KeyboardAvoidingView>
-        </View>
+            </View>
+        </Pressable>
     );
 }
 
@@ -126,13 +122,14 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     smallInputs: {
-        flex: 1,
+        width: "100%",
+        paddingBottom: 16,
     },
     headline: {
         textAlign: "center",
         color: Colors.gray.w,
     },
-    group: { flexDirection: "row" },
+    group: { flexDirection: "row", zIndex: 100 },
     submit: {
         width: "100%",
     },

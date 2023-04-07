@@ -4,9 +4,8 @@ import { StyleSheet } from "react-native";
 import PostList from "../components/posts/PostList";
 import { View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
-import { RootTabScreenProps } from "../types";
 
-export default function PostFeedScreen({ navigation }: RootTabScreenProps<"Feed">) {
+export default function PostFeedScreen() {
     return (
         <View style={styles.container}>
             <StatusBar style="light" />

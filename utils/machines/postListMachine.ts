@@ -63,7 +63,7 @@ const PostListMachine = {
 
 export const postListMachine = createMachine(PostListMachine, {
     services: {
-        setListeners: (context) => (callback) => {
+        setListeners: (_) => (callback) => {
             const res = getAllPostUpdates({
                 onChildChanged: (post) => {
                     callback({ type: "CHANGED LISTENER FIRED", post });

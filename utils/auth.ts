@@ -1,5 +1,5 @@
 import Filter from "bad-words";
-import Genders from "../constants/Genders.json";
+import Pronouns from "../constants/Pronouns.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
@@ -11,17 +11,17 @@ import { Unsubscribe } from "./posts";
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 export type UserInfo = {
+    userID: UserID;
     username: string;
     phone: string;
     major: string;
     gradYear: number;
-    gender: string;
+    pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
-    requests: [UserID, PostID][];
 };
 
 export type FBUserInfo = {
@@ -29,13 +29,12 @@ export type FBUserInfo = {
     phone: string;
     major: string;
     gradYear: number;
-    gender: string;
+    pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
-    requests: { [key: number]: { 0: string; 1: string } } | undefined;
 };
 
 // MESSAGES //
@@ -131,21 +130,13 @@ export async function writeUser(
     }
 }
 
-function convertUserInfo(data: FBUserInfo): UserInfo {
-    const newRequests = data.requests
-        ? Object.values(data.requests).map((req) => {
-              const userID = req[0],
-                  postID = req[1];
-              return [userID, postID] as [string, string];
-          })
-        : [];
-
+function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
     return {
         ...data,
+        userID,
         posts: data.posts ? Object.values(data.posts) : [],
         pending: data.pending ? Object.values(data.pending) : [],
         matches: data.matches ? Object.values(data.matches) : [],
-        requests: newRequests,
     };
 }
 
@@ -165,7 +156,9 @@ export function getUserUpdates(
         const onChange = userRef.on("value", (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                onUpdate(convertUserInfo(data));
+                const key = snapshot.key;
+                if (!key) throw Error("No userID key");
+                onUpdate(convertUserInfo(key, data));
             }
         });
         const unsub = () => userRef.off("value", onChange);
@@ -200,7 +193,8 @@ export async function getUserOnce(userID: UserID | null): Promise<Message<UserIn
         if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
-        if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
+        if (snapshot.exists())
+            return { data: { userID: userID, ...snapshot.val() }, type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
@@ -233,6 +227,7 @@ export async function deleteAccount(userID: UserID): Promise<SuccessMessage | Er
     try {
         const userRef = database().ref("users/" + userID);
         await userRef.remove();
+        await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -249,9 +244,10 @@ type ValidateProfileParams = {
     username: string;
     major: string;
     gradString: string;
-    gender: string;
+    pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
+    userID?: string | null;
 };
 /**
  * Checks to see if user info is valid, and returns a clean version.
@@ -262,8 +258,9 @@ type ValidateProfileParams = {
 export function validateProfile({
     username,
     major,
-    gender,
+    pronouns,
     gradString,
+    userID = null,
     phone = null,
     userInfo = null,
 }: ValidateProfileParams): UserInfo | string {
@@ -277,8 +274,8 @@ export function validateProfile({
 
         if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
 
-        if (!Genders.includes(gender.toLowerCase()))
-            throw new Error("Gender not accepted. Please email us if we've made a mistake.");
+        if (!Pronouns.includes(pronouns))
+            throw new Error("Pronouns not accepted. Please email us if we've made a mistake.");
 
         if (gradString.match(/\D/g) !== null)
             throw new Error("Please make sure grad year is all digits.");
@@ -287,9 +284,10 @@ export function validateProfile({
         if (userInfo)
             // Changing Info
             return {
+                userID: userInfo.userID,
                 username: username,
                 major: major,
-                gender: gender,
+                pronouns: pronouns,
                 gradYear: gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
@@ -297,22 +295,21 @@ export function validateProfile({
                 posts: userInfo.posts ? userInfo.posts : [],
                 pending: userInfo.pending ? userInfo.pending : [],
                 matches: userInfo.matches ? userInfo.matches : [],
-                requests: userInfo.requests ? userInfo.requests : [],
             };
-        else if (phone) {
+        else if (phone && userID) {
             // Inital Profile Setup
             return {
+                userID,
                 chillIndex: undefined,
                 username: username,
                 major: major,
-                gender: gender,
+                pronouns: pronouns,
                 gradYear: gradYear,
                 phone: phone,
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
                 matches: [],
-                requests: [],
             };
         } else return noUserError;
     } catch (e: any) {

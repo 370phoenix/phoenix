@@ -28,8 +28,13 @@ const CreateProfileMachine = {
                 onDone: [
                     {
                         target: "Information Valid",
+                        cond: "hasChanged",
+                        actions: "assignChanged",
+                    },
+                    {
+                        target: "Information Valid",
                         cond: "isValid",
-                        actions: "assignInfo",
+                        actions: "assignUnchanged",
                     },
                     {
                         target: "Information Invalid",
@@ -79,11 +84,12 @@ const CreateProfileMachine = {
                 username: string;
                 major: string;
                 gradString: string;
-                gender: string;
+                pronouns: string;
                 phone: string | null;
             } | null;
             userInfo: UserInfo | null;
             userID: string | null;
+            infoChanged: boolean;
         },
         events: {} as
             | { type: "SUBMIT" }
@@ -95,7 +101,7 @@ const CreateProfileMachine = {
                       username: string;
                       major: string;
                       gradString: string;
-                      gender: string;
+                      pronouns: string;
                       phone: string | null;
                   };
               }
@@ -108,6 +114,7 @@ const CreateProfileMachine = {
         phone: null,
         userID: null,
         prevInfo: null,
+        infoChanged: false,
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
@@ -123,8 +130,13 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
     },
     actions: {
         assignPrevInfo: assign({ prevInfo: (_, event: any) => event.prevInfo }),
-        assignInfo: assign({
+        assignUnchanged: assign({
             userInfo: (_, event: any) => event.data,
+            infoChanged: false,
+        }),
+        assignChanged: assign({
+            userInfo: (_, event: any) => event.data,
+            infoChanged: true,
         }),
         assignStuff: assign({
             rawInfo: (_, event: any) => event.info,
@@ -134,5 +146,25 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
     },
     guards: {
         isValid: (_, event: any) => typeof event.data !== "string",
+        hasChanged: (context, event: any) => isDifferent(context.prevInfo, event.data),
     },
 });
+
+// CAUTION: Only compares 1 level deep
+function isDifferent(o1: any | null, o2: any | null | string) {
+    if (!o1 || !o2 || typeof o2 === "string") return false;
+
+    const o1keys = Object.keys(o1);
+    const o2keys = Object.keys(o2);
+
+    for (const key of o1keys) {
+        const v1 = o1[key];
+        const v2 = o2[key];
+
+        const isObjects = typeof v1 === "object" && typeof v2 === "object";
+
+        if ((isObjects && isDifferent(v1, v2)) || (!isObjects && v1 !== v2)) return true;
+    }
+
+    return false;
+}

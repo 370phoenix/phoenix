@@ -40,7 +40,6 @@ const CustomDateTimePicker = ({
                 date={date}
                 onConfirm={handleConfirm}
                 onCancel={hideDatePicker}
-                minimumDate={new Date()}
                 minuteInterval={5}
             />
         </View>
