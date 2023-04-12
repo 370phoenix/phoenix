@@ -1,13 +1,10 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-<<<<<<< HEAD
 import { PostType } from "../../constants/DataTypes";
 import { fetchPost } from "../../utils/posts";
 import { MessageType } from "../../utils/auth";
 import { getMultiplePushTokens, getPushToken } from "../../utils/notifications";
-=======
 import { removePosts } from "./posts";
->>>>>>> main
 
 admin.initializeApp();
 
@@ -54,8 +51,7 @@ export const clearOnDemand = functions.https.onRequest(async (_req, res) => {
         console.error("Error removing posts");
         res.status(500).send("Error removing posts");
     }
-<<<<<<< HEAD
-}
+};
 
 async function deletePost(postID: string, userID: string, userInfo: UserInfo) {
     try {
@@ -210,6 +206,3 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
         body: JSON.stringify(message),
     });
 }
-=======
-});
->>>>>>> main
