@@ -4,7 +4,7 @@ export default {
         slug: "phoenix",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
+        icon: "./assets/images/Icon_biggish.png",
         scheme: "fareshare",
         userInterfaceStyle: "automatic",
         splash: {
