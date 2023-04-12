@@ -7,9 +7,13 @@ admin.initializeApp();
 
 export const ridersChangedNotification = functions.database
     .ref("/posts/{postID}/riders")
-    .onUpdate((change, context) => onRidersChanged(change, context));
+    .onUpdate(async (change, context) => {
+        const res = await onRidersChanged(change, context);
+        if(res) console.log("Rider change notification sent");
+        else console.error("Error sending rider change notification");
+    });
 
-    export const clearCompleted = functions.pubsub
+export const clearCompleted = functions.pubsub
     .schedule("0 0 * * *")
     .timeZone("America/New_York")
     .onRun(async () => {

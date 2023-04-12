@@ -78,7 +78,8 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
     });
 }
 
-export function onRidersChanged(change: any, context: any) {
+export async function onRidersChanged(change: any, context: any) {
+    try {
         const { postID } = context.params;
 
         // before = rider array before update, after = rider array after update
@@ -98,4 +99,9 @@ export function onRidersChanged(change: any, context: any) {
         else if (after.length < before.length) {
             sendCancelNotifications(postID);
         }
+        return true;
+    } catch (e:any){
+        console.error(`Error in DELETE POSTS: ${e.message}`);
+        return false;
+    }
     };
