@@ -51,7 +51,7 @@ export const clearOnDemand = functions.https.onRequest(async (_req, res) => {
         console.error("Error removing posts");
         res.status(500).send("Error removing posts");
     }
-};
+});
 
 async function deletePost(postID: string, userID: string, userInfo: UserInfo) {
     try {
