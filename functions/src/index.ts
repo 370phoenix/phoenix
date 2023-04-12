@@ -7,7 +7,7 @@ admin.initializeApp();
 
 export const ridersChangedNotification = functions.database
     .ref("/posts/{postID}/riders")
-    .onUpdate((change, context) => onRidersChanged);
+    .onUpdate((change, context) => onRidersChanged(change, context));
 
 export const clearCompleted = functions.pubsub
     .schedule("0 0 * * *")
