@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
-import { ErrorMessage, SuccessMessage, MessageType, getUserOnce, writeUser, UserInfo } from "./auth";
+import { ErrorMessage, SuccessMessage, MessageType, UserInfo } from "./auth";
 import database, { firebase } from "@react-native-firebase/database";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");

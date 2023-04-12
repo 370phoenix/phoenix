@@ -22,7 +22,6 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
-    requests: { [key: number]: { 0: string; 1: string } } | undefined;
     hasPushToken: boolean;
 };
 
@@ -304,7 +303,6 @@ export function validateProfile({
                 posts: userInfo.posts ? userInfo.posts : [],
                 pending: userInfo.pending ? userInfo.pending : [],
                 matches: userInfo.matches ? userInfo.matches : [],
-                requests: userInfo.requests ? userInfo.requests : [],
             };
         else if (phone && userID) {
             // Inital Profile Setup
@@ -320,8 +318,7 @@ export function validateProfile({
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
-                matches: [],
-                requests: []
+                matches: []
             };
         } else return noUserError;
     } catch (e: any) {

@@ -16,6 +16,10 @@ import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
+type Coords = {
+    lat: number;
+    long: number;
+    }
 
 export default function CreatePostForm() {
     const headerHeight = useHeaderHeight();
@@ -29,9 +33,9 @@ export default function CreatePostForm() {
     const [endTime, setEndTime] = useState(new Date());
     // location state
     const [pickup, setPickup] = useState("");
-    const [pickupCoords, setPickupCoords] = useState<number[] | undefined>(undefined);
+    const [pickupCoords, setPickupCoords] = useState<Coords | undefined>(undefined);
     const [dropoff, setDropoff] = useState("");
-    const [dropoffCoords, setDropoffCoords] = useState<number[] | undefined>(undefined);
+    const [dropoffCoords, setDropoffCoords] = useState<Coords | undefined>(undefined);
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);

@@ -216,7 +216,12 @@ export const authMachine = createMachine(AuthMachine, {
         setToken: async (context) => {
             const { user, userInfo } = context;
             if (!user || !userInfo) throw Error("Missing User Information");
-            await registerForPushNotificationsAsync(user.uid, userInfo);
+            try {
+                await registerForPushNotificationsAsync(user.uid, userInfo);
+            }
+            catch(e:any){
+                throw Error("Error registering for push notifications");
+            }
         },
     },
     actions: {

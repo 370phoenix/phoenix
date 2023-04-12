@@ -12,9 +12,6 @@ import { AuthContext, authMachine, stateSelector } from "./utils/machines/authMa
 export default function App() {
     const isLoadingComplete = useCachedResources();
     const authService = useInterpret(authMachine);
-    const state = useSelector(authService, stateSelector);
-
-    console.log(state.context);
 
     if (!isLoadingComplete) {
         return null;
