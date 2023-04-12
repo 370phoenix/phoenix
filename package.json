@@ -15,6 +15,7 @@
     },
     "homepage": "https://github.com/370phoenix/phoenix",
     "dependencies": {
+        "@expo/ngrok": "^4.1.0",
         "@expo/vector-icons": "^13.0.0",
         "@react-native-async-storage/async-storage": "~1.17.3",
         "@react-native-community/datetimepicker": "6.7.3",
@@ -42,6 +43,7 @@
         "expo-web-browser": "~12.1.1",
         "firebase-admin": "^11.5.0",
         "firebase-functions": "^4.2.1",
+        "global": "^4.4.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-native": "0.71.3",
