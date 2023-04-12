@@ -1,7 +1,7 @@
 export default {
     expo: {
-        name: "phoenix",
-        slug: "phoenix",
+        name: "FareShare",
+        slug: "fare-share",
         version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/images/Icon_biggish.png",
