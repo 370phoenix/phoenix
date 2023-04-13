@@ -1,6 +1,6 @@
 export default {
     expo: {
-        name: "Fare Share",
+        name: "FareShare - Save $",
         slug: "phoenix",
         version: "1.0.0",
         orientation: "portrait",
