@@ -1,7 +1,8 @@
-import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { removePosts } from "./posts";
+import * as functions from "firebase-functions";
+
 import { onRidersChanged } from "./notifications";
+import { removePosts } from "./posts";
 
 admin.initializeApp();
 
