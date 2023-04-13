@@ -4,7 +4,7 @@ import { assign, createMachine, InterpreterFrom } from "xstate";
 import { UserID, PostType } from "../../constants/DataTypes";
 import { getUserUpdates, MessageType, UserInfo } from "../auth";
 import { fetchSomePosts } from "../posts";
-import { registerForPushNotificationsAsync } from "../notifications";
+import { registerForPushNotificationsAsync } from "../../functions/src/notifications";
 
 const AuthMachine = {
     id: "New Authentication Machine",

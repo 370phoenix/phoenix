@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   root: true,
   env: {
     es6: true,
