@@ -33,3 +33,10 @@ export type PostType = {
     riders: UserID[] | undefined;
     pending: UserID[] | undefined;
 };
+
+export type FeedbackEntryType = {
+    message: string;
+    postID: string;
+    userID: string;
+    timestamp: number;
+};

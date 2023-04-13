@@ -5,7 +5,7 @@ import { View, Text } from "../shared/Themed";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { useContext } from "react";
-import { multiplePostsMachine } from "../../utils/machines/multiplePostsMachine";
+import { multipleCompletedMachine } from "../../utils/machines/multipleCompletedMachine";
 
 export default function PastRidesList() {
     const authService = useContext(AuthContext);
@@ -17,12 +17,16 @@ export default function PastRidesList() {
     }
 
     const { completed } = userInfo;
-    const [state, send] = useMachine(multiplePostsMachine);
+    const [state, send] = useMachine(multipleCompletedMachine);
     const { posts } = state.context;
+    console.log(state.context);
 
     if (state.matches("Start")) {
         send({ type: "LOAD", postIDs: completed ?? [] });
     }
+    // if (state.matches("Posts Loaded")) {
+    //     send({ type: "CLOSE" });
+    // }
 
     if (!userInfo)
         return (
@@ -36,10 +40,10 @@ export default function PastRidesList() {
         );
 
     return (
-        <View style={{ marginTop: 20, marginBottom: 200 }}>
+        <View style={{ marginTop: 20, marginBottom: 20 }}>
             {posts && posts.length !== 0 && (
                 <FlatList
-                    scrollEnabled={false}
+                    scrollEnabled={true}
                     data={posts}
                     style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                     showsVerticalScrollIndicator={false}
@@ -47,6 +51,7 @@ export default function PastRidesList() {
                         return <PastPostsCard post={item} />;
                     }}
                 />
+                // <Spacer direction="column" size={16} />
             )}
         </View>
     );

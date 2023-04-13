@@ -25,6 +25,7 @@ import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
 import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
 import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
+import PastPostDetailsScreen from "../screens/modals/PastPostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
 import auth from "@react-native-firebase/auth";
@@ -138,6 +139,10 @@ function RootNavigator() {
                             <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
                             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
                             <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+                            <Stack.Screen
+                                name="PastPostDetails"
+                                component={PastPostDetailsScreen}
+                            />
                         </Stack.Group>
                     </>
                 )

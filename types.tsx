@@ -26,6 +26,7 @@ export type RootStackParamList = {
     SignIn: undefined;
     CreateProfile: CreateProfileParamList | undefined;
     PostDetails: PostDetailsParamList | undefined;
+    PastPostDetails: PostDetailsParamList | undefined;
     CreatePost: undefined;
     MatchDetails: MatchDetailsParamList | undefined;
     PastRides: undefined;

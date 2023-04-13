@@ -93,6 +93,26 @@ export async function fetchSomePosts(
     }
 }
 
+export async function fetchSomeCompleted(
+    ids: PostID[]
+): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
+    try {
+        const postsRef = db.ref("completed");
+        const posts: PostType[] = [];
+
+        for (const id of ids) {
+            if (!id) continue;
+            const postRef = postsRef.child(id);
+            const snapshot = await postRef.once("value");
+            if (snapshot.exists()) posts.push(snapshot.val());
+        }
+
+        return { type: MessageType.success, data: posts };
+    } catch (e: any) {
+        return { type: MessageType.error, message: e.message };
+    }
+}
+
 type PostUpdateParams = {
     onChildChanged: (data: PostType) => void;
     onChildAdded: (data: PostType) => void;
@@ -351,7 +371,6 @@ export async function matchPost(
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 
-
 /**
  * Initiates a request for a user to unmatch from a post after pressing the unmatch button.
  *
@@ -372,10 +391,10 @@ export async function unmatchPost(
         if (!userInfo || !newMatches) throw Error("Error fetching user info");
         const postIndex = newMatches.indexOf(post.postID);
         if (postIndex === -1) throw Error("Post not found in user matches");
-        if(newMatches.length === 1) newMatches.shift();
+        if (newMatches.length === 1) newMatches.shift();
         else newMatches.splice(postIndex, 1);
         userInfo.matches = newMatches;
-        
+
         // update user to remove post
         const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(r2.message);
@@ -385,14 +404,14 @@ export async function unmatchPost(
         if (!newRiders) throw Error("Error fetching users from post");
         const userIndex = newRiders.indexOf(userID);
         if (userIndex === -1) throw Error("User not found in post riders");
-        if(newRiders.length === 1) newRiders.shift();
+        if (newRiders.length === 1) newRiders.shift();
         newRiders.splice(userIndex, 1);
         post.riders = newRiders;
-        
+
         // update post to remove user
         const r3 = await writePostData(post);
         if (r3.type !== MessageType.success) throw new Error(r3.message);
-        
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
@@ -419,7 +438,7 @@ export async function cancelPendingMatch(
         if (!userInfo || !newPending) throw Error("Error fetching user info");
         const postIndex = newPending.indexOf(post.postID);
         if (postIndex === -1) throw Error("Post not found in user's pending rides");
-        if(newPending.length === 1) newPending.shift();
+        if (newPending.length === 1) newPending.shift();
         else newPending.splice(postIndex, 1);
         userInfo.matches = newPending;
 
@@ -428,7 +447,7 @@ export async function cancelPendingMatch(
         if (!newRiders) throw Error("Error fetching users from post");
         const userIndex = newRiders.indexOf(userID);
         if (userIndex === -1) throw Error("User not found in post riders");
-        if(newRiders.length === 1) newRiders.shift();
+        if (newRiders.length === 1) newRiders.shift();
         newRiders.splice(userIndex, 1);
         post.pending = newRiders;
 
@@ -439,7 +458,7 @@ export async function cancelPendingMatch(
         // update post to remove user
         const r5 = await writePostData(post);
         if (r5.type !== MessageType.success) throw new Error(r5.message);
-        
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };

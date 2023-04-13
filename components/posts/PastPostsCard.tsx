@@ -3,10 +3,11 @@ import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text, Spacer } from "../shared/Themed";
 import Colors from "../../constants/Colors";
+import { PostType } from "../../constants/DataTypes";
 import { convertDate, convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
-import { PostType } from "../../constants/DataTypes";
+import feedbackExclaim from "../../assets/icons/feedbackExclaim";
 
 export type Props = {
     post: PostType;
@@ -14,12 +15,13 @@ export type Props = {
 
 export default function PastPostsCard({ post }: Props) {
     const navigation = useNavigation();
+    const colorPurple = Colors.purple.p;
 
     if (!post) return <View />;
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PostDetails", { post })} //need to switch this to PastPostDetails
+            onPress={() => navigation.navigate("PastPostDetails", { post })} //need to switch this to PastPostDetails
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -29,37 +31,26 @@ export default function PastPostsCard({ post }: Props) {
                 },
             ]}>
             <View style={styles.body}>
-                <Text textStyle="header" styleSize="s" style={{ color: Colors.purple.p }}>
+                <Text textStyle="header" styleSize="s" style={{ color: colorPurple }}>
                     {convertLocation(post.pickup)}
                 </Text>
                 <View style={styles.headerContainer}>
                     {post.roundTrip ? (
-                        <RoundTrip color={Colors.purple.p} height={20} />
+                        <RoundTrip color={colorPurple} height={20} />
                     ) : (
-                        <Right color={Colors.purple.p} height={20} />
+                        <Right color={colorPurple} height={20} />
                     )}
-                    <Text textStyle="header" styleSize="s" style={{ color: Colors.purple.p }}>
+                    <Text textStyle="header" styleSize="s" style={{ color: colorPurple }}>
                         {convertLocation(post.dropoff)}
                     </Text>
                 </View>
                 <Spacer direction="column" size={16} />
-
-                <Text textStyle="label" style={{ color: Colors.purple.p }}>
-                    {convertDate(post.startTime)}
-                </Text>
-                {/* {!isProfile && (
-                    <Text textStyle="body" styleSize="s" style={{ color: color.p }}>
-                        {fStartTime} - {fEndTime}
+                <View>
+                    <Text textStyle="label" style={{ color: colorPurple }}>
+                        {convertDate(post.startTime)}
                     </Text>
-                )} */}
+                </View>
             </View>
-            {/* <Spacer direction={isProfile ? "column" : "row"} size={16} />
-            <RiderBadge
-                post={post}
-                isProfile={isProfile}
-                userInfo={userInfo}
-                isMatched={isMatched ? isMatched : false}
-            /> */}
         </Pressable>
     );
 }
@@ -72,6 +63,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderTopWidth: 1,
         borderRadius: 8,
+        marginBottom: 8,
     },
     body: { flex: 1 },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
