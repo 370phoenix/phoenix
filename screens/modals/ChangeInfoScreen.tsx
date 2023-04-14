@@ -63,7 +63,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         });
     }, [name, major, grad, userID, send, pronouns]);
 
-    const onConfirm = async () => {
+    const onConfirm = () => {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
                 text: "Cancel",
@@ -79,13 +79,24 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         ]);
     };
 
-    const onDelete = async () => {
-        if (!userID) {
-            setMessage("Error: no user found.");
-            return;
-        }
-        const res = await deleteAccount(userID);
-        if (res.type === MessageType.error) setMessage(res.message);
+    const onDelete = () => {
+        Alert.alert("Confirm Action", "Are you sure you want to delete your account?", [
+            {
+                text: "Cancel",
+                onPress: () => {},
+            },
+            {
+                text: "Confirm",
+                onPress: async () => {
+                    if (!userID) {
+                        setMessage("Error: no user found.");
+                        return;
+                    }
+                    const res = await deleteAccount(userID);
+                    if (res.type === MessageType.error) setMessage(res.message);
+                },
+            },
+        ]);
     };
 
     return (
