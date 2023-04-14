@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
@@ -19,9 +19,10 @@ import SuccessfulPost from "../shared/SuccessPage";
 type Coords = {
     lat: number;
     long: number;
-    }
+};
 
-export default function CreatePostForm() {
+// FIXME: too much state going on here
+export default function CreatePostForm({ navigation }: { navigation: any }) {
     const headerHeight = useHeaderHeight();
     const authService: any = useContext(AuthContext);
     const id = useSelector(authService, userIDSelector);
@@ -40,15 +41,16 @@ export default function CreatePostForm() {
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);
     const [notes, setNotes] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const [message, setMessage] = useState<string | null>(null);
 
     // contains constraints for modifying seats
     const addTotalSpots = () => {
-        if (totalSpots < 6) setTotalSpots(totalSpots + 1);
+        if (totalSpots < 6) setTotalSpots((totalSpots) => totalSpots + 1);
     };
     const deleteTotalSpots = () => {
-        if (totalSpots > 1) setTotalSpots(totalSpots - 1);
+        if (totalSpots > 1) setTotalSpots((totalSpots) => totalSpots - 1);
     };
 
     const onChangePickup = (text: any) => {
@@ -65,6 +67,8 @@ export default function CreatePostForm() {
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
+        if (submitting) return;
+        setSubmitting(true);
         //uses validation function
         const post: NewPostType = {
             pickup,
@@ -85,7 +89,12 @@ export default function CreatePostForm() {
             const validatedPost = await validateData({ post });
             await createPost(validatedPost, userID, userInfo);
             setWriteComplete(true);
+            setSubmitting(false);
+            setTimeout(() => {
+                if (navigation.canGoBack()) navigation.goBack();
+            }, 500);
         } catch (e: any) {
+            setSubmitting(false);
             setMessage(e.message);
         }
     };
@@ -108,32 +117,44 @@ export default function CreatePostForm() {
 
     const Form = (
         <ScrollView>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.body}>
-                    <Spacer direction="column" size={24} />
-                    <Text textStyle="header" styleSize="l">
-                        Create Post
-                    </Text>
-                    <Spacer direction="column" size={16} />
-                    {TripDetails}
-                    <Spacer direction="column" size={16} />
-                    <DateTimeGroup
-                        start={startTime}
-                        onChangeStart={setStartTime}
-                        end={endTime}
-                        onChangeEnd={setEndTime}
-                    />
+            <View style={styles.body}>
+                <Spacer direction="column" size={24} />
+                <Text textStyle="header" styleSize="l">
+                    Create Post
+                </Text>
+                <Spacer direction="column" size={16} />
+                {TripDetails}
+                <Spacer direction="column" size={16} />
+                <DateTimeGroup
+                    start={startTime}
+                    onChangeStart={setStartTime}
+                    end={endTime}
+                    onChangeEnd={setEndTime}
+                />
 
-                    <Spacer direction="column" size={16} />
-                    <Text textStyle="label" styleSize="l">
-                        Notes for riders?
-                    </Text>
-                    <Spacer direction="column" size={8} />
-                    <TextArea
-                        label=""
-                        inputState={[notes, setNotes]}
-                        placeholder="Type here..."
-                        placeholderTextColor={Colors.gray[2]}
+                <Spacer direction="column" size={16} />
+                <Text textStyle="label" styleSize="l">
+                    Notes for riders?
+                </Text>
+                <Spacer direction="column" size={8} />
+                <TextArea
+                    label=""
+                    inputState={[notes, setNotes]}
+                    placeholder="Type here..."
+                    placeholderTextColor={Colors.gray[2]}
+                />
+                <Spacer direction="column" size={16} />
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}>
+                    <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                    <NumberPicker
+                        count={totalSpots}
+                        handlePlus={addTotalSpots}
+                        handleMinus={deleteTotalSpots}
                     />
                     <Spacer direction="column" size={16} />
                     <View
@@ -165,7 +186,23 @@ export default function CreatePostForm() {
                     />
                     <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
-            </TouchableWithoutFeedback>
+                <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                {message && (
+                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                        {message}
+                    </Text>
+                )}
+                {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+                <Button
+                    disabled={submitting}
+                    onPress={onSubmit}
+                    color="navy"
+                    title="Post"
+                    style={{ height: headerHeight + 32 }}
+                />
+                <Spacer direction="column" size={128} style={{ flex: 1 }} />
+            </View>
         </ScrollView>
     );
 

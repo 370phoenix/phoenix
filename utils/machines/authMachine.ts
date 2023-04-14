@@ -179,6 +179,7 @@ export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 export const userPostsSelector = (state: any) =>
     state.context.posts ? (state.context.posts as PostType[]) : null;
+export const userSelector = (state: any) => state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
 
 export const authMachine = createMachine(AuthMachine, {
     services: {

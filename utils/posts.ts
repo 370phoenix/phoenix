@@ -9,6 +9,7 @@ import {
     writeUser,
 } from "./auth";
 import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
+import { ChatHeader } from "../utils/chat";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -159,9 +160,11 @@ export async function deletePost(
     userInfo: UserInfo
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
+        // Remove Post ref
         const postRef = db.ref("posts/" + id);
         await postRef.remove();
 
+        // Update User Info
         let newPosts = userInfo.posts ? userInfo.posts : [];
         if (newPosts.length == 1) newPosts = [];
         else {
@@ -172,6 +175,12 @@ export async function deletePost(
 
         const res = await writeUser(userId, userInfo);
         if (res.type === MessageType.error) throw Error(res.message);
+
+        // Remove Chat Header
+        await db.ref("chats/" + id).remove();
+
+        // Remove Messages
+        await db.ref("messages/" + id).remove();
 
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -202,6 +211,7 @@ export async function createPost(
         if (!userID) throw Error("No user signed in.");
         if (!userInfo) throw Error("No user info found.");
 
+        // Add post to DB
         const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
         const postID = postRef.key;
@@ -211,15 +221,24 @@ export async function createPost(
         };
         await postRef.set(newPost);
 
+        // Add post to user info
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
         const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
+        // Add a chat header
+        await db.ref(`chats/${postID}`).set({
+            postID,
+            title: post.dropoff,
+            displayNames: { [userID]: userInfo.username },
+            lastMessage: undefined,
+        });
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
-        console.log(`Error in Write user Data: ${e.message}`);
+        console.error("Error in create post: " + e.message);
         return { message: "Error: " + e.message, type: MessageType.error };
     }
 }
@@ -304,8 +323,14 @@ export async function handleAcceptReject({
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
 
+        if (isAccept) {
+            console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
+            await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+        }
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
 }
@@ -351,7 +376,6 @@ export async function matchPost(
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 
-
 /**
  * Initiates a request for a user to unmatch from a post after pressing the unmatch button.
  *
@@ -372,10 +396,10 @@ export async function unmatchPost(
         if (!userInfo || !newMatches) throw Error("Error fetching user info");
         const postIndex = newMatches.indexOf(post.postID);
         if (postIndex === -1) throw Error("Post not found in user matches");
-        if(newMatches.length === 1) newMatches.shift();
+        if (newMatches.length === 1) newMatches.shift();
         else newMatches.splice(postIndex, 1);
         userInfo.matches = newMatches;
-        
+
         // update user to remove post
         const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(r2.message);
@@ -385,14 +409,14 @@ export async function unmatchPost(
         if (!newRiders) throw Error("Error fetching users from post");
         const userIndex = newRiders.indexOf(userID);
         if (userIndex === -1) throw Error("User not found in post riders");
-        if(newRiders.length === 1) newRiders.shift();
+        if (newRiders.length === 1) newRiders.shift();
         newRiders.splice(userIndex, 1);
         post.riders = newRiders;
-        
+
         // update post to remove user
         const r3 = await writePostData(post);
         if (r3.type !== MessageType.success) throw new Error(r3.message);
-        
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };
@@ -419,7 +443,7 @@ export async function cancelPendingMatch(
         if (!userInfo || !newPending) throw Error("Error fetching user info");
         const postIndex = newPending.indexOf(post.postID);
         if (postIndex === -1) throw Error("Post not found in user's pending rides");
-        if(newPending.length === 1) newPending.shift();
+        if (newPending.length === 1) newPending.shift();
         else newPending.splice(postIndex, 1);
         userInfo.matches = newPending;
 
@@ -428,7 +452,7 @@ export async function cancelPendingMatch(
         if (!newRiders) throw Error("Error fetching users from post");
         const userIndex = newRiders.indexOf(userID);
         if (userIndex === -1) throw Error("User not found in post riders");
-        if(newRiders.length === 1) newRiders.shift();
+        if (newRiders.length === 1) newRiders.shift();
         newRiders.splice(userIndex, 1);
         post.pending = newRiders;
 
@@ -439,7 +463,7 @@ export async function cancelPendingMatch(
         // update post to remove user
         const r5 = await writePostData(post);
         if (r5.type !== MessageType.success) throw new Error(r5.message);
-        
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { type: MessageType.error, message: `Error: ${e.message}` };

@@ -9,6 +9,8 @@ import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import * as Notifications from "expo-notifications";
+import PendingCard from "./PendingCard";
+import MatchCardWrapper from "./MatchCardWrapper";
 
 type Props = {
     userID: UserID;
@@ -16,9 +18,11 @@ type Props = {
 
 export default function MatchList({ userID }: Props) {
     useEffect(() => {
-        const subscription = Notifications.addNotificationReceivedListener((notification: Notifications.Notification) => {
-            console.log(notification);
-        });
+        const subscription = Notifications.addNotificationReceivedListener(
+            (notification: Notifications.Notification) => {
+                console.log(notification);
+            }
+        );
         return () => subscription.remove();
     }, []);
 
@@ -73,7 +77,7 @@ export default function MatchList({ userID }: Props) {
                 style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
-                    return <MatchCard post={item} userID={userID} list={MatchSublist.matches} />;
+                    return <MatchCard post={item} userID={userID} />;
                 }}
             />
             <FlatList
@@ -82,7 +86,7 @@ export default function MatchList({ userID }: Props) {
                 style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
-                    return <MatchCard postID={item} userID={userID} list={MatchSublist.matches} />;
+                    return <MatchCardWrapper postID={item} userID={userID} />;
                 }}
             />
             <Text textStyle="header" styleSize="l" style={styles.title}>
@@ -94,7 +98,7 @@ export default function MatchList({ userID }: Props) {
                 style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
-                    return <MatchCard postID={item} userID={userID} list={MatchSublist.pending} />;
+                    return <PendingCard postID={item} />;
                 }}
             />
         </View>
