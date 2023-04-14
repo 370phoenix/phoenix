@@ -1,10 +1,10 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { UserID } from "../../constants/DataTypes";
+import { UserID, PostType } from "../../constants/DataTypes";
 import { getUserUpdates, MessageType, UserInfo } from "../auth";
-import { PostType } from "../../constants/DataTypes";
 import { fetchSomePosts } from "../posts";
+import { registerForPushNotificationsAsync } from "../notifications";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -70,6 +70,10 @@ const AuthMachine = {
                         "Start": {
                             always: [
                                 {
+                                    target: "Set Token in DB",
+                                    cond: "noTokenSet",
+                                },
+                                {
                                     target: "Loading User Posts",
                                     cond: "postsChanged",
                                 },
@@ -94,6 +98,26 @@ const AuthMachine = {
                         },
                         "Posts Loaded": {},
                         "Loading Failed": {},
+                        "Set Token in DB": {
+                            invoke: {
+                                src: "setToken",
+                                id: "setToken",
+                                onDone: {
+                                    target: "Start",
+                                    actions: "updateUserInfoTokenSet",
+                                },
+                                onError: {
+                                    target: "Start",
+                                    actions: "logError",
+                                },
+                            },
+                            on: {
+                                "USER INFO CHANGED": {
+                                    target: "#New Authentication Machine.Init",
+                                    actions: "assignUserInfo",
+                                },
+                            },
+                        },
                     },
                 },
                 "Needs Profile": {
@@ -115,7 +139,14 @@ const AuthMachine = {
             },
         },
     },
-    context: { user: null, userInfo: null, ranOnce: false, error: null, posts: null },
+    context: {
+        user: null,
+        userInfo: null,
+        ranOnce: false,
+        error: null,
+        posts: null,
+        hasPushToken: false,
+    },
     schema: {
         context: {} as AuthMachineContext,
         events: {} as AuthMachineEvents,
@@ -130,6 +161,7 @@ type AuthMachineContext = {
     ranOnce: boolean;
     error: string | null;
     posts: PostType[] | null;
+    hasPushToken: boolean;
 };
 
 type AuthMachineEvents =
@@ -182,6 +214,16 @@ export const authMachine = createMachine(AuthMachine, {
             if (res.type === MessageType.error) throw Error(res.message);
             else return res.data;
         },
+        setToken: async (context) => {
+            const { user, userInfo } = context;
+            if (!user || !userInfo) throw Error("Missing User Information");
+            try {
+                await registerForPushNotificationsAsync(user.uid, userInfo);
+            }
+            catch(e:any){
+                throw Error("Error registering for push notifications");
+            }
+        },
     },
     actions: {
         assignUser: assign({
@@ -205,13 +247,21 @@ export const authMachine = createMachine(AuthMachine, {
         assignPosts: assign({
             posts: (_, event: any) => event.data,
         }),
+        updateUserInfoTokenSet: assign({
+            hasPushToken: true,
+            userInfo: (context, event: any) => {
+                if(event.type !== "USER INFO CHANGED" && context.userInfo) return {...context.userInfo, hasPushToken: true};
+                if(event.type === "USER INFO CHANGED" && !event.userInfo) return null;
+                return {...event.userInfo, hasPushToken: true};
+    }}),
         logError: (_, event: any) => console.error(event.data),
     },
     guards: {
         userExists: (context) => (context.user ? true : false),
         userInfoExists: (context) => (context.userInfo ? true : false),
-        noRunYet: (context) => context.ranOnce == false,
+        noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
+        noTokenSet: (context) => !context.hasPushToken,
     },
 });
 

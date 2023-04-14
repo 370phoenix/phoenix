@@ -22,6 +22,7 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
+    hasPushToken: boolean;
 };
 
 export type FBUserInfo = {
@@ -35,6 +36,8 @@ export type FBUserInfo = {
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
+    hasPushToken: boolean;
 };
 
 // MESSAGES //
@@ -229,6 +232,8 @@ export async function deleteAccount(userID: UserID): Promise<SuccessMessage | Er
     try {
         const userRef = database().ref("users/" + userID);
         await userRef.remove();
+        const pushTokenRef = database().ref("pushTokens/" + userID);
+        await pushTokenRef.remove();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
@@ -249,6 +254,7 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
+    hasPushToken?: boolean;
     userID?: string | null;
 };
 /**
@@ -262,6 +268,7 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
+    hasPushToken = false,
     userID = null,
     phone = null,
     userInfo = null,
@@ -287,11 +294,12 @@ export function validateProfile({
         if (userInfo)
             // Changing Info
             return {
+                username,
+                major,
+                hasPushToken,
+                pronouns,
+                gradYear,
                 userID: userInfo.userID,
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
                 ridesCompleted: userInfo.ridesCompleted,
@@ -304,15 +312,16 @@ export function validateProfile({
             return {
                 userID,
                 chillIndex: undefined,
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
-                phone: phone,
+                username,
+                major,
+                pronouns,
+                gradYear,
+                phone,
+                hasPushToken,
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
-                matches: [],
+                matches: []
             };
         } else return noUserError;
     } catch (e: any) {

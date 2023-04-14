@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { TouchableWithoutFeedback, View, Keyboard, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
@@ -16,6 +16,11 @@ import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
+type Coords = {
+    lat: number;
+    long: number;
+};
+
 // FIXME: too much state going on here
 export default function CreatePostForm({ navigation }: { navigation: any }) {
     const headerHeight = useHeaderHeight();
@@ -29,7 +34,9 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const [endTime, setEndTime] = useState(new Date());
     // location state
     const [pickup, setPickup] = useState("");
+    const [pickupCoords, setPickupCoords] = useState<Coords | undefined>(undefined);
     const [dropoff, setDropoff] = useState("");
+    const [dropoffCoords, setDropoffCoords] = useState<Coords | undefined>(undefined);
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);
@@ -66,8 +73,8 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
         const post: NewPostType = {
             pickup,
             dropoff,
-            pickupCoords: undefined,
-            dropoffCoords: undefined,
+            pickupCoords,
+            dropoffCoords,
             user: userID,
             riders: [],
             pending: [],
@@ -97,7 +104,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
         <>
             <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
             <View>
-                <LocationButton setLocation={setPickup} onChangeText={onChangePickup} />
+                <LocationButton setLocation={setPickupCoords} onChangeText={onChangePickup} />
             </View>
             <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>

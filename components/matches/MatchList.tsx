@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { FlatList, StyleSheet } from "react-native";
 
 import MatchCard from "./MatchCard";
@@ -8,13 +8,24 @@ import Colors from "../../constants/Colors";
 import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
+import * as Notifications from "expo-notifications";
 import PendingCard from "./PendingCard";
 import MatchCardWrapper from "./MatchCardWrapper";
 
 type Props = {
     userID: UserID;
 };
+
 export default function MatchList({ userID }: Props) {
+    useEffect(() => {
+        const subscription = Notifications.addNotificationReceivedListener(
+            (notification: Notifications.Notification) => {
+                console.log(notification);
+            }
+        );
+        return () => subscription.remove();
+    }, []);
+
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
     const userPosts = useSelector(authService, userPostsSelector) ?? [];
@@ -22,11 +33,9 @@ export default function MatchList({ userID }: Props) {
     if (!userInfo)
         return (
             <View style={{ marginTop: 0 }}>
-                {
-                    <Text style={{ color: "white" }} textStyle="title" styleSize="l">
-                        Loading...
-                    </Text>
-                }
+                <Text style={{ color: "white" }} textStyle="title" styleSize="l">
+                    Loading...
+                </Text>
             </View>
         );
 

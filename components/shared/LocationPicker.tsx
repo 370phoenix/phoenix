@@ -4,6 +4,7 @@ import { View } from "react-native";
 
 import { Button, TextField } from "./Themed";
 import Colors from "../../constants/Colors";
+import { Coords } from "../../constants/DataTypes";
 
 export { Location };
 export default function LocationPicker({
@@ -44,7 +45,8 @@ export function LocationButton({
 
         let location: Location.LocationObject | null = await Location.getLastKnownPositionAsync();
         if (location == null) location = await Location.getCurrentPositionAsync();
-        setLocation(location);
+        const coords : Coords = {lat: location.coords.latitude, long: location.coords.longitude}
+        setLocation(coords);
 
         const place = await Location.reverseGeocodeAsync({
             latitude: location.coords.latitude,
