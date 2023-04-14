@@ -94,9 +94,13 @@ function Messages({ messages, userID, displayNames, sendMessage }: MessagesProps
                 )}
             />
             <ChatInput
-                scrollToEnd={() =>
-                    listRef.current && listRef.current.scrollToEnd({ animated: true })
-                }
+                scrollToEnd={() => {
+                    if (!listRef.current) return;
+                    const ref = listRef.current.getNativeScrollRef();
+                    if (!ref) return;
+                    if ("scrollToEnd" in ref && typeof ref.scrollToEnd === "function")
+                        ref.scrollToEnd({ animated: true });
+                }}
                 userID={userID}
                 sendMessage={sendMessage}
             />
