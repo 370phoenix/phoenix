@@ -26,8 +26,6 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: -20,
         // marginBottom: 16,
-        backgroundColor: Colors.gray[4],
+        backgroundColor: Colors.gray[3],
     },
 });
-
-//need to fix bottom of lis

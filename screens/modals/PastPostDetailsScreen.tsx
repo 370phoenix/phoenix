@@ -2,6 +2,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
+import { firebase } from "@react-native-firebase/database";
 
 import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -16,6 +17,8 @@ import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
+import { pushFeedback } from "../../utils/feedback";
+import { FeedbackEntryType } from "../../constants/DataTypes";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">; //change to "PastPostDetails"
 export default function DetailsModal({ route }: Props) {
@@ -59,13 +62,30 @@ function MoreInfo({ post }: { post: PostType }) {
     const { riders, error } = state.context;
     const [notes, setNotes] = useState("");
 
-    const onSubmit = useState<string>;
+    const authService: any = useContext(AuthContext);
+    const id = useSelector(authService, userIDSelector);
+    const userID = id ? id : "No user found";
+
+    const postID = post.postID;
+
+    const timestamp = Date.now();
 
     if (state.matches("Start")) {
         const ids = post.riders ? post.riders : [];
         if (!ids.includes(post.user)) ids.push(post.user);
         send("LOAD", { ids });
     }
+
+    const onSubmit = async () => {
+        const feedback: FeedbackEntryType = {
+            message: notes,
+            postID: postID,
+            userID: userID,
+            timestamp: timestamp,
+        };
+
+        pushFeedback(feedback);
+    };
 
     // changed ride info --> ride feedback
     //commented out everything up until notes
@@ -86,6 +106,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 placeholder="Type feedback here..."
                 placeholderTextColor={Colors.gray[2]}
             />
+            <Button onPress={onSubmit} title="Submit" color="purple" />
             <Spacer direction="column" size={48} />
 
             {riders && <UserList riders={riders} message={error} />}
@@ -119,6 +140,10 @@ function UserList({ riders, message }: { riders: UserInfo[]; message: string | n
 
 function UserDetails({ user, num }: { user: UserInfo; num: number }) {
     const onSubmit = useState<string>;
+
+    const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+
+    const rnsRef = db.ref("noShow").child(userID).child(postID).set(true);
 
     return (
         <View>

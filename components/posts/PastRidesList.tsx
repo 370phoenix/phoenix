@@ -51,7 +51,6 @@ export default function PastRidesList() {
                         return <PastPostsCard post={item} />;
                     }}
                 />
-                // <Spacer direction="column" size={16} />
             )}
         </View>
     );

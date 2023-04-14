@@ -45,10 +45,13 @@ export default function PastPostsCard({ post }: Props) {
                     </Text>
                 </View>
                 <Spacer direction="column" size={16} />
-                <View>
+
+                <View style={styles.iconRow}>
                     <Text textStyle="label" style={{ color: colorPurple }}>
                         {convertDate(post.startTime)}
                     </Text>
+                    <RoundTrip color={colorPurple} height={20} />
+                    <feedbackExclaim height={20} />
                 </View>
             </View>
         </Pressable>
@@ -57,8 +60,7 @@ export default function PastPostsCard({ post }: Props) {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        paddingLeft: 16,
-        paddingVertical: 16,
+        padding: 16,
         flexDirection: "row",
         alignItems: "center",
         borderTopWidth: 1,
@@ -74,8 +76,9 @@ const styles = StyleSheet.create({
         color: Colors.gray[2],
     },
     headerContainer: {
+        flex: 1,
         flexDirection: "row",
-        alignItems: "baseline",
+        alignItems: "center",
     },
     bodyContainer: {
         flexDirection: "row",
@@ -102,5 +105,13 @@ const styles = StyleSheet.create({
     riderGroup: {
         alignItems: "center",
         justifyContent: "center",
+    },
+    iconRow: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between", //flex-start, flex-end, center, space-between, space-around, and space-evenly
+        alignItems: "center", //flex-start, flex-end, center, and baseline.
+
+        //add padding to card, arrow and destination in same row
     },
 });
