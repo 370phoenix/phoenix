@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
-import { onRidersChanged } from "./notifications";
+import { onRidersChanged, onPendingChanged } from "./notifications";
 import { removePosts } from "./posts";
 
 admin.initializeApp();
@@ -10,8 +10,16 @@ export const ridersChangedNotification = functions.database
     .ref("/posts/{postID}/riders")
     .onUpdate(async (change, context) => {
         const res = await onRidersChanged(change, context);
-        if(res) console.log("Rider change notification sent");
+        if (res) console.log("Rider change notification sent");
         else console.error("Error sending rider change notification");
+    });
+
+export const pendingChangedNotification = functions.database
+    .ref("/posts/{postID}/pending")
+    .onUpdate(async (change, context) => {
+        const res = await onPendingChanged(change, context);
+        if (res) console.log("New request notification sent");
+        else console.error("Error sending new request notification");
     });
 
 export const clearCompleted = functions.pubsub

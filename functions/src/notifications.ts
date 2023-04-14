@@ -6,7 +6,25 @@ import * as admin from "firebase-admin";
 //////////////////////////////////////////
 //////////////////////////////////////////
 
-const db = admin.database();
+export async function onPendingChanged(change: any, context: any) {
+    try {
+        const { postID } = context.params;
+
+        // before = rider array before update, after = rider array after update
+        const before = change.before.val();
+        const after = change.after.val();
+
+        // more pending than before, someone has requested
+        if (after.length > before.length) {
+            sendNewRequestNotification(postID);
+        }
+
+        return true;
+    } catch (e: any) {
+        console.error(`Error in DELETE POSTS: ${e.message}`);
+        return false;
+    }
+}
 
 export async function onRidersChanged(change: any, context: any) {
     try {
@@ -41,6 +59,8 @@ export async function onRidersChanged(change: any, context: any) {
  */
 async function sendCancelNotifications(postID: string) {
     try {
+        const db = admin.database();
+
         const snapshot = await db.ref("posts/" + postID).get();
         if (!snapshot) throw Error("Error fetching post\n");
         const post = snapshot.val();
@@ -69,6 +89,8 @@ async function sendCancelNotifications(postID: string) {
  */
 async function sendAcceptNotification(postID: string, userID: string) {
     try {
+        const db = admin.database();
+
         const r1 = await getPushToken(userID);
         const token = r1.data;
         const snapshot = await db.ref("posts/" + postID).get();
@@ -84,6 +106,28 @@ async function sendAcceptNotification(postID: string, userID: string) {
 }
 
 /**
+ * Send push notifications for accepted requests when listener detects update
+ */
+async function sendNewRequestNotification(postID: string) {
+    try {
+        const db = admin.database();
+
+        const snapshot = await db.ref("posts/" + postID).get();
+        if (!snapshot) throw Error("Error fetching post\n");
+        const post = snapshot.val();
+        const user = post.user;
+        const r1 = await getPushToken(user);
+        const token = r1.data;
+        const dropoff = post.dropoff;
+        const title = "New Match Request!";
+        const body = `Someone requested a match with your ride to ${dropoff}! To view more details, open the FareShare app.`;
+        sendOneNotification(token, title, body);
+    } catch (e: any) {
+        console.error(`Error: ${e.message}`);
+    }
+}
+
+/**
  * Skeleton for sending push notification using Expo API
  */
 async function sendOneNotification(expoPushToken: string, title: string, body: string) {
@@ -92,7 +136,6 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
         title,
         body,
     };
-
     await fetch("https://exp.host/--/api/v2/push/send", {
         method: "POST",
         headers: {
@@ -102,6 +145,7 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
         },
         body: JSON.stringify(message),
     });
+    console.log("Sent notification to" + expoPushToken);
 }
 
 /**
@@ -112,6 +156,8 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
  */
 async function getPushToken(userID: string): Promise<any> {
     try {
+        const db = admin.database();
+
         const snapshot = await db.ref("pushTokens/" + userID).once("value");
         const val = snapshot.val();
         if (snapshot.exists()) return { type: "Success", data: val };
