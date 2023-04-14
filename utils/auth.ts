@@ -161,7 +161,9 @@ export function getUserUpdates(
                 onUpdate(convertUserInfo(key, data));
             }
         });
-        const unsub = () => userRef.off("value", onChange);
+        const unsub = () => {
+            userRef.off("value", onChange);
+        };
         return unsub;
     } catch (e: any) {
         return `Error ${e.message}`;
@@ -266,7 +268,8 @@ export function validateProfile({
 }: ValidateProfileParams): UserInfo | string {
     try {
         const noUserError = "Must supply either phone or previous user info.";
-        if (!(phone || userInfo)) throw new Error(noUserError);
+        console.log(!phone && !userInfo);
+        if (!phone && !userInfo) throw new Error(noUserError);
 
         const filter = new Filter();
 

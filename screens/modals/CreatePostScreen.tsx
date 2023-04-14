@@ -4,10 +4,10 @@ import { StyleSheet, View } from "react-native";
 import CreatePostForm from "../../components/posts/CreatePostForm";
 import Colors from "../../constants/Colors";
 
-export default function CreatePostScreen() {
+export default function CreatePostScreen({ navigation }: any) {
     return (
         <View style={styles.container}>
-            <CreatePostForm />
+            <CreatePostForm navigation={navigation} />
         </View>
     );
 }

@@ -1,54 +1,31 @@
-import React, { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
+import { convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
-import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
-import { UserID, PostType } from "../../constants/DataTypes";
+import { postInfoMachine } from "../../utils/machines/postInfoMachine";
 
 export type Props = {
-    post: PostType;
-    userID: UserID;
+    postID: string;
 };
 
-export default function MatchCard({ userID, post }: Props) {
-    const navigation = useNavigation();
+export default function PendingCard({ postID }: Props) {
+    const [state, send] = useMachine(postInfoMachine);
+    if (state.matches("Start")) send("LOAD", { id: postID });
+    const { post } = state.context;
+    const color = Colors.purple.p;
 
-    const isMine = post.user === userID;
-    const color = isMine ? Colors.navy.p : Colors.purple.p;
-
-    const [state, send] = useMachine(chatHeaderMachine);
-    if (state.matches("Start")) send({ type: "INIT", postID: post.postID });
-    const { header, error } = state.context;
-    if (!header) return <></>;
-
-    if (error)
-        return (
-            <View style={[styles.cardContainer, { backgroundColor: Colors.gray.w }]}>
-                <Text textStyle="label" styleSize="m" style={styles.error}>
-                    {error}
-                </Text>
-            </View>
-        );
-
+    if (!post) return <></>;
     return (
-        <Pressable
-            onPress={() => navigation.navigate("ChatScreen", { post, header })} // Okay to override with ! because of early return
-            style={({ pressed }) => [
-                styles.cardContainer,
-                {
-                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
-                },
-            ]}>
+        <View style={styles.cardContainer}>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        post.pickup
+                        {convertLocation(post.pickup)}
                     </Text>
                 </View>
                 <View style={styles.bodyContainer}>
@@ -58,7 +35,7 @@ export default function MatchCard({ userID, post }: Props) {
                         <Right color={color} height={20} />
                     )}
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        post.dropoff
+                        {convertLocation(post.dropoff)}
                     </Text>
                 </View>
             </View>
@@ -71,7 +48,7 @@ export default function MatchCard({ userID, post }: Props) {
                     </Text>
                 </View>
             </View>
-        </Pressable>
+        </View>
     );
 }
 
@@ -82,6 +59,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         borderTopWidth: 1,
+        opacity: 0.7,
     },
     body: { flex: 1 },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },

@@ -6,10 +6,11 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
 import { MatchSublist } from "./components/matches/MatchList";
+
 import { PostType } from "./constants/DataTypes";
 import { UserInfo } from "./utils/auth";
+import { ChatHeader } from "./utils/chat";
 
 declare global {
     namespace ReactNavigation {
@@ -27,12 +28,12 @@ export type RootStackParamList = {
     CreateProfile: CreateProfileParamList | undefined;
     PostDetails: PostDetailsParamList | undefined;
     CreatePost: undefined;
-    MatchDetails: MatchDetailsParamList | undefined;
+    ChatScreen: ChatScreenParamList | undefined;
 };
 
-export type MatchDetailsParamList = {
+export type ChatScreenParamList = {
     post: PostType;
-    list: MatchSublist;
+    header: ChatHeader;
 };
 
 export type PostDetailsParamList = {

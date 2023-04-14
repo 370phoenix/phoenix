@@ -24,7 +24,7 @@ import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
 import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
-import MatchDetailsScreen from "../screens/matches/MatchDetailsScreen";
+import ChatScreen from "../screens/matches/ChatScreen";
 import auth from "@react-native-firebase/auth";
 import { useSelector } from "@xstate/react";
 import { AuthContext, needsInfoSelector, signedInSelector } from "../utils/machines/authMachine";
@@ -92,10 +92,10 @@ function RootNavigator() {
                             })}
                         />
                         <Stack.Screen
-                            name="MatchDetails"
-                            component={MatchDetailsScreen}
+                            name="ChatScreen"
+                            component={ChatScreen}
                             options={({ navigation }) => ({
-                                title: "Match Details",
+                                title: "Chat Screen",
                                 headerLeft: () => (
                                     <Button
                                         title="Go back"
