@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { FlatList, StyleSheet } from "react-native";
 
 import MatchCard from "./MatchCard";
@@ -8,11 +8,21 @@ import Colors from "../../constants/Colors";
 import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
+import Notifications from "expo-notifications";
 
 type Props = {
     userID: UserID;
 };
+
 export default function MatchList({ userID }: Props) {
+
+    useEffect(() => {
+        const subscription = Notifications.addNotificationReceivedListener((notification) => {
+            console.log(notification);
+        });
+        return () => subscription.remove();
+    });
+    
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
     const userPosts = useSelector(authService, userPostsSelector) ?? [];
