@@ -268,7 +268,8 @@ export function validateProfile({
 }: ValidateProfileParams): UserInfo | string {
     try {
         const noUserError = "Must supply either phone or previous user info.";
-        if (!(phone || userInfo)) throw new Error(noUserError);
+        console.log(!phone && !userInfo);
+        if (!phone && !userInfo) throw new Error(noUserError);
 
         const filter = new Filter();
 

@@ -41,6 +41,10 @@ const CreateProfileMachine = {
                         actions: "assignError",
                     },
                 ],
+                onError: {
+                    target: "Information Invalid",
+                    actions: "assignError"
+                }
             },
         },
         "Information Valid": {
@@ -125,7 +129,9 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
         writeUser: (context: { userID: string | null; userInfo: UserInfo | null }) =>
             writeUser(context.userID, context.userInfo),
         validateInfo: async (context: any) => {
-            return validateProfile({ ...context.rawInfo, userInfo: context.prevInfo });
+            const res = validateProfile({ ...context.rawInfo, userInfo: context.prevInfo, userID: context.userID });
+            if (typeof res == "string") throw new Error(res);
+            else return res;
         },
     },
     actions: {
@@ -142,7 +148,7 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
             rawInfo: (_, event: any) => event.info,
             userID: (_, event: any) => event.userID,
         }),
-        assignError: assign({ error: (_, event: any) => event.data }),
+        assignError: assign({ error: (_, event: any) => "message" in event.data ? event.data.message : event.data }),
     },
     guards: {
         isValid: (_, event: any) => typeof event.data !== "string",
