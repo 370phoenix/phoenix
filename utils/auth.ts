@@ -3,6 +3,7 @@ import Pronouns from "../constants/Pronouns.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
+import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
 
 ///////////////////////////////////////////
@@ -230,11 +231,13 @@ export async function checkUserInfo(
  */
 export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + userID);
-        await userRef.remove();
-        const pushTokenRef = database().ref("pushTokens/" + userID);
-        await pushTokenRef.remove();
-        await auth().signOut();
+        functions().useEmulator("10.44.233.198", 5001);
+        await functions().httpsCallable("deleteUserPosts")();
+        // const userRef = database().ref("users/" + userID);
+        // await userRef.remove();
+        // const pushTokenRef = database().ref("pushTokens/" + userID);
+        // await pushTokenRef.remove();
+        // await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
         return { message: `Error ${e.message}`, type: MessageType.error };
@@ -321,7 +324,7 @@ export function validateProfile({
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
-                matches: []
+                matches: [],
             };
         } else return noUserError;
     } catch (e: any) {
