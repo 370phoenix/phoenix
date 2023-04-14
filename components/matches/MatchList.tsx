@@ -15,14 +15,13 @@ type Props = {
 };
 
 export default function MatchList({ userID }: Props) {
-
     useEffect(() => {
         const subscription = Notifications.addNotificationReceivedListener((notification) => {
             console.log(notification);
         });
         return () => subscription.remove();
-    });
-    
+    }, []);
+
     const authService = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
     const userPosts = useSelector(authService, userPostsSelector) ?? [];
@@ -30,11 +29,9 @@ export default function MatchList({ userID }: Props) {
     if (!userInfo)
         return (
             <View style={{ marginTop: 0 }}>
-                {
-                    <Text style={{ color: "white" }} textStyle="title" styleSize="l">
-                        Loading...
-                    </Text>
-                }
+                <Text style={{ color: "white" }} textStyle="title" styleSize="l">
+                    Loading...
+                </Text>
             </View>
         );
 
