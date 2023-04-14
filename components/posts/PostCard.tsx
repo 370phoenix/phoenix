@@ -7,7 +7,7 @@ import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
 import { UserID, PostType } from "../../constants/DataTypes";
 import Colors from "../../constants/Colors";
-import { convertLocation, convertDate, convertTime } from "../../utils/convertPostTypes";
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { deletePost } from "../../utils/posts";
 import { Spacer, Text, View } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
@@ -33,8 +33,8 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     if (post.pending?.includes(userID!)) return <></>;
     if (!post.dropoff) return <></>;
 
-    const pickup = convertLocation(post.pickup);
-    const dropoff = convertLocation(post.dropoff);
+    const pickup = post.pickup;
+    const dropoff = post.dropoff;
     const fDate = convertDate(post.startTime);
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);

@@ -10,13 +10,13 @@ import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
 import { NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import validateData, { MessageType } from "../../utils/postValidation";
+import validateData from "../../utils/postValidation";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
 
 // stores options for number picker form inputs
-
+// FIXME: too much state going on here
 export default function CreatePostForm({ navigation }: { navigation: any }) {
     const headerHeight = useHeaderHeight();
     const authService: any = useContext(AuthContext);
@@ -28,35 +28,30 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
     // location state
-    const [pickup, setPickup] = useState<string>("");
-    const [pickupText, setPickupText] = useState("");
-    const [dropoff, setDropoff] = useState<string>("");
-    const [dropoffText, setDropoffText] = useState("");
+    const [pickup, setPickup] = useState("");
+    const [dropoff, setDropoff] = useState("");
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
-    const [numSeats, setNumSeats] = useState(1);
+    const [totalSpots, setTotalSpots] = useState(1);
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
     const [message, setMessage] = useState<string | null>(null);
 
     // contains constraints for modifying seats
-    const addNumSeats = () => {
-        if (numSeats < 5) setNumSeats((numSeats) => numSeats + 1);
+    const addTotalSpots = () => {
+        if (totalSpots < 6) setTotalSpots((totalSpots) => totalSpots + 1);
     };
-    const deleteNumSeats = () => {
-        if (numSeats > 1) setNumSeats((numSeats) => numSeats - 1);
+    const deleteTotalSpots = () => {
+        if (totalSpots > 1) setTotalSpots((totalSpots) => totalSpots - 1);
     };
 
-    const onChangePickup = (text: string) => {
-        setPickupText(text);
+    const onChangePickup = (text: any) => {
         setPickup(text);
     };
-    const onChangeDropoff = (text: string) => {
-        setDropoffText(text);
+    const onChangeDropoff = (text: any) => {
         setDropoff(text);
     };
-
     // change handler for round trip switch
     const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
 
@@ -65,56 +60,46 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
-        if (!submitting) {
-            setSubmitting(true);
-            //uses validation function
-            //errors are displayed as error messages below
-            const valid = validateData({
-                startTime,
-                endTime,
-                pickup,
-                dropoff,
-                numSeats,
-                notes,
-            });
-
-            if (valid.type === MessageType.error) {
-                setMessage(valid.message);
-                setSubmitting(false);
-                return;
-            }
-
-            // Push to database
-            if (valid.type === MessageType.success) {
-                const post: NewPostType = {
-                    pickup,
-                    dropoff,
-                    totalSpots: numSeats + 1,
-                    notes,
-                    startTime: startTime.getTime(),
-                    endTime: endTime.getTime(),
-                    roundTrip: isRoundtrip,
-                    user: userID,
-                    riders: [],
-                    pending: [],
-                };
-
-                //Verify completion
-                await createPost(post, userID, userInfo);
-                setWriteComplete(true);
-                setTimeout(() => navigation.goBack(), 500);
-            }
+        if (submitting) return;
+        setSubmitting(true);
+        //uses validation function
+        const post: NewPostType = {
+            pickup,
+            dropoff,
+            pickupCoords: undefined,
+            dropoffCoords: undefined,
+            user: userID,
+            riders: [],
+            pending: [],
+            totalSpots,
+            notes,
+            roundTrip: isRoundtrip,
+            startTime: startTime.getTime(),
+            endTime: endTime.getTime(),
+        };
+        //errors are displayed as error messages below
+        try {
+            const validatedPost = await validateData({ post });
+            await createPost(validatedPost, userID, userInfo);
+            setWriteComplete(true);
+            setSubmitting(false);
+            setTimeout(() => {
+                if (navigation.canGoBack()) navigation.goBack();
+            }, 500);
+        } catch (e: any) {
+            setSubmitting(false);
+            setMessage(e.message);
         }
     };
 
     // group contains location and round trip info
     const TripDetails = (
         <>
-            <LocationPicker name="From" inputText={pickupText} onChangeText={onChangePickup} />
+            <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
             <View>
                 <LocationButton setLocation={setPickup} onChangeText={onChangePickup} />
             </View>
-            <LocationPicker name="To" inputText={dropoffText} onChangeText={onChangeDropoff} />
+            <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
                 <Text textStyle="lineTitle">ROUND TRIP?</Text>
                 <Spacer direction="row" size={24} />
@@ -160,10 +145,39 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                     }}>
                     <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
                     <NumberPicker
-                        count={numSeats}
-                        handlePlus={addNumSeats}
-                        handleMinus={deleteNumSeats}
+                        count={totalSpots}
+                        handlePlus={addTotalSpots}
+                        handleMinus={deleteTotalSpots}
                     />
+                    <Spacer direction="column" size={16} />
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}>
+                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
+                        <NumberPicker
+                            count={totalSpots}
+                            handlePlus={addTotalSpots}
+                            handleMinus={deleteTotalSpots}
+                        />
+                    </View>
+                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
+                    {message && (
+                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
+                            {message}
+                        </Text>
+                    )}
+                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
+                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+                    <Button
+                        onPress={onSubmit}
+                        color="navy"
+                        title="Post"
+                        style={{ height: headerHeight + 32 }}
+                    />
+                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
                 <Spacer direction="column" size={16} style={{ flex: 1 }} />
                 {message && (

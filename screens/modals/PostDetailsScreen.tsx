@@ -10,7 +10,7 @@ import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../constants/DataTypes";
 import { RootStackParamList } from "../../types";
-import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { MessageType, UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
@@ -93,8 +93,8 @@ function MoreInfo({ post }: { post: PostType }) {
     const [state, send] = useMachine(multipleUserMachine);
     const { riders, error } = state.context;
 
-    const pickup = convertLocation(post.pickup);
-    const dropoff = convertLocation(post.dropoff);
+    const pickup = post.pickup;
+    const dropoff = post.dropoff;
     const date = convertDate(post.startTime);
     const startTime = convertTime(post.startTime);
     const endTime = convertTime(post.endTime);

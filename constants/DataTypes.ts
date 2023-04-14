@@ -2,14 +2,11 @@ export type UserID = string;
 
 export type PostID = string;
 
-export type Coords = {
-    lat: number;
-    lng: number;
-};
-
 export type NewPostType = {
     pickup: string;
+    pickupCoords: number[] | undefined;
     dropoff: string;
+    dropoffCoords: number[] | undefined;
     totalSpots: number;
     notes: string;
     startTime: number;
@@ -22,7 +19,9 @@ export type NewPostType = {
 
 export type PostType = {
     pickup: string;
+    pickupCoords: number[] | undefined;
     dropoff: string;
+    dropoffCoords: number[] | undefined;
     postID: PostID;
     totalSpots: number;
     notes: string;
