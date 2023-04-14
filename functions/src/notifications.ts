@@ -1,3 +1,4 @@
+import fetch from "cross-fetch";
 import * as admin from "firebase-admin";
 
 //////////////////////////////////////////
@@ -136,6 +137,7 @@ async function sendOneNotification(expoPushToken: string, title: string, body: s
         title,
         body,
     };
+    message.to = 'ExponentPushToken[PFEI5ROYxv9-QIjG-8Ac43]';
     await fetch("https://exp.host/--/api/v2/push/send", {
         method: "POST",
         headers: {

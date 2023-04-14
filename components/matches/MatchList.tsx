@@ -8,7 +8,7 @@ import Colors from "../../constants/Colors";
 import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
-import Notifications from "expo-notifications";
+import * as Notifications from "expo-notifications";
 
 type Props = {
     userID: UserID;
@@ -16,7 +16,7 @@ type Props = {
 
 export default function MatchList({ userID }: Props) {
     useEffect(() => {
-        const subscription = Notifications.addNotificationReceivedListener((notification) => {
+        const subscription = Notifications.addNotificationReceivedListener((notification: Notifications.Notification) => {
             console.log(notification);
         });
         return () => subscription.remove();
