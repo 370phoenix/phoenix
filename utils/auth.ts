@@ -232,7 +232,6 @@ export async function checkUserInfo(
  */
 export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        console.log(auth().currentUser?.uid);
         await functions().httpsCallable("deleteUser")();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
