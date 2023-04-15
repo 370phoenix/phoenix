@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import functions from "@react-native-firebase/functions";
 
 import { Right } from "../../assets/icons/Chevron";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -8,7 +9,6 @@ import { Full, Outline } from "../../assets/icons/User";
 import { UserID, PostType } from "../../constants/DataTypes";
 import Colors from "../../constants/Colors";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
-import { deletePost } from "../../utils/posts";
 import { Spacer, Text, View } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
 import { useMachine, useSelector } from "@xstate/react";
@@ -147,7 +147,16 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                 text: "Confirm",
                 onPress: async () => {
                     const [userID, userObj] = userInfo;
-                    if (userID && userObj) await deletePost(post.postID, userID, userObj);
+                    if (userID && userObj) {
+                        try {
+                            await functions().httpsCallable("fullPostDelete")({
+                                post: post,
+                                postID: post.postID,
+                            });
+                        } catch (e: any) {
+                            console.error(e);
+                        }
+                    }
                 },
             },
             {

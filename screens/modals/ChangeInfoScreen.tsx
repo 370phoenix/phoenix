@@ -48,6 +48,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
     const allowChange = state.matches("Information Valid") && state.context.infoChanged;
+    console.log(state.matches("Information Valid"), state.context.infoChanged);
 
     useEffect(() => {
         if (!userID || !userInfo) return;

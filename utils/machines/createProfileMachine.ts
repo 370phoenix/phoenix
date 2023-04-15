@@ -43,8 +43,8 @@ const CreateProfileMachine = {
                 ],
                 onError: {
                     target: "Information Invalid",
-                    actions: "assignError"
-                }
+                    actions: "assignError",
+                },
             },
         },
         "Information Valid": {
@@ -130,7 +130,11 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
         writeUser: (context: { userID: string | null; userInfo: UserInfo | null }) =>
             writeUser(context.userID, context.userInfo),
         validateInfo: async (context: any) => {
-            const res = validateProfile({ ...context.rawInfo, userInfo: context.prevInfo, userID: context.userID });
+            const res = validateProfile({
+                ...context.rawInfo,
+                userInfo: context.prevInfo,
+                userID: context.userID,
+            });
             if (typeof res == "string") throw new Error(res);
             else return res;
         },
@@ -149,29 +153,24 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
             rawInfo: (_, event: any) => event.info,
             userID: (_, event: any) => event.userID,
         }),
-        assignError: assign({ error: (_, event: any) => "message" in event.data ? event.data.message : event.data }),
+        assignError: assign({
+            error: (_, event: any) => ("message" in event.data ? event.data.message : event.data),
+        }),
     },
     guards: {
         isValid: (_, event: any) => typeof event.data !== "string",
-        hasChanged: (context, event: any) => isDifferent(context.prevInfo, event.data),
+        hasChanged: (context, event: any) => {
+            if (!context.prevInfo) return true;
+            return isDifferent(context.prevInfo, event.data);
+        },
     },
 });
 
 // CAUTION: Only compares 1 level deep
-function isDifferent(o1: any | null, o2: any | null | string) {
-    if (!o1 || !o2 || typeof o2 === "string") return false;
-
-    const o1keys = Object.keys(o1);
-    const o2keys = Object.keys(o2);
-
-    for (const key of o1keys) {
-        const v1 = o1[key];
-        const v2 = o2[key];
-
-        const isObjects = typeof v1 === "object" && typeof v2 === "object";
-
-        if ((isObjects && isDifferent(v1, v2)) || (!isObjects && v1 !== v2)) return true;
-    }
-
+function isDifferent(o1: UserInfo, o2: UserInfo) {
+    if (o1.major != o2.major) return true;
+    if (o1.pronouns != o2.pronouns) return true;
+    if (o1.username != o2.username) return true;
+    if (o1.gradYear != o2.gradYear) return true;
     return false;
 }

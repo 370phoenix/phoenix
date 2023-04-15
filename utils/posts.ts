@@ -142,55 +142,6 @@ export function getAllPostUpdates({
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
-///////////// DELETE POSTS ////////////////
-///////////////////////////////////////////
-///////////////////////////////////////////
-
-/**
- * Delete a single post.
- *
- * @param id (PostID): The ID of the post to delete
- * @param userId (UserID): The ID of the user that made the post
- * @param userInfo (UserInfo): The UserInfo of the user that made the post
- * @returns (SuccessMessage | ErrorMessage)
- */
-export async function deletePost(
-    id: PostID,
-    userId: UserID,
-    userInfo: UserInfo
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        // Remove Post ref
-        const postRef = db.ref("posts/" + id);
-        await postRef.remove();
-
-        // Update User Info
-        let newPosts = userInfo.posts ? userInfo.posts : [];
-        if (newPosts.length == 1) newPosts = [];
-        else {
-            const i = newPosts.indexOf(id);
-            if (i !== -1) newPosts.splice(i, 1);
-        }
-        userInfo.posts = newPosts;
-
-        const res = await writeUser(userId, userInfo);
-        if (res.type === MessageType.error) throw Error(res.message);
-
-        // Remove Chat Header
-        await db.ref("chats/" + id).remove();
-
-        // Remove Messages
-        await db.ref("messages/" + id).remove();
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        console.log(`Error in delete post: ${e.message}`);
-        return { type: MessageType.error, message: e.message };
-    }
-}
-
-///////////////////////////////////////////
-///////////////////////////////////////////
 ///////////// CREATE POSTS ////////////////
 ///////////////////////////////////////////
 ///////////////////////////////////////////

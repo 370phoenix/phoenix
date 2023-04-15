@@ -232,12 +232,12 @@ export async function checkUserInfo(
  */
 export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const app = firebase.app();
-        functions().useEmulator("10.44.233.198", 5001);
-        await functions(app).httpsCallable("deleteUser")();
+        console.log(auth().currentUser?.uid);
+        await functions().httpsCallable("deleteUser")();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
 }
