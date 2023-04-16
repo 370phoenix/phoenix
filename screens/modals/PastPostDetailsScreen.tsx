@@ -143,6 +143,8 @@ function UserDetails({ user, num }: { user: UserInfo; num: number }) {
 
     const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
+    const userID = user.id; //change from user.ID --> user.userID ?
+
     const rnsRef = db.ref("noShow").child(userID).child(postID).set(true);
 
     return (

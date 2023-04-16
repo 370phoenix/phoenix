@@ -7,7 +7,7 @@ import { PostType } from "../../constants/DataTypes";
 import { convertDate, convertLocation } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
-import feedbackExclaim from "../../assets/icons/feedbackExclaim";
+import FeedbackExclaim from "../../assets/icons/feedbackExclaim";
 
 export type Props = {
     post: PostType;
@@ -50,8 +50,7 @@ export default function PastPostsCard({ post }: Props) {
                     <Text textStyle="label" style={{ color: colorPurple }}>
                         {convertDate(post.startTime)}
                     </Text>
-                    <RoundTrip color={colorPurple} height={20} />
-                    <feedbackExclaim height={20} />
+                    <FeedbackExclaim height={40} />
                 </View>
             </View>
         </Pressable>
