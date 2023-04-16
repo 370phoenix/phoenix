@@ -3,7 +3,9 @@ import Pronouns from "../constants/Pronouns.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
+import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
+import firebase from "@react-native-firebase/app";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -230,13 +232,11 @@ export async function checkUserInfo(
  */
 export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + userID);
-        await userRef.remove();
-        const pushTokenRef = database().ref("pushTokens/" + userID);
-        await pushTokenRef.remove();
+        await functions().httpsCallable("deleteUser")();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
 }
@@ -321,7 +321,7 @@ export function validateProfile({
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
-                matches: []
+                matches: [],
             };
         } else return noUserError;
     } catch (e: any) {
