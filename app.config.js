@@ -1,10 +1,10 @@
 export default {
     expo: {
-        name: "phoenix",
+        name: "FareShare - Save",
         slug: "phoenix",
         version: "1.0.1",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
+        icon: "./assets/images/Icon_biggish.png",
         scheme: "fareshare",
         userInterfaceStyle: "automatic",
         splash: {
@@ -44,9 +44,6 @@ export default {
                 backgroundColor: "#ffffff",
             },
             package: "com.willtheodore.phoenix",
-        },
-        web: {
-            favicon: "./assets/images/favicon.png",
         },
         plugins: [
             "@react-native-firebase/auth",
