@@ -8,8 +8,13 @@ import {
     UserInfo,
     writeUser,
 } from "./auth";
-import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
-import { FBPostType, FirebasePostSchema, FreshPostType, PostSchema } from "./postValidation";
+import {
+    FBPostType,
+    FirebasePostSchema,
+    FreshPostType,
+    PostSchema,
+    PostType,
+} from "./postValidation";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -34,40 +39,10 @@ export type Unsubscribe = () => void;
  * @returns Success with Post Data | Error
  * @throws ZodError when validation fails
  */
-export async function fetchPost(postID: PostID): Promise<PostType> {
+export async function fetchPost(postID: string): Promise<PostType> {
     const snapshot = await db.ref("posts/" + postID).once("value");
-    const val = snapshot.val();
-    if (snapshot.exists())
-        return PostSchema.parse({
-            user: val.user,
-            postID: val.postID,
-            dropoff: val.dropoff,
-            pickup: val.pickup,
-            pickupCoords: val.pickupCoords,
-            dropoffCoords: val.dropoffCoords,
-            startTime: new Date(val.startTime),
-            endTime: new Date(val.endTime),
-            totalSpots: val.totalSpots,
-            notes: val.notes,
-            roundTrip: val.roundTrip,
-        });
+    if (snapshot.exists()) return valToPost(snapshot.val());
     else throw Error("Post does not exist.");
-}
-
-/**
- * Fetch all posts once.
- *
- * @returns (PostType[] | string): Post Data array or error messgae
- */
-export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
-    try {
-        const snapshot = await db.ref("posts").once("value");
-        const data: PostType[] = Object.values(snapshot.val());
-        data.sort((a, b) => a.startTime - b.startTime);
-        return { type: MessageType.success, data: data };
-    } catch (e: any) {
-        return { type: MessageType.error, message: e.message };
-    }
 }
 
 /**
@@ -77,7 +52,7 @@ export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | Erro
  * @returns (Success<PostType[] | ErrorMessage) Posts or an Error Message.
  */
 export async function fetchSomePosts(
-    ids: PostID[]
+    ids: string[]
 ): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
     try {
         const postsRef = db.ref("posts");
@@ -87,7 +62,7 @@ export async function fetchSomePosts(
             if (!id) continue;
             const postRef = postsRef.child(id);
             const snapshot = await postRef.once("value");
-            if (snapshot.exists()) posts.push(snapshot.val());
+            if (snapshot.exists()) posts.push(valToPost(snapshot.val()));
         }
 
         return { type: MessageType.success, data: posts };
@@ -112,8 +87,7 @@ export function getAllPostUpdates({
         "child_added",
         (snapshot) => {
             if (snapshot.exists()) {
-                const data: PostType = snapshot.val();
-                onChildAdded(data);
+                onChildAdded(valToPost(snapshot.val()));
             }
         },
         (_) => {} // TODO: HANDLE (ERROR) => {}
@@ -122,16 +96,14 @@ export function getAllPostUpdates({
         "child_changed",
         (snapshot) => {
             if (snapshot.exists()) {
-                const data: PostType = snapshot.val();
-                onChildChanged(data);
+                onChildChanged(valToPost(snapshot.val()));
             }
         },
         (_) => {} // TODO: HANDLE (ERROR) => {}
     );
     const onRemove = postsRef.on("child_removed", (snapshot) => {
         if (snapshot.exists()) {
-            const data: PostType = snapshot.val();
-            onChildRemoved(data);
+            onChildRemoved(valToPost(snapshot.val()));
         }
     });
     const unsub = () => {
@@ -171,7 +143,7 @@ export async function createPost(
         await postRef.set(newPost);
 
         // Add post to user info
-        const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
+        const posts: string[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
         const r2 = await writeUser(userID, userInfo);
@@ -218,9 +190,9 @@ export async function writePostData(post: PostType): Promise<SuccessMessage | Er
 type ARParams = {
     isAccept: boolean;
     userInfo: UserInfo | null;
-    requesterID: UserID;
+    requesterID: string;
     requesterInfo: UserInfo | null;
-    posterID: UserID;
+    posterID: string;
     post: PostType;
 };
 /**
@@ -292,7 +264,7 @@ export async function handleAcceptReject({
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function matchPost(
-    userID: UserID,
+    userID: string,
     post: PostType
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
@@ -333,7 +305,7 @@ export async function matchPost(
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function unmatchPost(
-    userID: UserID,
+    userID: string,
     post: PostType
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
@@ -372,80 +344,18 @@ export async function unmatchPost(
     }
 }
 
-/**
- * Initiates a request for a user to cancel pending match request from a post.
- *
- * @param userID (UserID): The ID of the user requesting to cancel a match request.
- * @param post (PostType): The post the user is trying to cancel a match request for.
- * @returns (SuccessMessage | ErrorMessage)
- */
-export async function cancelPendingMatch(
-    userID: UserID,
-    post: PostType
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        // remove postID from user.matches
-        const r1 = await getUserOnce(userID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const userInfo = r1.data;
-        const newPending = userInfo.pending;
-        if (!userInfo || !newPending) throw Error("Error fetching user info");
-        const postIndex = newPending.indexOf(post.postID);
-        if (postIndex === -1) throw Error("Post not found in user's pending rides");
-        if (newPending.length === 1) newPending.shift();
-        else newPending.splice(postIndex, 1);
-        userInfo.matches = newPending;
-
-        // remove userID from post.pending
-        const newRiders = post.pending;
-        if (!newRiders) throw Error("Error fetching users from post");
-        const userIndex = newRiders.indexOf(userID);
-        if (userIndex === -1) throw Error("User not found in post riders");
-        if (newRiders.length === 1) newRiders.shift();
-        newRiders.splice(userIndex, 1);
-        post.pending = newRiders;
-
-        // update user to remove post
-        const r3 = await writeUser(userID, userInfo);
-        if (r3.type === MessageType.error) throw Error(r3.message);
-
-        // update post to remove user
-        const r5 = await writePostData(post);
-        if (r5.type !== MessageType.success) throw new Error(r5.message);
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
-}
-
-/**
- * Helper function that identifies a request in the request array.
- *
- * @param requests ([UserID, PostID][]): The requests to search for
- * @param request ([UserID, PostID]): The request to locate
- * @returns (number) -1 if not found, the index in requests if found.
- */
-export function findRequestIndex(requests: [UserID, PostID][], request: [UserID, PostID]) {
-    for (let i = 0; i < requests.length; i++) {
-        const req = requests[i];
-        if (req[0] == request[0] && req[1] == request[1]) return i;
-    }
-    return -1;
-}
-
-export function comparePosts(a: PostType, b: PostType) {
-    if (!compareLengths("riders")) return false;
-    if (!compareLengths("pending")) return false;
-    return true;
-
-    function compareLengths(att: keyof PostType) {
-        const arrA = a[att] as string[] | undefined;
-        const arrB = b[att] as string[] | undefined;
-        if (!arrA && arrB) return false;
-        if (!arrB && arrA) return false;
-        if (!arrA && !arrB) return true;
-        if (!arrA || !arrB) return false;
-        return arrA.length == arrB.length;
-    }
+function valToPost(val: any) {
+    return PostSchema.parse({
+        user: val.user,
+        postID: val.postID,
+        dropoff: val.dropoff,
+        pickup: val.pickup,
+        pickupCoords: val.pickupCoords,
+        dropoffCoords: val.dropoffCoords,
+        startTime: new Date(val.startTime),
+        endTime: new Date(val.endTime),
+        totalSpots: val.totalSpots,
+        notes: val.notes,
+        roundTrip: val.roundTrip,
+    });
 }
