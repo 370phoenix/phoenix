@@ -1,10 +1,10 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { UserID, PostType } from "../../constants/DataTypes";
 import { getUserUpdates, MessageType, UserInfo } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
+import { PostType } from "../postValidation";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -174,12 +174,13 @@ export const signedInSelector = (state: any) => state.matches("FB Signed In");
 export const needsInfoSelector = (state: any) =>
     ["FB Signed In.Needs Profile", "FB Signed In.Waiting"].some(state.matches);
 export const userIDSelector = (state: any) =>
-    state.context.user ? (state.context.user.uid as UserID) : null;
+    state.context.user ? (state.context.user.uid as string) : null;
 export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 export const userPostsSelector = (state: any) =>
     state.context.posts ? (state.context.posts as PostType[]) : null;
-export const userSelector = (state: any) => state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
+export const userSelector = (state: any) =>
+    state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
 
 export const authMachine = createMachine(AuthMachine, {
     services: {
@@ -219,8 +220,7 @@ export const authMachine = createMachine(AuthMachine, {
             if (!user || !userInfo) throw Error("Missing User Information");
             try {
                 await registerForPushNotificationsAsync(user.uid, userInfo);
-            }
-            catch(e:any){
+            } catch (e: any) {
                 throw Error("Error registering for push notifications");
             }
         },
@@ -250,10 +250,12 @@ export const authMachine = createMachine(AuthMachine, {
         updateUserInfoTokenSet: assign({
             hasPushToken: true,
             userInfo: (context, event: any) => {
-                if(event.type !== "USER INFO CHANGED" && context.userInfo) return {...context.userInfo, hasPushToken: true};
-                if(event.type === "USER INFO CHANGED" && !event.userInfo) return null;
-                return {...event.userInfo, hasPushToken: true};
-    }}),
+                if (event.type !== "USER INFO CHANGED" && context.userInfo)
+                    return { ...context.userInfo, hasPushToken: true };
+                if (event.type === "USER INFO CHANGED" && !event.userInfo) return null;
+                return { ...event.userInfo, hasPushToken: true };
+            },
+        }),
         logError: (_, event: any) => console.error(event.data),
     },
     guards: {
