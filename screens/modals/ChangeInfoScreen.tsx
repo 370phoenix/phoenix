@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
-import { deleteAccount, MessageType } from "../../utils/auth";
+import { deleteAccount } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useEffect, useState } from "react";
@@ -48,7 +48,6 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [message, setMessage] = useState<string | null>(null);
 
     const allowChange = state.matches("Information Valid") && state.context.infoChanged;
-    console.log(state.matches("Information Valid"), state.context.infoChanged);
 
     useEffect(() => {
         if (!userID || !userInfo) return;
@@ -89,12 +88,11 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!userID) {
-                        setMessage("Error: no user found.");
-                        return;
+                    try {
+                        await deleteAccount();
+                    } catch (e: any) {
+                        setMessage(e.message);
                     }
-                    const res = await deleteAccount(userID);
-                    if (res.type === MessageType.error) setMessage(res.message);
                 },
             },
         ]);

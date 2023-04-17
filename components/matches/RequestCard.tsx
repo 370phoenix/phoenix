@@ -5,13 +5,13 @@ import Colors from "../../constants/Colors";
 import { UserInfo } from "../../utils/auth";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
-import { PostType, UserID } from "../../constants/DataTypes";
 import { useMachine } from "@xstate/react";
 import { requestCardMachine } from "../../utils/machines/requestCardMachine";
+import { PostType } from "../../utils/postValidation";
 
 export type Props = {
-    requesterID: UserID;
-    posterID: UserID;
+    requesterID: string;
+    posterID: string;
     userInfo: UserInfo | null;
     post: PostType;
 };

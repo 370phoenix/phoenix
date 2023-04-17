@@ -13,6 +13,7 @@ import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { chatMachine } from "../../utils/machines/chatMachine";
 import { ChatMessage } from "../../utils/chat";
 import ChatInput from "../../components/chat/ChatInput";
+import { FBToPostSchema } from "../../utils/postValidation";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChatScreen">;
 export default function ChatScreen({ route, navigation }: Props) {
@@ -20,7 +21,8 @@ export default function ChatScreen({ route, navigation }: Props) {
     const userID = useSelector(authService, userIDSelector);
 
     if (!userID || !route.params) return <></>;
-    const { post, header } = route.params;
+    const { post: serializedPost, header } = route.params;
+    const post = FBToPostSchema.parse(serializedPost);
 
     const [state, send] = useMachine(chatMachine);
     if (state.matches("Start")) send({ type: "CHECK CACHE", header, navigation, post, userID });
@@ -58,7 +60,7 @@ export default function ChatScreen({ route, navigation }: Props) {
             {error && (
                 <View style={styles.errorContainer}>
                     <Text style={styles.error} textStyle="body" styleSize="m">
-                        {error}
+                        {error.message}
                     </Text>
                 </View>
             )}

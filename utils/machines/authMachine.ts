@@ -1,10 +1,11 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { getUserUpdates, MessageType, UserInfo } from "../auth";
+import { getUserUpdates, UserInfo } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
 import { PostType } from "../postValidation";
+import { logError } from "../errorHandling";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -91,7 +92,7 @@ const AuthMachine = {
                                     target: "Posts Loaded",
                                 },
                                 onError: {
-                                    actions: "assignError",
+                                    actions: "logError",
                                     target: "Loading Failed",
                                 },
                             },
@@ -197,13 +198,14 @@ export const authMachine = createMachine(AuthMachine, {
                 console.log("MISSING USER IN FB SIGNED IN");
                 return () => {};
             }
-            const res = getUserUpdates(context.user.uid, (data) => {
-                callback({ type: "USER INFO CHANGED", userInfo: data });
-            });
-
-            if (typeof res === "string") return () => {};
-
-            return res;
+            try {
+                return getUserUpdates(context.user.uid, (data) => {
+                    callback({ type: "USER INFO CHANGED", userInfo: data });
+                });
+            } catch (e: any) {
+                logError(e);
+                return () => {};
+            }
         },
         loadUserPosts: async (context) => {
             const { user, userInfo } = context;
@@ -211,9 +213,7 @@ export const authMachine = createMachine(AuthMachine, {
             const { posts: postIDs } = userInfo;
             if (!postIDs) return [];
 
-            const res = await fetchSomePosts(postIDs);
-            if (res.type === MessageType.error) throw Error(res.message);
-            else return res.data;
+            return await fetchSomePosts(postIDs);
         },
         setToken: async (context) => {
             const { user, userInfo } = context;
@@ -256,7 +256,7 @@ export const authMachine = createMachine(AuthMachine, {
                 return { ...event.userInfo, hasPushToken: true };
             },
         }),
-        logError: (_, event: any) => console.error(event.data),
+        logError: (_, event: any) => logError(event.data),
     },
     guards: {
         userExists: (context) => (context.user ? true : false),

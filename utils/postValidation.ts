@@ -58,6 +58,18 @@ export const PostSchemaFresh = PostSchemaBase.extend({
     endTime: z.date(),
 });
 
+export const FBToPostSchema = PostSchemaBase.extend({
+    startTime: z.coerce.number().transform((val) => new Date(val)),
+    endTime: z.coerce.number().transform((val) => new Date(val)),
+    postID: z.string(),
+});
+
+export const PostToFBSchema = PostSchemaBase.extend({
+    startTime: z.date().transform((val) => val.getTime()),
+    endTime: z.date().transform((val) => val.getTime()),
+    postID: z.string(),
+});
+
 export const PostSchema = PostSchemaFresh.extend({
     postID: z.string(),
 });

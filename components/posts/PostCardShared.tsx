@@ -1,4 +1,4 @@
-import { Alert, Platform, Pressable, View, StyleSheet } from "react-native";
+import { Alert, Pressable, View, StyleSheet } from "react-native";
 import functions from "@react-native-firebase/functions";
 
 import Colors from "../../constants/Colors";
@@ -157,7 +157,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                                         backgroundColor: pressed ? Colors.red[3] : Colors.gray.w,
                                     },
                                 ]}>
-                                <Trash color={Colors.red.p} width={16} />
+                                <Trash color={Colors.red.p} width={20} />
                             </Pressable>
                         </>
                     )}
@@ -184,7 +184,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     trash: {
-        marginRight: 8,
+        borderRadius: 8,
+        padding: 8,
+        marginBottom: -8,
         justifyContent: "center",
         alignItems: "center",
     },

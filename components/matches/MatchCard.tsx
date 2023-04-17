@@ -9,7 +9,7 @@ import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
-import { PostType } from "../../utils/postValidation";
+import { PostToFBSchema, PostType } from "../../utils/postValidation";
 
 export type Props = {
     post: PostType;
@@ -38,7 +38,9 @@ export default function MatchCard({ userID, post }: Props) {
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("ChatScreen", { post, header })} // Okay to override with ! because of early return
+            onPress={() =>
+                navigation.navigate("ChatScreen", { post: PostToFBSchema.parse(post), header })
+            } // Okay to override with ! because of early return
             style={({ pressed }) => [
                 styles.cardContainer,
                 {

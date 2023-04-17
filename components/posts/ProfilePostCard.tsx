@@ -4,7 +4,7 @@ import { Platform, Pressable, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
 import { UserInfo } from "../../utils/auth";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
-import { PostType } from "../../utils/postValidation";
+import { PostType, PostToFBSchema } from "../../utils/postValidation";
 import { PostCardGuts } from "./PostCardShared";
 
 interface ProfilePostCardProps {
@@ -25,7 +25,8 @@ export default function ProfilePostCard({ post, userInfo }: ProfilePostCardProps
         <Pressable
             onPress={() => {
                 if (!header) return;
-                navigation.navigate("ChatScreen", { post, header });
+                const serializedPost = PostToFBSchema.parse(post);
+                navigation.navigate("ChatScreen", { post: serializedPost, header });
             }}
             style={({ pressed }) => [
                 styles.cardContainer,

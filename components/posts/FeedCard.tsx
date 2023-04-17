@@ -5,7 +5,7 @@ import Colors from "../../constants/Colors";
 import { useSelector } from "@xstate/react";
 import { useContext } from "react";
 import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine";
-import { PostType } from "../../utils/postValidation";
+import { PostToFBSchema, PostType } from "../../utils/postValidation";
 import { PostCardGuts } from "./PostCardShared";
 
 type Props = {
@@ -29,7 +29,10 @@ export default function FeedCard({ post }: Props) {
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PostDetails", { post })}
+            onPress={() => {
+                if (!isMatched)
+                    navigation.navigate("PostDetails", { post: PostToFBSchema.parse(post) });
+            }}
             style={({ pressed }) => [
                 styles.cardContainer,
                 {

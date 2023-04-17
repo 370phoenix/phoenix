@@ -17,7 +17,7 @@ export default async function geocodeAddress(dText: string): Promise<Coords | nu
         };
         return locCords;
     } catch (e) {
-        console.log("Invalid address.");
+        console.log("GEOCODE ERROR: Invalid address");
         return null;
     }
 }

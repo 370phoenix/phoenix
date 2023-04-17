@@ -75,6 +75,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                 notes,
                 roundTrip,
             });
+            setError(null);
             await createPost(validatedPost, userInfo);
             setWriteComplete(true);
             setSubmitting(false);
