@@ -1,74 +1,33 @@
-import { StyleSheet, Pressable, Platform, Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Alert, Platform, Pressable, View, StyleSheet } from "react-native";
 import functions from "@react-native-firebase/functions";
 
-import { Right } from "../../assets/icons/Chevron";
+import Colors from "../../constants/Colors";
+import { Spacer, Text } from "../shared/Themed";
+import { UserInfo } from "../../utils/auth";
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
+import { PostType } from "../../utils/postValidation";
 import RoundTrip from "../../assets/icons/RoundTrip";
+import { Right } from "../../assets/icons/Arrow";
 import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
-import { UserID, PostType } from "../../constants/DataTypes";
-import Colors from "../../constants/Colors";
-import { convertDate, convertTime } from "../../utils/convertPostTypes";
-import { Spacer, Text, View } from "../shared/Themed";
-import { UserInfo } from "../../utils/auth";
-import { useMachine, useSelector } from "@xstate/react";
-import { useContext } from "react";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { ChatHeader } from "../../utils/chat";
-import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 
-type Props = {
-    isProfile?: boolean;
-    userInfo?: [UserID | null, UserInfo | null];
+interface PostCardGutsProps {
     post: PostType;
-};
-export default function PostCard({ post, isProfile = false, userInfo = [null, null] }: Props) {
-    const authService = useContext(AuthContext);
-    const userID = useSelector(authService, userIDSelector);
-    const updatedUserInfo = useSelector(authService, userInfoSelector);
-
-    // Don't show your own posts in the feed
-    const navigation = useNavigation();
-    if (!isProfile && post.user === userID) return <></>;
-    if (post.pending?.includes(userID!)) return <></>;
-    if (!post.dropoff) return <></>;
-
+    isProfile: boolean;
+    isMatched: boolean;
+    userInfo: UserInfo;
+}
+export function PostCardGuts({ post, isProfile, isMatched, userInfo }: PostCardGutsProps) {
     const pickup = post.pickup;
     const dropoff = post.dropoff;
-    const fDate = convertDate(post.startTime);
-    const fStartTime = convertTime(post.startTime);
-    const fEndTime = convertTime(post.endTime);
+    const fDate = convertDate(new Date(post.startTime));
+    const fStartTime = convertTime(new Date(post.startTime));
+    const fEndTime = convertTime(new Date(post.endTime));
 
     const color = isProfile ? Colors.navy : Colors.purple;
 
-    let isMatched = false;
-    if (Array.isArray(updatedUserInfo?.matches))
-        isMatched =
-            userID === post.user || updatedUserInfo?.matches?.includes(post.postID) ? true : false;
-
-    let state, send, header: ChatHeader | null;
-    if (isMatched) {
-        [state, send] = useMachine(chatHeaderMachine);
-        if (state.matches("Start")) send({ type: "INIT", postID: post.postID });
-        header = state.context.header;
-    }
-
     return (
-        <Pressable
-            onPress={() =>
-                isMatched && header
-                    ? navigation.navigate("ChatScreen", { post, header })
-                    : navigation.navigate("PostDetails", { post })
-            }
-            style={({ pressed }) => [
-                styles.cardContainer,
-                {
-                    backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
-                    marginHorizontal: isProfile ? 0 : 16,
-                    flexDirection: isProfile ? "column" : "row",
-                },
-            ]}
-            key={post.postID}>
+        <>
             <View style={styles.body}>
                 <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                     {pickup}
@@ -99,9 +58,9 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
                 post={post}
                 isProfile={isProfile}
                 userInfo={userInfo}
-                isMatched={isMatched ? isMatched : false}
+                isMatched={isMatched}
             />
-        </Pressable>
+        </>
     );
 }
 
@@ -109,7 +68,7 @@ type BadgeProps = {
     post: PostType;
     isProfile: boolean;
     isMatched: boolean;
-    userInfo: [UserID | null, UserInfo | null];
+    userInfo: UserInfo;
 };
 function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
     const total = post.totalSpots;
@@ -146,16 +105,18 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    const [userID, userObj] = userInfo;
-                    if (userID && userObj) {
-                        try {
-                            await functions().httpsCallable("fullPostDelete")({
-                                post: post,
-                                postID: post.postID,
+                    const { userID } = userInfo;
+                    if (userID) {
+                        const fullPostDelete = functions().httpsCallable("fullPostDelete");
+                        fullPostDelete({
+                            postID: post.postID,
+                        })
+                            .then(() => {
+                                console.log("Post Deleted");
+                            })
+                            .catch((e) => {
+                                console.error(e);
                             });
-                        } catch (e: any) {
-                            console.error(e);
-                        }
                     }
                 },
             },
@@ -193,10 +154,10 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                                 style={({ pressed }) => [
                                     styles.trash,
                                     {
-                                        backgroundColor: pressed ? color.m : color.p,
+                                        backgroundColor: pressed ? Colors.red[3] : Colors.gray.w,
                                     },
                                 ]}>
-                                <Trash color={Colors.gray.w} width={16} />
+                                <Trash color={Colors.red.p} width={16} />
                             </Pressable>
                         </>
                     )}
@@ -207,21 +168,6 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
 }
 
 const styles = StyleSheet.create({
-    cardContainer: {
-        marginBottom: 16,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        alignItems: "center",
-        shadowColor: Platform.OS === "ios" ? Colors.purple.p : undefined,
-        shadowOpacity: 0.5,
-        elevation: 10,
-        shadowOffset: {
-            width: 2,
-            height: 4,
-        },
-        shadowRadius: 4,
-    },
     body: { flex: 1, width: "100%" },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
     riderBadge: { height: 100, flexDirection: "column", justifyContent: "center" },
@@ -238,9 +184,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     trash: {
-        borderRadius: 4,
-        height: 40,
-        width: 40,
+        marginRight: 8,
         justifyContent: "center",
         alignItems: "center",
     },

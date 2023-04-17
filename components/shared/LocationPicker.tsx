@@ -1,29 +1,34 @@
 import * as Location from "expo-location";
-import { useState } from "react";
-import { View } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 
-import { Button, TextField } from "./Themed";
+import { TextField, Text } from "./Themed";
 import Colors from "../../constants/Colors";
-import { Coords } from "../../constants/DataTypes";
+import Alert from "../../assets/icons/Alert";
+import { Coords } from "../../utils/postValidation";
 
-export { Location };
+interface LocationPickerProps {
+    name: string;
+    inputText: string;
+    onChangeText: React.Dispatch<React.SetStateAction<string>>;
+    addressError: boolean;
+}
 export default function LocationPicker({
     name,
     inputText,
     onChangeText,
-}: {
-    name: string;
-    inputText: string;
-    onChangeText: any;
-}) {
+    addressError,
+}: LocationPickerProps) {
     return (
-        <View>
+        <View style={styles.locationPicker}>
             <TextField
-                label={name === "From" ? "Pickup" : "Dropoff"}
+                style={{ flex: 1 }}
+                label={name === "From" ? "" : "Destination"}
+                textStyle={["body", "s"]}
                 inputState={[inputText, onChangeText]}
                 placeholder={`${name}`}
                 placeholderTextColor={Colors.gray[2]}
             />
+            {addressError && <Alert color={Colors.red.p} width={30} style={{ marginLeft: 8 }} />}
         </View>
     );
 }
@@ -32,38 +37,56 @@ export function LocationButton({
     setLocation,
     onChangeText,
 }: {
-    setLocation: any;
-    onChangeText: any;
+    setLocation: (coords: Coords) => void;
+    onChangeText: (text: string) => void;
 }) {
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const getLocation = async () => {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-            setErrorMsg("Access to Location denied");
-            onChangeText(errorMsg);
+            onChangeText("Access to Location denied");
         }
 
         let location: Location.LocationObject | null = await Location.getLastKnownPositionAsync();
         if (location == null) location = await Location.getCurrentPositionAsync();
-        const coords : Coords = {lat: location.coords.latitude, long: location.coords.longitude}
+        const coords: Coords = { lat: location.coords.latitude, long: location.coords.longitude };
         setLocation(coords);
 
         const place = await Location.reverseGeocodeAsync({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
+            latitude: coords.lat,
+            longitude: coords.long,
         });
 
         place.find((p) => {
+            if (p.name !== null) {
+                onChangeText(p.name);
+            }
             onChangeText(`${p.streetNumber} ${p.street}, ${p.city} ${p.region}, ${p.postalCode}`);
         });
     };
     return (
-        <Button
-            title="Use Current Location"
-            color="navy"
-            short
-            clear
-            onPress={() => getLocation()}
-        />
+        <Pressable
+            style={({ pressed }) => [styles.button, { opacity: pressed ? 0.5 : 1 }]}
+            onPress={() => getLocation()}>
+            <Text textStyle="lineTitle" style={styles.buttonText}>
+                Use Current Location
+            </Text>
+        </Pressable>
     );
 }
+
+const styles = StyleSheet.create({
+    locationPicker: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+    },
+    button: {
+        padding: 0,
+        marginTop: -4,
+        marginBottom: 4,
+    },
+    buttonText: {
+        color: Colors.purple.p,
+        textTransform: "uppercase",
+    },
+});

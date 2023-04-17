@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-import { View, Button } from "./Themed";
+import { View, Text } from "./Themed";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
+import { Pressable, StyleSheet } from "react-native";
+import Colors from "../../constants/Colors";
 
 const CustomDateTimePicker = ({
     mode,
     date,
     onConfirm,
 }: {
-    mode: "date" | "time" | "datetime";
+    mode: "date" | "time";
     date: Date;
     onConfirm: any;
 }) => {
@@ -28,12 +30,14 @@ const CustomDateTimePicker = ({
         hideDatePicker();
     };
 
-    let title: string = convertDate(date);
-    if (mode === "time") title = convertTime(date);
-    else if (mode === "datetime") title = convertDate(date) + " " + convertTime(date);
+    const title = mode === "date" ? convertDate(date) : convertTime(date);
     return (
         <View>
-            <Button color="green" title={title} onPress={showDatePicker} />
+            <Pressable style={styles.dateTimeButton} onPress={showDatePicker}>
+                <Text textStyle="body" styleSize="m" style={styles.dateTimeText}>
+                    {title}
+                </Text>
+            </Pressable>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
                 mode={mode}
@@ -47,3 +51,15 @@ const CustomDateTimePicker = ({
 };
 
 export default CustomDateTimePicker;
+
+const styles = StyleSheet.create({
+    dateTimeButton: {
+        backgroundColor: Colors.gray[3],
+        borderRadius: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    dateTimeText: {
+        color: Colors.gray.b,
+    },
+});

@@ -9,11 +9,11 @@ import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
-import { UserID, PostType } from "../../constants/DataTypes";
+import { PostType } from "../../utils/postValidation";
 
 export type Props = {
     post: PostType;
-    userID: UserID;
+    userID: string;
 };
 
 export default function MatchCard({ userID, post }: Props) {
@@ -48,7 +48,7 @@ export default function MatchCard({ userID, post }: Props) {
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        post.pickup
+                        {post.pickup}
                     </Text>
                 </View>
                 <View style={styles.bodyContainer}>
@@ -58,7 +58,7 @@ export default function MatchCard({ userID, post }: Props) {
                         <Right color={color} height={20} />
                     )}
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        post.dropoff
+                        {post.dropoff}
                     </Text>
                 </View>
             </View>

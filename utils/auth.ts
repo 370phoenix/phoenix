@@ -1,6 +1,5 @@
 import Filter from "bad-words";
 import Pronouns from "../constants/Pronouns.json";
-import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
@@ -12,7 +11,7 @@ import { Unsubscribe } from "./posts";
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 export type UserInfo = {
-    userID: UserID;
+    userID: string;
     username: string;
     phone: string;
     major: string;
@@ -20,9 +19,9 @@ export type UserInfo = {
     pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
-    posts: PostID[] | undefined;
-    pending: PostID[] | undefined;
-    matches: PostID[] | undefined;
+    posts: string[] | undefined;
+    pending: string[] | undefined;
+    matches: string[] | undefined;
     hasPushToken: boolean;
 };
 
@@ -115,7 +114,7 @@ export async function signIn(
 /**
  * Used to overwrite the user info.
  *
- * @param userID (UserID): The user ID
+ * @param userID (string): The user ID
  * @param userInfo (UserInfo): The new user Info
  * @returns (SuccessMessage | ErrorMessage)
  */
@@ -134,7 +133,7 @@ export async function writeUser(
     }
 }
 
-function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
+function convertUserInfo(userID: string, data: FBUserInfo): UserInfo {
     return {
         ...data,
         userID,
@@ -152,7 +151,7 @@ function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
  * @returns (SuccessMessage<Unsubscribe> | ErrorMessage): An unsubscribe function
  */
 export function getUserUpdates(
-    userID: UserID,
+    userID: string,
     onUpdate: (data: UserInfo) => void
 ): Unsubscribe | string {
     try {
@@ -174,7 +173,7 @@ export function getUserUpdates(
     }
 }
 
-export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string> {
+export async function getUsersOnce(users: string[]): Promise<UserInfo[] | string> {
     try {
         const info = [];
         for (const user of users) {
@@ -191,10 +190,10 @@ export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string
 /**
  * Gets a user's info only once
  *
- * @param userID (UserID): The user to get the info of
+ * @param userID (string): The user to get the info of
  * @returns (SuccessMessage<UserInfo> | ErrorMessage | InfoMessage) Informs there is no data, or returns it if there is.
  */
-export async function getUserOnce(userID: UserID | null): Promise<Message<UserInfo>> {
+export async function getUserOnce(userID: string | null): Promise<Message<UserInfo>> {
     try {
         if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
@@ -208,8 +207,8 @@ export async function getUserOnce(userID: UserID | null): Promise<Message<UserIn
 }
 
 export async function checkUserInfo(
-    userID: UserID | undefined
-): Promise<[UserID, UserInfo | undefined] | string> {
+    userID: string | undefined
+): Promise<[string, UserInfo | undefined] | string> {
     try {
         let id = userID ? userID : auth().currentUser?.uid;
         if (!id) throw Error("No User ID");
@@ -229,7 +228,7 @@ export async function checkUserInfo(
  * @param user (User): The user who's info to delete.
  * @returns (SuccessMessage | ErrorMessage)
  */
-export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
+export async function deleteAccount(userID: string): Promise<SuccessMessage | ErrorMessage> {
     try {
         await functions().httpsCallable("deleteUser")();
         await auth().signOut();

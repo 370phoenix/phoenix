@@ -7,6 +7,7 @@ import { Right } from "../../assets/icons/Arrow";
 import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
 import { postInfoMachine } from "../../utils/machines/postInfoMachine";
+import { PostType } from "../../utils/postValidation";
 
 export type Props = {
     postID: string;
@@ -15,7 +16,7 @@ export type Props = {
 export default function PendingCard({ postID }: Props) {
     const [state, send] = useMachine(postInfoMachine);
     if (state.matches("Start")) send("LOAD", { id: postID });
-    const { post } = state.context;
+    const { post } = state.context as { post: PostType | null };
     const color = Colors.purple.p;
 
     // TODO: Verify post.pickup and post.dropoff are correct.

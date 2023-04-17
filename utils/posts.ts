@@ -9,6 +9,7 @@ import {
     writeUser,
 } from "./auth";
 import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
+import { FBPostType, FirebasePostSchema, FreshPostType, PostSchema } from "./postValidation";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -31,24 +32,26 @@ export type Unsubscribe = () => void;
  *
  * @param postID (PostID): ID to fetch
  * @returns Success with Post Data | Error
+ * @throws ZodError when validation fails
  */
-export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType> | ErrorMessage> {
-    try {
-        const snapshot = await db.ref("posts/" + postID).once("value");
-        const val = snapshot.val();
-        if (snapshot.exists())
-            return {
-                type: MessageType.success,
-                data: {
-                    ...val,
-                    riders: val.riders ? val.riders : [],
-                    pending: val.pending ? val.pending : [],
-                },
-            };
-        else return { type: MessageType.error, message: "Error: post missing or not found." };
-    } catch (e: any) {
-        return { message: `Error: ${e.message}`, type: MessageType.error };
-    }
+export async function fetchPost(postID: PostID): Promise<PostType> {
+    const snapshot = await db.ref("posts/" + postID).once("value");
+    const val = snapshot.val();
+    if (snapshot.exists())
+        return PostSchema.parse({
+            user: val.user,
+            postID: val.postID,
+            dropoff: val.dropoff,
+            pickup: val.pickup,
+            pickupCoords: val.pickupCoords,
+            dropoffCoords: val.dropoffCoords,
+            startTime: new Date(val.startTime),
+            endTime: new Date(val.endTime),
+            totalSpots: val.totalSpots,
+            notes: val.notes,
+            roundTrip: val.roundTrip,
+        });
+    else throw Error("Post does not exist.");
 }
 
 /**
@@ -113,7 +116,7 @@ export function getAllPostUpdates({
                 onChildAdded(data);
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
     const onChange = postsRef.on(
         "child_changed",
@@ -123,7 +126,7 @@ export function getAllPostUpdates({
                 onChildChanged(data);
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
     const onRemove = postsRef.on("child_removed", (snapshot) => {
         if (snapshot.exists()) {
@@ -153,22 +156,18 @@ export function getAllPostUpdates({
  * @returns (SuccessMessage | ErrorMessage)
  */
 export async function createPost(
-    post: NewPostType,
-    userID: UserID | null,
+    post: FreshPostType,
     userInfo: UserInfo | null
 ): Promise<SuccessMessage | ErrorMessage> {
     try {
-        if (!userID) throw Error("No user signed in.");
         if (!userInfo) throw Error("No user info found.");
+        const { user: userID } = post;
 
         // Add post to DB
         const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
         const postID = postRef.key;
-        const newPost: PostType = {
-            ...post,
-            postID,
-        };
+        const newPost: FBPostType = FirebasePostSchema.parse({ postID, ...post });
         await postRef.set(newPost);
 
         // Add post to user info

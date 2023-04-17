@@ -1,27 +1,19 @@
-export function convertDate(date: number | Date) {
-    let tempDate;
-    if (typeof date === "number") tempDate = new Date(date);
-    else tempDate = date;
-    const dayOfWeek = tempDate.toLocaleString("en-us", { weekday: "long" }).split(",")[0];
-    const month = tempDate.toLocaleString("en-us", { month: "long" });
+export function convertDate(date: Date) {
+    const dayOfWeek = date.toLocaleString("en-us", { weekday: "long" }).split(",")[0];
+    const month = date.toLocaleString("en-us", { month: "long" });
 
-    const fDate = `${dayOfWeek}, ${month} ${tempDate.getDate()}`;
-    return fDate;
+    return `${dayOfWeek}, ${month} ${date.getDate()}`;
 }
 
-export function convertTime(date: number | Date) {
-    let tempDate;
-    if (typeof date === "number") tempDate = new Date(date);
-    else tempDate = date;
-    let minutes: string | number = tempDate.getMinutes();
-    minutes = Math.floor(minutes / 5) * 5;
-    minutes = minutes < 10 ? "0" + minutes :     minutes;
-    let hours: string | number = tempDate.getHours();
+export function convertTime(date: Date) {
+    const minutes = Math.floor(date.getMinutes() / 5) * 5;
+    const minuteString = minutes < 10 ? "0" + minutes : String(minutes);
+
+    let hours = date.getHours();
     hours = hours > 12 ? hours - 12 : hours;
-    if(hours === 0) hours = 12;
-    const ampm = tempDate.getHours() >= 12 ? "pm" : "am";
+    if (hours === 0) hours = 12;
 
-    const fTime = `${hours}:${minutes}${ampm}`;
-    return fTime;
+    const ampm = date.getHours() >= 12 ? "PM" : "AM";
+
+    return `${hours}:${minuteString} ${ampm}`;
 }
-

@@ -1,6 +1,6 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { useContext } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import ProfilePostList from "../components/profile/ProfilePostList";
 import ProfileView from "../components/profile/ProfileView";
 
@@ -17,11 +17,11 @@ export default function ProfileScreen({}: props) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.body}>
+            <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
                 <ProfileView userInfo={userInfo} />
                 <Spacer direction="column" size={16} />
                 <ProfilePostList />
-            </View>
+            </ScrollView>
         </View>
     );
 }

@@ -5,15 +5,15 @@ import MatchCard from "./MatchCard";
 import RequestCard from "./RequestCard";
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import * as Notifications from "expo-notifications";
 import PendingCard from "./PendingCard";
 import MatchCardWrapper from "./MatchCardWrapper";
+import { PostType } from "../../utils/postValidation";
 
 type Props = {
-    userID: UserID;
+    userID: string;
 };
 
 export default function MatchList({ userID }: Props) {

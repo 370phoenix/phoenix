@@ -95,9 +95,9 @@ function MoreInfo({ post }: { post: PostType }) {
 
     const pickup = post.pickup;
     const dropoff = post.dropoff;
-    const date = convertDate(post.startTime);
-    const startTime = convertTime(post.startTime);
-    const endTime = convertTime(post.endTime);
+    const date = convertDate(new Date(post.startTime));
+    const startTime = convertTime(new Date(post.startTime));
+    const endTime = convertTime(new Date(post.endTime));
 
     if (state.matches("Start")) {
         const ids = post.riders ? post.riders : [];
