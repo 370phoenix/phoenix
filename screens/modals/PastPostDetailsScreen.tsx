@@ -66,6 +66,8 @@ function MoreInfo({ post }: { post: PostType }) {
     const id = useSelector(authService, userIDSelector);
     const userID = id ? id : "No user found";
 
+    const [buttonText, setButtonText] = useState("Submit");
+
     const postID = post.postID;
 
     const timestamp = Date.now();
@@ -83,6 +85,8 @@ function MoreInfo({ post }: { post: PostType }) {
             userID: userID,
             timestamp: timestamp,
         };
+
+        setButtonText("Submitted");
 
         pushFeedback(feedback);
     };
@@ -106,18 +110,26 @@ function MoreInfo({ post }: { post: PostType }) {
                 placeholder="Type feedback here..."
                 placeholderTextColor={Colors.gray[2]}
             />
-            <Button onPress={onSubmit} title="Submit" color="purple" />
+            <Button onPress={onSubmit} title={buttonText} color="purple" />
             <Spacer direction="column" size={48} />
 
-            {riders && <UserList riders={riders} message={error} />}
+            {riders && <UserList riders={riders} message={error} post={post} />}
         </View>
     );
 }
 
 //need this
-function UserList({ riders, message }: { riders: UserInfo[]; message: string | null }) {
+function UserList({
+    riders,
+    message,
+    post,
+}: {
+    riders: UserInfo[];
+    message: string | null;
+    post: PostType;
+}) {
     let i = 1;
-    const onSubmit = useState<string>;
+    //const onSubmit = useState<string>;
     return (
         <View style={{ marginTop: riders.length > 0 ? 0 : 20 }}>
             {message && (
@@ -129,7 +141,7 @@ function UserList({ riders, message }: { riders: UserInfo[]; message: string | n
                 riders.map((match) => {
                     return (
                         <View key={Math.random()}>
-                            <UserDetails num={i++} user={match} />
+                            <UserDetails num={i++} user={match} post={post} />
                             <Spacer direction="column" size={32} />
                         </View>
                     );
@@ -138,14 +150,17 @@ function UserList({ riders, message }: { riders: UserInfo[]; message: string | n
     );
 }
 
-function UserDetails({ user, num }: { user: UserInfo; num: number }) {
-    const onSubmit = useState<string>;
-
+function UserDetails({ user, num, post }: { user: UserInfo; num: number; post: PostType }) {
     const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
-    const userID = user.id; //change from user.ID --> user.userID ?
+    const userID = user.userID;
+    const postID = post.postID;
 
-    const rnsRef = db.ref("noShow").child(userID).child(postID).set(true);
+    const rnsRef = db.ref("noShow").child(userID).child(postID);
+
+    const onSubmit = async () => {
+        rnsRef.set(true);
+    };
 
     return (
         <View>

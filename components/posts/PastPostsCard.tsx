@@ -44,13 +44,13 @@ export default function PastPostsCard({ post }: Props) {
                         {convertLocation(post.dropoff)}
                     </Text>
                 </View>
-                <Spacer direction="column" size={16} />
+                {/* <Spacer direction="column" size={16} /> */}
 
                 <View style={styles.iconRow}>
                     <Text textStyle="label" style={{ color: colorPurple }}>
                         {convertDate(post.startTime)}
                     </Text>
-                    <FeedbackExclaim height={40} />
+                    <FeedbackExclaim height={35} />
                 </View>
             </View>
         </Pressable>
