@@ -37,6 +37,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const [pickupCoords, setPickupCoords] = useState<Coords | undefined>(undefined);
     const [dropoff, setDropoff] = useState("");
     const [dropoffCoords, setDropoffCoords] = useState<Coords | undefined>(undefined);
+    // TODO: Why is this never changed? (setDropoffCoords)
 
     const [isRoundtrip, setIsRoundtrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);

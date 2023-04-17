@@ -9,7 +9,7 @@ const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.
  *
  * @returns ExpoPushToken for current user
  */
-export async function registerForPushNotificationsAsync(userID: string, userInfo: any) {
+export async function registerForPushNotificationsAsync(userID: string, _userInfo: any) {
     let token;
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -30,7 +30,7 @@ export async function registerForPushNotificationsAsync(userID: string, userInfo
         }
         token = (await Notifications.getExpoPushTokenAsync()).data;
 
-        if(!token) throw Error("Error getting push token");
+        if (!token) throw Error("Error getting push token");
 
         // write userID and token pair to database
         await writePushTokenOnce(userID, token);
@@ -39,7 +39,6 @@ export async function registerForPushNotificationsAsync(userID: string, userInfo
         const tokenRef = db.ref("users/" + userID + "/hasPushToken");
         await tokenRef.set(true);
         console.log("Success! User push token generated");
-
     } else {
         console.warn("Must use physical device for Push Notifications");
     }
@@ -54,7 +53,7 @@ export async function writePushTokenOnce(
 ): Promise<any> {
     try {
         if (!userID || !pushToken) throw new Error("No User ID or Push Token.");
-        
+
         const userRef = db.ref("pushTokens/" + userID);
         await userRef.set(pushToken);
         return { type: "Success", data: undefined };

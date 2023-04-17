@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useContext, useEffect, useRef } from "react";
-import { StyleSheet, Animated, FlatList, View, Pressable, Keyboard, Easing } from "react-native";
+import { StyleSheet, Animated, FlatList, View, Easing } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMachine, useSelector } from "@xstate/react";
 

@@ -9,7 +9,6 @@ import {
     writeUser,
 } from "./auth";
 import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
-import { ChatHeader } from "../utils/chat";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -114,7 +113,7 @@ export function getAllPostUpdates({
                 onChildAdded(data);
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
     const onChange = postsRef.on(
         "child_changed",
@@ -124,7 +123,7 @@ export function getAllPostUpdates({
                 onChildChanged(data);
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
     const onRemove = postsRef.on("child_removed", (snapshot) => {
         if (snapshot.exists()) {

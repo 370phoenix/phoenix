@@ -1,5 +1,5 @@
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import { assign, createMachine, DoneInvokeEvent, ErrorExecutionEvent } from "xstate";
+import { assign, createMachine } from "xstate";
 import { getConfirm, signIn } from "../auth";
 
 const SignInMachine = {

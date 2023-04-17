@@ -5,7 +5,6 @@ import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
-import firebase from "@react-native-firebase/app";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////

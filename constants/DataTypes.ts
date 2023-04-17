@@ -3,7 +3,7 @@ export type UserID = string;
 export type Coords = {
     lat: number;
     long: number;
-    }
+};
 
 export type PostID = string;
 
