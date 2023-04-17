@@ -71,7 +71,7 @@ const AuthMachine = {
                             always: [
                                 {
                                     target: "Set Token in DB",
-                                    cond: "noTokenSet",
+                                    cond: "needTokenUpdate",
                                 },
                                 {
                                     target: "Loading User Posts",
@@ -145,7 +145,7 @@ const AuthMachine = {
         ranOnce: false,
         error: null,
         posts: null,
-        hasPushToken: false,
+        updatedToken: false
     },
     schema: {
         context: {} as AuthMachineContext,
@@ -161,7 +161,7 @@ type AuthMachineContext = {
     ranOnce: boolean;
     error: string | null;
     posts: PostType[] | null;
-    hasPushToken: boolean;
+    updatedToken: boolean;
 };
 
 type AuthMachineEvents =
@@ -248,12 +248,8 @@ export const authMachine = createMachine(AuthMachine, {
             posts: (_, event: any) => event.data,
         }),
         updateUserInfoTokenSet: assign({
-            hasPushToken: true,
-            userInfo: (context, event: any) => {
-                if(event.type !== "USER INFO CHANGED" && context.userInfo) return {...context.userInfo, hasPushToken: true};
-                if(event.type === "USER INFO CHANGED" && !event.userInfo) return null;
-                return {...event.userInfo, hasPushToken: true};
-    }}),
+            updatedToken: true
+        }),
         logError: (_, event: any) => console.error(event.data),
     },
     guards: {
@@ -261,7 +257,7 @@ export const authMachine = createMachine(AuthMachine, {
         userInfoExists: (context) => (context.userInfo ? true : false),
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
-        noTokenSet: (context) => !context.hasPushToken,
+        needTokenUpdate: (context) => context.updatedToken === false
     },
 });
 

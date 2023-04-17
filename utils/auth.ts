@@ -24,7 +24,6 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
-    hasPushToken: boolean;
 };
 
 export type FBUserInfo = {
@@ -39,7 +38,6 @@ export type FBUserInfo = {
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
-    hasPushToken: boolean;
 };
 
 // MESSAGES //
@@ -254,7 +252,6 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
-    hasPushToken?: boolean;
     userID?: string | null;
 };
 /**
@@ -268,7 +265,6 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
-    hasPushToken = false,
     userID = null,
     phone = null,
     userInfo = null,
@@ -296,7 +292,6 @@ export function validateProfile({
             return {
                 username,
                 major,
-                hasPushToken,
                 pronouns,
                 gradYear,
                 userID: userInfo.userID,
@@ -317,7 +312,6 @@ export function validateProfile({
                 pronouns,
                 gradYear,
                 phone,
-                hasPushToken,
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],
