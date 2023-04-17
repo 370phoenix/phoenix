@@ -4,6 +4,7 @@ import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
+import firebase from "@react-native-firebase/app";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -22,7 +23,6 @@ export type UserInfo = {
     posts: string[] | undefined;
     pending: string[] | undefined;
     matches: string[] | undefined;
-    hasPushToken: boolean;
 };
 
 export type FBUserInfo = {
@@ -37,7 +37,6 @@ export type FBUserInfo = {
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
-    hasPushToken: boolean;
 };
 
 // For helper method cleanUndefined
@@ -211,7 +210,6 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
-    hasPushToken?: boolean;
     userID?: string | null;
 };
 /**
@@ -227,7 +225,6 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
-    hasPushToken = false,
     userID = null,
     phone = null,
     userInfo = null,
@@ -254,7 +251,6 @@ export function validateProfile({
         return {
             username,
             major,
-            hasPushToken,
             pronouns,
             gradYear,
             userID: userInfo.userID,
@@ -275,7 +271,6 @@ export function validateProfile({
             pronouns,
             gradYear,
             phone,
-            hasPushToken,
             ridesCompleted: 0,
             posts: [],
             pending: [],

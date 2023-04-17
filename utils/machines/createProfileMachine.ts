@@ -90,7 +90,6 @@ const CreateProfileMachine = {
                 gradString: string;
                 pronouns: string;
                 phone: string | null;
-                hasPushToken: boolean | null;
             } | null;
             userInfo: UserInfo | null;
             userID: string | null;
@@ -100,16 +99,16 @@ const CreateProfileMachine = {
             | { type: "SUBMIT" }
             | { type: "ADVANCE"; prevInfo: UserInfo | null }
             | {
-                  type: "UPDATE INFO";
-                  userID: string;
-                  info: {
-                      username: string;
-                      major: string;
-                      gradString: string;
-                      pronouns: string;
-                      phone: string | null;
-                  };
-              }
+                type: "UPDATE INFO";
+                userID: string;
+                info: {
+                    username: string;
+                    major: string;
+                    gradString: string;
+                    pronouns: string;
+                    phone: string | null;
+                };
+            }
             | DoneInvokeEvent<UserInfo>,
     },
     context: {

@@ -72,7 +72,7 @@ const AuthMachine = {
                             always: [
                                 {
                                     target: "Set Token in DB",
-                                    cond: "noTokenSet",
+                                    cond: "needTokenUpdate",
                                 },
                                 {
                                     target: "Loading User Posts",
@@ -146,7 +146,7 @@ const AuthMachine = {
         ranOnce: false,
         error: null,
         posts: null,
-        hasPushToken: false,
+        updatedToken: false,
     },
     schema: {
         context: {} as AuthMachineContext,
@@ -162,7 +162,7 @@ type AuthMachineContext = {
     ranOnce: boolean;
     error: string | null;
     posts: PostType[] | null;
-    hasPushToken: boolean;
+    updatedToken: boolean;
 };
 
 type AuthMachineEvents =
@@ -196,7 +196,7 @@ export const authMachine = createMachine(AuthMachine, {
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
                 console.log("MISSING USER IN FB SIGNED IN");
-                return () => {};
+                return () => { };
             }
             try {
                 return getUserUpdates(context.user.uid, (data) => {
@@ -204,7 +204,7 @@ export const authMachine = createMachine(AuthMachine, {
                 });
             } catch (e: any) {
                 logError(e);
-                return () => {};
+                return () => { };
             }
         },
         loadUserPosts: async (context) => {
@@ -248,7 +248,6 @@ export const authMachine = createMachine(AuthMachine, {
             posts: (_, event: any) => event.data,
         }),
         updateUserInfoTokenSet: assign({
-            hasPushToken: true,
             userInfo: (context, event: any) => {
                 if (event.type !== "USER INFO CHANGED" && context.userInfo)
                     return { ...context.userInfo, hasPushToken: true };
@@ -263,7 +262,7 @@ export const authMachine = createMachine(AuthMachine, {
         userInfoExists: (context) => (context.userInfo ? true : false),
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
-        noTokenSet: (context) => !context.hasPushToken,
+        needTokenUpdate: (context) => context.updatedToken === false,
     },
 });
 

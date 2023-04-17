@@ -97,7 +97,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
 
     const onChange = postsRef.on(
@@ -109,7 +109,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
 
     const onRemove = postsRef.on("child_removed", (snapshot) => {

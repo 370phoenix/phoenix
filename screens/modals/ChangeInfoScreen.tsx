@@ -37,17 +37,18 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [grad, setGrad] = useState(userInfo ? String(userInfo.gradYear) : "");
     const [pronouns, setPronouns] = useState(
         Pronouns[
-            userInfo
-                ? Pronouns.indexOf(userInfo.pronouns) != -1
-                    ? Pronouns.indexOf(userInfo.pronouns)
-                    : 0
+        userInfo
+            ? Pronouns.indexOf(userInfo.pronouns) != -1
+                ? Pronouns.indexOf(userInfo.pronouns)
                 : 0
+            : 0
         ]
     );
 
     const [message, setMessage] = useState<string | null>(null);
 
     const allowChange = state.matches("Information Valid") && state.context.infoChanged;
+    console.log(state.matches("Information Valid"), state.context.infoChanged);
 
     useEffect(() => {
         if (!userID || !userInfo) return;
@@ -67,7 +68,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
                 text: "Cancel",
-                onPress: () => {},
+                onPress: () => { },
             },
             {
                 text: "Confirm",
@@ -83,7 +84,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to delete your account?", [
             {
                 text: "Cancel",
-                onPress: () => {},
+                onPress: () => { },
             },
             {
                 text: "Confirm",
