@@ -9,14 +9,6 @@
             "distribution": "internal",
             "ios": {
                 "resourceClass": "m-medium"
-                "env": {
-                    "FIREBASE_APP_CHECK_DEBUG_TOKEN": process.env.IOS_APP_CHECK_DEBUG_TOKEN,
-                }
-            }
-            ,"android": {
-                "env": {
-                    "FIREBASE_APP_CHECK_DEBUG_TOKEN": process.env.ANDROID_APP_CHECK_DEBUG_TOKEN,
-                }
             }
         },
         "preview": {
