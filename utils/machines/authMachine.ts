@@ -248,12 +248,7 @@ export const authMachine = createMachine(AuthMachine, {
             posts: (_, event: any) => event.data,
         }),
         updateUserInfoTokenSet: assign({
-            userInfo: (context, event: any) => {
-                if (event.type !== "USER INFO CHANGED" && context.userInfo)
-                    return { ...context.userInfo, hasPushToken: true };
-                if (event.type === "USER INFO CHANGED" && !event.userInfo) return null;
-                return { ...event.userInfo, hasPushToken: true };
-            },
+            updatedToken: true,
         }),
         logError: (_, event: any) => logError(event.data),
     },
