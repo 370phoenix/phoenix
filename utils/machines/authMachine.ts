@@ -1,9 +1,10 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { getUserUpdates, UserInfo } from "../auth";
+import { getUserUpdates } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
+import {UserInfo} from "../userValidation";
 import { PostType } from "../postValidation";
 import { logError } from "../errorHandling";
 
@@ -221,7 +222,7 @@ export const authMachine = createMachine(AuthMachine, {
             const { posts: postIDs } = userInfo;
             if (!postIDs) return [];
 
-            return await fetchSomePosts(postIDs);
+            return await fetchSomePosts(Object.keys(postIDs));
         },
         setToken: async (context) => {
             const { user, userInfo } = context;
@@ -291,11 +292,11 @@ function checkPostChanges(context: AuthMachineContext) {
 
     // Check for changes in old posts
     for (const id of postIDs) {
-        if (!userInfo.posts.includes(id)) return true;
+        return userInfo.posts[id] === true;
     }
 
     // Check for changes in new posts
-    for (const id of userInfo.posts) {
+    for (const id of Object.keys(userInfo.posts)) {
         if (!postIDs.includes(id)) return true;
     }
 

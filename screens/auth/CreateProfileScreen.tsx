@@ -59,7 +59,7 @@ export default function CreateProfileScreen({ }: Props) {
                 </Text>
                 {error && (
                     <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                        {error}
+                        {error.message}
                     </Text>
                 )}
                 <TextField

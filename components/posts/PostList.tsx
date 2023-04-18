@@ -12,7 +12,7 @@ export default function PostList() {
 
     const user = auth().currentUser;
     // filter out matched posts from feed
-    if (user) posts = posts.filter((post) => !post.riders?.includes(user.uid));
+    if (user) posts = posts.filter((post) => post.riders && !post.riders[user.uid]);
 
     return (
         <View style={{ marginTop: 20 }}>

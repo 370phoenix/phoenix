@@ -31,7 +31,7 @@ export default function MatchCard({ userID, post }: Props) {
         return (
             <View style={[styles.cardContainer, { backgroundColor: Colors.gray.w }]}>
                 <Text textStyle="label" styleSize="m" style={styles.error}>
-                    {error}
+                    {error.message}
                 </Text>
             </View>
         );

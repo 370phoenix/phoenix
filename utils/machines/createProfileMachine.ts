@@ -1,5 +1,6 @@
 import { assign, createMachine, DoneInvokeEvent } from "xstate";
-import { UserInfo, validateProfile, writeUser } from "../auth";
+import { writeUser } from "../auth";
+import { validateProfile, UserInfo } from "../userValidation";
 
 const CreateProfileMachine = {
     id: "Create Profile Machine",
