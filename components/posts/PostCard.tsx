@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, Platform, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import functions from "@react-native-firebase/functions";
 
 import { Right } from "../../assets/icons/Chevron";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -7,14 +8,14 @@ import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
 import { UserID, PostType } from "../../constants/DataTypes";
 import Colors from "../../constants/Colors";
-import { convertLocation, convertDate, convertTime } from "../../utils/convertPostTypes";
-import { deletePost } from "../../utils/posts";
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { Spacer, Text, View } from "../shared/Themed";
 import { UserInfo } from "../../utils/auth";
-import { useSelector } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
 import { useContext } from "react";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { MatchSublist } from "../matches/MatchList";
+import { ChatHeader } from "../../utils/chat";
+import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 
 type Props = {
     isProfile?: boolean;
@@ -32,8 +33,8 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
     if (post.pending?.includes(userID!)) return <></>;
     if (!post.dropoff) return <></>;
 
-    const pickup = convertLocation(post.pickup);
-    const dropoff = convertLocation(post.dropoff);
+    const pickup = post.pickup;
+    const dropoff = post.dropoff;
     const fDate = convertDate(post.startTime);
     const fStartTime = convertTime(post.startTime);
     const fEndTime = convertTime(post.endTime);
@@ -45,11 +46,18 @@ export default function PostCard({ post, isProfile = false, userInfo = [null, nu
         isMatched =
             userID === post.user || updatedUserInfo?.matches?.includes(post.postID) ? true : false;
 
+    let state, send, header: ChatHeader | null;
+    if (isMatched) {
+        [state, send] = useMachine(chatHeaderMachine);
+        if (state.matches("Start")) send({ type: "INIT", postID: post.postID });
+        header = state.context.header;
+    }
+
     return (
         <Pressable
             onPress={() =>
-                isMatched
-                    ? navigation.navigate("MatchDetails", { post, list: MatchSublist.matches })
+                isMatched && header
+                    ? navigation.navigate("ChatScreen", { post, header })
                     : navigation.navigate("PostDetails", { post })
             }
             style={({ pressed }) => [
@@ -139,7 +147,16 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                 text: "Confirm",
                 onPress: async () => {
                     const [userID, userObj] = userInfo;
-                    if (userID && userObj) await deletePost(post.postID, userID, userObj);
+                    if (userID && userObj) {
+                        try {
+                            await functions().httpsCallable("fullPostDelete")({
+                                post: post,
+                                postID: post.postID,
+                            });
+                        } catch (e: any) {
+                            console.error(e);
+                        }
+                    }
                 },
             },
             {

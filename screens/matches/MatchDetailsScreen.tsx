@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text, View, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
-import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
+import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import ProfileInfo from "../../components/profile/ProfileInfo";
 import auth from "@react-native-firebase/auth";
 import { MatchSublist } from "../../components/matches/MatchList";
@@ -89,7 +89,7 @@ export default function MatchDetailsScreen({ route, navigation }: Props) {
                 Ride Information
             </Text>
             <Text textStyle="label">
-                {convertLocation(post.pickup)} {"->"} {convertLocation(post.dropoff)}
+                {post.pickup} {"->"} {post.dropoff}
             </Text>
             <Text>{convertDate(post.startTime)}</Text>
             <Text style={styles.mb16}>

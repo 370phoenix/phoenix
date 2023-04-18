@@ -9,6 +9,7 @@ import {
     writeUser,
 } from "./auth";
 import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
+import { ChatHeader } from "../utils/chat";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -161,47 +162,6 @@ export function getAllPostUpdates({
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
-///////////// DELETE POSTS ////////////////
-///////////////////////////////////////////
-///////////////////////////////////////////
-
-/**
- * Delete a single post.
- *
- * @param id (PostID): The ID of the post to delete
- * @param userId (UserID): The ID of the user that made the post
- * @param userInfo (UserInfo): The UserInfo of the user that made the post
- * @returns (SuccessMessage | ErrorMessage)
- */
-export async function deletePost(
-    id: PostID,
-    userId: UserID,
-    userInfo: UserInfo
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        const postRef = db.ref("posts/" + id);
-        await postRef.remove();
-
-        let newPosts = userInfo.posts ? userInfo.posts : [];
-        if (newPosts.length == 1) newPosts = [];
-        else {
-            const i = newPosts.indexOf(id);
-            if (i !== -1) newPosts.splice(i, 1);
-        }
-        userInfo.posts = newPosts;
-
-        const res = await writeUser(userId, userInfo);
-        if (res.type === MessageType.error) throw Error(res.message);
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        console.log(`Error in delete post: ${e.message}`);
-        return { type: MessageType.error, message: e.message };
-    }
-}
-
-///////////////////////////////////////////
-///////////////////////////////////////////
 ///////////// CREATE POSTS ////////////////
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -222,6 +182,7 @@ export async function createPost(
         if (!userID) throw Error("No user signed in.");
         if (!userInfo) throw Error("No user info found.");
 
+        // Add post to DB
         const postRef = db.ref("posts/").push();
         if (!postRef.key) throw new Error("No key generated.");
         const postID = postRef.key;
@@ -231,15 +192,24 @@ export async function createPost(
         };
         await postRef.set(newPost);
 
+        // Add post to user info
         const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
         posts.push(postID);
         userInfo.posts = posts;
         const r2 = await writeUser(userID, userInfo);
         if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
 
+        // Add a chat header
+        await db.ref(`chats/${postID}`).set({
+            postID,
+            title: post.dropoff,
+            displayNames: { [userID]: userInfo.username },
+            lastMessage: undefined,
+        });
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
-        console.log(`Error in Write user Data: ${e.message}`);
+        console.error("Error in create post: " + e.message);
         return { message: "Error: " + e.message, type: MessageType.error };
     }
 }
@@ -324,8 +294,14 @@ export async function handleAcceptReject({
         const r4 = await writePostData(post);
         if (r4.type === MessageType.error) throw new Error(r4.message);
 
+        if (isAccept) {
+            console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
+            await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+        }
+
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { type: MessageType.error, message: `Error: ${e.message}` };
     }
 }

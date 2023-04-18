@@ -3,7 +3,9 @@ import Pronouns from "../constants/Pronouns.json";
 import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
+import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
+import firebase from "@react-native-firebase/app";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -22,7 +24,11 @@ export type UserInfo = {
     posts: PostID[] | undefined;
     pending: PostID[] | undefined;
     matches: PostID[] | undefined;
+<<<<<<< HEAD
     completed: PostID[] | undefined;
+=======
+    hasPushToken: boolean;
+>>>>>>> main
 };
 
 export type FBUserInfo = {
@@ -36,7 +42,12 @@ export type FBUserInfo = {
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
+<<<<<<< HEAD
     completed: PostID[] | undefined;
+=======
+    requests: { [key: number]: { 0: string; 1: string } } | undefined;
+    hasPushToken: boolean;
+>>>>>>> main
 };
 
 // MESSAGES //
@@ -163,7 +174,9 @@ export function getUserUpdates(
                 onUpdate(convertUserInfo(key, data));
             }
         });
-        const unsub = () => userRef.off("value", onChange);
+        const unsub = () => {
+            userRef.off("value", onChange);
+        };
         return unsub;
     } catch (e: any) {
         return `Error ${e.message}`;
@@ -195,7 +208,8 @@ export async function getUserOnce(userID: UserID | null): Promise<Message<UserIn
         if (!userID) throw Error("No user ID.");
         const userRef = database().ref("users/" + userID);
         const snapshot = await userRef.once("value");
-        if (snapshot.exists()) return { data: snapshot.val(), type: MessageType.success };
+        if (snapshot.exists())
+            return { data: { userID: userID, ...snapshot.val() }, type: MessageType.success };
         return { message: "User does not have information stored.", type: MessageType.info };
     } catch (e: any) {
         return { message: `Error: ${e.message}`, type: MessageType.error };
@@ -226,11 +240,11 @@ export async function checkUserInfo(
  */
 export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
     try {
-        const userRef = database().ref("users/" + userID);
-        await userRef.remove();
+        await functions().httpsCallable("deleteUser")();
         await auth().signOut();
         return { type: MessageType.success, data: undefined };
     } catch (e: any) {
+        console.error(e.message);
         return { message: `Error ${e.message}`, type: MessageType.error };
     }
 }
@@ -248,6 +262,7 @@ type ValidateProfileParams = {
     pronouns: string;
     phone?: string | null;
     userInfo?: UserInfo | null;
+    hasPushToken?: boolean;
     userID?: string | null;
 };
 /**
@@ -261,13 +276,15 @@ export function validateProfile({
     major,
     pronouns,
     gradString,
+    hasPushToken = false,
     userID = null,
     phone = null,
     userInfo = null,
 }: ValidateProfileParams): UserInfo | string {
     try {
         const noUserError = "Must supply either phone or previous user info.";
-        if (!(phone || userInfo)) throw new Error(noUserError);
+        console.log(!phone && !userInfo);
+        if (!phone && !userInfo) throw new Error(noUserError);
 
         const filter = new Filter();
 
@@ -285,11 +302,12 @@ export function validateProfile({
         if (userInfo)
             // Changing Info
             return {
+                username,
+                major,
+                hasPushToken,
+                pronouns,
+                gradYear,
                 userID: userInfo.userID,
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
                 phone: userInfo.phone,
                 chillIndex: userInfo.chillIndex,
                 ridesCompleted: userInfo.ridesCompleted ? userInfo.ridesCompleted : 0,
@@ -303,11 +321,12 @@ export function validateProfile({
             return {
                 userID,
                 chillIndex: undefined,
-                username: username,
-                major: major,
-                pronouns: pronouns,
-                gradYear: gradYear,
-                phone: phone,
+                username,
+                major,
+                pronouns,
+                gradYear,
+                phone,
+                hasPushToken,
                 ridesCompleted: 0,
                 posts: [],
                 pending: [],

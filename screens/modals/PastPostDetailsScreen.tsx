@@ -188,3 +188,12 @@ const styles = StyleSheet.create({
         padding: 16,
     },
 });
+/* 
+-database validation : ZOD framework
+-need new dev build - download?
+-cant make any post more than a day in advance
+-devs at apple need a test account
+-need a change in DB - change and matches are inefficient -- need array with obj key and value true (obj.keys (as array) then updating in DB by path --> one operation to remove or add people)
+-resubmitted to app store with demo acct
+-app icon didnt work on that build
+*/
