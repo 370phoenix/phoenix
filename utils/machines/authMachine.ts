@@ -97,7 +97,14 @@ const AuthMachine = {
                                 },
                             },
                         },
-                        "Posts Loaded": {},
+                        "Posts Loaded": {
+                            on: {
+                                "UPDATE POST": {
+                                    target: "Posts Loaded",
+                                    actions: "updatePost",
+                                },
+                            },
+                        },
                         "Loading Failed": {},
                         "Set Token in DB": {
                             invoke: {
@@ -168,7 +175,8 @@ type AuthMachineContext = {
 type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
-    | { type: "SIGN OUT" };
+    | { type: "SIGN OUT" }
+    | { type: "UPDATE POST"; post: PostType };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
@@ -246,6 +254,19 @@ export const authMachine = createMachine(AuthMachine, {
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
+        }),
+        updatePost: assign({
+            posts: (context, event) => {
+                if (event.type !== "UPDATE POST") return context.posts;
+                if (!context.posts) return context.posts;
+
+                const i = context.posts.findIndex((post) => post.postID === event.post.postID);
+                if (i === -1) return context.posts;
+
+                const newPosts = [...context.posts];
+                newPosts[i] = event.post;
+                return newPosts;
+            },
         }),
         updateUserInfoTokenSet: assign({
             updatedToken: true,

@@ -206,7 +206,7 @@ type ARParams = {
  *      postID (PostID): The ID of the post the requester is trying to join.
  * }
  *
- * @returns (SuccessMessage | ErrorMessage)
+ * @returns (Proimse<PostType>) The new post data.
  * @throws (FirebaseError | Error) from Firebase or validation
  */
 export async function handleAcceptReject({
@@ -215,7 +215,7 @@ export async function handleAcceptReject({
     requesterID,
     requesterInfo,
     post,
-}: ARParams): Promise<void> {
+}: ARParams): Promise<PostType> {
     if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
 
     const { postID } = post;
@@ -247,6 +247,7 @@ export async function handleAcceptReject({
         console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
         await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
     }
+    return post;
 }
 
 /**

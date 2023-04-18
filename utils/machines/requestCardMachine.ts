@@ -88,8 +88,20 @@ const RequestCardMachine = {
         },
         events: {} as
             | { type: "LOAD INFO"; id: string }
-            | { type: "ACCEPT"; post: PostType; posterID: string; userInfo: UserInfo }
-            | { type: "REJECT"; post: PostType; posterID: string; userInfo: UserInfo },
+            | {
+                type: "ACCEPT";
+                post: PostType;
+                posterID: string;
+                userInfo: UserInfo;
+                onSuccessful: (post: PostType) => void;
+            }
+            | {
+                type: "REJECT";
+                post: PostType;
+                posterID: string;
+                userInfo: UserInfo;
+                onSuccessful: (post: PostType) => void;
+            },
     },
     context: { requesterInfo: null, userID: null },
     predictableActionArguments: true,
@@ -103,7 +115,7 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
         },
         acceptUser: async (context, event) => {
             if (context.userID && event.type === "ACCEPT") {
-                await handleAcceptReject({
+                const newPost = await handleAcceptReject({
                     isAccept: true,
                     userInfo: event.userInfo,
                     requesterID: context.userID,
@@ -111,11 +123,12 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     post: event.post,
                     posterID: event.posterID,
                 });
+                event.onSuccessful(newPost);
             } else throw Error("No info attached to event or Missing ID.");
         },
         rejectUser: async (context, event) => {
             if (context.userID && event.type === "REJECT") {
-                await handleAcceptReject({
+                const newPost = await handleAcceptReject({
                     isAccept: false,
                     userInfo: event.userInfo,
                     requesterID: context.userID,
@@ -123,6 +136,7 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     post: event.post,
                     posterID: event.posterID,
                 });
+                event.onSuccessful(newPost);
             } else throw Error("No info attached to event or Missing ID.");
         },
     },

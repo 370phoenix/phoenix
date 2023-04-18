@@ -6,10 +6,10 @@ import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
-import { Full } from "../../assets/icons/User";
 import { useMachine } from "@xstate/react";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 import { PostToFBSchema, PostType } from "../../utils/postValidation";
+import Calendar from "../../assets/icons/Calendar";
 
 export type Props = {
     post: PostType;
@@ -47,6 +47,18 @@ export default function MatchCard({ userID, post }: Props) {
                     backgroundColor: pressed ? Colors.gray[4] : Colors.gray.w,
                 },
             ]}>
+            <MatchCardGuts post={post} color={color} />
+        </Pressable>
+    );
+}
+
+interface MatchCardGutsProps {
+    post: PostType;
+    color: string;
+}
+export function MatchCardGuts({ post, color }: MatchCardGutsProps) {
+    return (
+        <>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
                     <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
@@ -64,16 +76,14 @@ export default function MatchCard({ userID, post }: Props) {
                     </Text>
                 </View>
             </View>
-            <View style={styles.riderIcon}>
-                <View style={styles.riderGroup}>
-                    <Full color={color} height={28} />
-                    <Text style={{ color: color }}>
-                        {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1} /{" "}
-                        {post.totalSpots}
-                    </Text>
-                </View>
+            <View style={styles.riderGroup}>
+                <Calendar color={color} height={28} width={24} />
+                <Text
+                    style={{
+                        color: color,
+                    }}>{`${post.startTime.getMonth() + 1}/${post.startTime.getDate()}`}</Text>
             </View>
-        </Pressable>
+        </>
     );
 }
 
@@ -83,7 +93,9 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         flexDirection: "row",
         alignItems: "center",
-        borderTopWidth: 1,
+        marginHorizontal: 16,
+        marginBottom: 8,
+        borderRadius: 8,
     },
     body: { flex: 1 },
     riderIndicator: { justifyContent: "center", alignItems: "center", height: 25 },
@@ -122,5 +134,6 @@ const styles = StyleSheet.create({
     riderGroup: {
         alignItems: "center",
         justifyContent: "center",
+        marginRight: 16,
     },
 });
