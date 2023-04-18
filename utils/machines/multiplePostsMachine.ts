@@ -1,6 +1,6 @@
 import { createMachine, assign } from "xstate";
 import { PostType } from "../../constants/DataTypes";
-import { MessageType } from "../auth";
+// import { MessageType } from "../auth";
 import { fetchSomePosts } from "../posts";
 
 const MutliplePostsMachine = {

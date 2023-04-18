@@ -42,6 +42,13 @@ export type FBUserInfo = {
     hasPushToken: boolean;
 };
 
+export type FeedbackEntryType = {
+    message: string;
+    postID: string;
+    userID: string;
+    timestamp: number;
+};
+
 // For helper method cleanUndefined
 type Clean<T> = {
     [K in keyof T]?: any;
