@@ -1,4 +1,5 @@
 import { firebase } from "@react-native-firebase/database";
+import * as Clipboard from "expo-clipboard";
 
 import { getUserOnce, UserInfo, writeUser } from "./auth";
 import { safeRun } from "./errorHandling";
@@ -10,6 +11,7 @@ import {
     PostToFBSchema,
     PostType,
 } from "./postValidation";
+
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -338,4 +340,8 @@ function valToPost(val: any) {
         riders: val.riders,
         pending: val.pending,
     });
+}
+
+export async function copyToClipboard(text: string){
+    await Clipboard.setStringAsync(text);
 }

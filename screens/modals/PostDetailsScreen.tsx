@@ -30,6 +30,8 @@ export default function DetailsModal({ route, navigation }: Props) {
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
+    const filled = post.riders ? post.riders.filter((val) => val != null).length + 1 : 1;
+
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
             {
@@ -43,9 +45,6 @@ export default function DetailsModal({ route, navigation }: Props) {
                         if (!post) return;
                         if (post.riders?.includes(userID)) return;
                         if (post.pending?.includes(userID)) return;
-                        const filled = post.riders
-                            ? post.riders.filter((val) => val != null).length + 1
-                            : 1;
                         if (filled >= post.totalSpots) return;
 
                         await matchPost(userID, post);
@@ -83,7 +82,12 @@ export default function DetailsModal({ route, navigation }: Props) {
                             height: useHeaderHeight() + 16,
                             padding: 16,
                         }}>
-                        <Button title="Match!" onPress={handleMatch} color="purple" />
+                        <Button
+                            title="Match!"
+                            onPress={handleMatch}
+                            color="purple"
+                            disabled={filled >= post.totalSpots}
+                        />
                         <Spacer direction="column" size={24} />
                     </View>
                 </>
