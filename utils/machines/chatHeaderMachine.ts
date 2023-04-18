@@ -1,5 +1,5 @@
 import { firebase } from "@react-native-firebase/database";
-import { createMachine, assign, DoneInvokeEvent } from "xstate";
+import { createMachine, assign } from "xstate";
 
 import { ChatHeader } from "../chat";
 

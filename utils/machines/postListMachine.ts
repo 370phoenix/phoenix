@@ -1,7 +1,7 @@
 import { assign, createMachine } from "xstate";
-import { PostType } from "../../constants/DataTypes";
-import { MessageType } from "../auth";
+import { logError } from "../errorHandling";
 import { getAllPostUpdates, Unsubscribe } from "../posts";
+import { PostType } from "../postValidation";
 
 const PostListMachine = {
     id: "Post List Machine",
@@ -64,20 +64,21 @@ const PostListMachine = {
 export const postListMachine = createMachine(PostListMachine, {
     services: {
         setListeners: (_) => (callback) => {
-            const res = getAllPostUpdates({
-                onChildChanged: (post) => {
-                    callback({ type: "CHANGED LISTENER FIRED", post });
-                },
-                onChildAdded: (post) => {
-                    callback({ type: "ADDED LISTENER FIRED", post });
-                },
-                onChildRemoved: (post) => {
-                    callback({ type: "REMOVE LISTENER FIRED", post });
-                },
-            });
-
-            if (res.type === MessageType.error) return () => {};
-            return res.data;
+            try {
+                return getAllPostUpdates({
+                    onChildChanged: (post) => {
+                        callback({ type: "CHANGED LISTENER FIRED", post });
+                    },
+                    onChildAdded: (post) => {
+                        callback({ type: "ADDED LISTENER FIRED", post });
+                    },
+                    onChildRemoved: (post) => {
+                        callback({ type: "REMOVE LISTENER FIRED", post });
+                    },
+                });
+            } catch (error: any) {
+                logError(error);
+            }
         },
     },
     actions: {
@@ -106,7 +107,6 @@ export const postListMachine = createMachine(PostListMachine, {
 
             let i = 0;
             if ((i = prev.findIndex((val) => val.postID === post.postID)) !== -1) {
-                // MUST change array address (create a new array) to cause a re-render. Copy arrays like below for state changes.
                 const newPosts = [...prev];
                 newPosts[i] = post;
                 return { posts: newPosts };

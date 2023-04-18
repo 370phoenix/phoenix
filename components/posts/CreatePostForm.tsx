@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 
@@ -8,42 +8,36 @@ import NumberPicker from "../shared/NumberPicker";
 import { Button, Text, Spacer, TextArea } from "../shared/Themed";
 import LocationPicker, { LocationButton } from "../shared/LocationPicker";
 import Colors from "../../constants/Colors";
-import { NewPostType } from "../../constants/DataTypes";
 import { createPost } from "../../utils/posts";
-import validateData from "../../utils/postValidation";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
+import validateData, { Coords } from "../../utils/postValidation";
+import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
-
-// stores options for number picker form inputs
-type Coords = {
-    lat: number;
-    long: number;
-};
+import { z } from "zod";
 
 // FIXME: too much state going on here
 export default function CreatePostForm({ navigation }: { navigation: any }) {
     const headerHeight = useHeaderHeight();
     const authService: any = useContext(AuthContext);
-    const id = useSelector(authService, userIDSelector);
-    const userID = id ? id : "No user found";
     const userInfo = useSelector(authService, userInfoSelector);
+
+    if (!userInfo) return <></>;
+    const { userID } = userInfo;
 
     // date time state
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
     // location state
     const [pickup, setPickup] = useState("");
-    const [pickupCoords, setPickupCoords] = useState<Coords | undefined>(undefined);
     const [dropoff, setDropoff] = useState("");
-    const [dropoffCoords, setDropoffCoords] = useState<Coords | undefined>(undefined);
+    const pickupCoords = useRef<Coords | null>(null);
 
-    const [isRoundtrip, setIsRoundtrip] = useState(false);
+    const [roundTrip, setRoundTrip] = useState(false);
     const [totalSpots, setTotalSpots] = useState(1);
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
-    const [message, setMessage] = useState<string | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
     // contains constraints for modifying seats
     const addTotalSpots = () => {
@@ -60,7 +54,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
         setDropoff(text);
     };
     // change handler for round trip switch
-    const roundtripSwitch = () => setIsRoundtrip((previousState) => !previousState);
+    const roundtripSwitch = () => setRoundTrip((previousState) => !previousState);
 
     //error message
     const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
@@ -69,25 +63,20 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const onSubmit = async () => {
         if (submitting) return;
         setSubmitting(true);
-        //uses validation function
-        const post: NewPostType = {
-            pickup,
-            dropoff,
-            pickupCoords,
-            dropoffCoords,
-            user: userID,
-            riders: [],
-            pending: [],
-            totalSpots,
-            notes,
-            roundTrip: isRoundtrip,
-            startTime: startTime.getTime(),
-            endTime: endTime.getTime(),
-        };
         //errors are displayed as error messages below
         try {
-            const validatedPost = await validateData({ post });
-            await createPost(validatedPost, userID, userInfo);
+            const validatedPost = await validateData({
+                user: userID,
+                pickup,
+                dropoff,
+                startTime,
+                endTime,
+                totalSpots,
+                notes,
+                roundTrip,
+            });
+            setError(null);
+            await createPost(validatedPost, userInfo);
             setWriteComplete(true);
             setSubmitting(false);
             setTimeout(() => {
@@ -95,36 +84,35 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
             }, 500);
         } catch (e: any) {
             setSubmitting(false);
-            setMessage(e.message);
+            setError(e);
         }
     };
 
-    // group contains location and round trip info
-    const TripDetails = (
-        <>
-            <LocationPicker name="From" inputText={pickup} onChangeText={onChangePickup} />
-            <View>
-                <LocationButton setLocation={setPickupCoords} onChangeText={onChangePickup} />
-            </View>
-            <LocationPicker name="To" inputText={dropoff} onChangeText={onChangeDropoff} />
-            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
-                <Text textStyle="lineTitle">ROUND TRIP?</Text>
-                <Spacer direction="row" size={24} />
-                <CustomSwitch isEnabled={isRoundtrip} toggleSwitch={roundtripSwitch} />
-            </View>
-        </>
-    );
+    if (writeComplete) return <SuccessfulPost message="SUCCESSFULLY POSTED!" />;
 
-    const Form = (
+    return (
         <ScrollView>
             <View style={styles.body}>
-                <Spacer direction="column" size={24} />
-                <Text textStyle="header" styleSize="l">
+                <Text style={styles.header} textStyle="header" styleSize="l">
                     Create Post
                 </Text>
-                <Spacer direction="column" size={16} />
-                {TripDetails}
-                <Spacer direction="column" size={16} />
+
+                {error &&
+                    (error instanceof z.ZodError ? (
+                        error.issues.map((err, i) => <ErrorBox message={err.message} key={i} />)
+                    ) : (
+                        <ErrorBox message={error.message} />
+                    ))}
+
+                <TripDetails
+                    pickup={pickup}
+                    pickupCoords={pickupCoords}
+                    onChangePickup={onChangePickup}
+                    dropoff={dropoff}
+                    onChangeDropoff={onChangeDropoff}
+                    error={error}
+                />
+
                 <DateTimeGroup
                     start={startTime}
                     onChangeStart={setStartTime}
@@ -132,68 +120,35 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                     onChangeEnd={setEndTime}
                 />
 
-                <Spacer direction="column" size={16} />
+                <View style={styles.formRow}>
+                    <Text textStyle="lineTitle">ROUND TRIP?</Text>
+                    <Spacer direction="row" size={24} />
+                    <CustomSwitch isEnabled={roundTrip} toggleSwitch={roundtripSwitch} />
+                </View>
+
                 <Text textStyle="label" styleSize="l">
                     Notes for riders?
                 </Text>
-                <Spacer direction="column" size={8} />
                 <TextArea
                     label=""
+                    textStyle={["body", "s"]}
+                    style={styles.notes}
                     inputState={[notes, setNotes]}
                     placeholder="Type here..."
                     placeholderTextColor={Colors.gray[2]}
                 />
-                <Spacer direction="column" size={16} />
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}>
+
+                <View style={styles.freeSeats}>
                     <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
                     <NumberPicker
                         count={totalSpots}
                         handlePlus={addTotalSpots}
                         handleMinus={deleteTotalSpots}
                     />
-                    <Spacer direction="column" size={16} />
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        }}>
-                        <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
-                        <NumberPicker
-                            count={totalSpots}
-                            handlePlus={addTotalSpots}
-                            handleMinus={deleteTotalSpots}
-                        />
-                    </View>
-                    <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                    {message && (
-                        <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                            {message}
-                        </Text>
-                    )}
-                    {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
-                    {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
-                    <Button
-                        onPress={onSubmit}
-                        color="navy"
-                        title="Post"
-                        style={{ height: headerHeight + 32 }}
-                    />
-                    <Spacer direction="column" size={128} style={{ flex: 1 }} />
                 </View>
-                <Spacer direction="column" size={16} style={{ flex: 1 }} />
-                {message && (
-                    <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                        {message}
-                    </Text>
-                )}
-                {!message && <Spacer direction="column" size={128} style={{ flex: 1 }} />}
-                {message && <Spacer direction="column" size={112} style={{ flex: 1 }} />}
+
+                <Spacer direction={"column"} size={120} style={{ flex: 1 }} />
+
                 <Button
                     disabled={submitting}
                     onPress={onSubmit}
@@ -205,14 +160,61 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
             </View>
         </ScrollView>
     );
-
-    return (
-        <>
-            {writeComplete && <SuccessfulPost message="SUCCESSFULLY POSTED!" />}
-            {!writeComplete && Form}
-        </>
-    );
 }
+
+interface TripDetailsProps {
+    onChangePickup: (text: any) => void;
+    onChangeDropoff: (text: any) => void;
+    dropoff: string;
+    pickup: string;
+    pickupCoords: React.MutableRefObject<Coords | null>;
+    error: Error | null;
+}
+const TripDetails = ({
+    onChangePickup,
+    onChangeDropoff,
+    dropoff,
+    pickup,
+    pickupCoords,
+    error,
+}: TripDetailsProps) => {
+    // TOOD: UPDATE ADDRESS ERROR
+    const pickupError = (error && error.message.includes("pickup")) || false;
+    const dropoffError = (error && error.message.includes("dropoff")) || false;
+    return (
+        <View style={styles.tripDetails}>
+            <LocationPicker
+                name="From"
+                inputText={pickup}
+                onChangeText={onChangePickup}
+                addressError={pickupError}
+            />
+            <LocationButton
+                setLocation={(coords) => (pickupCoords.current = coords)}
+                onChangeText={onChangePickup}
+            />
+            <LocationPicker
+                name="To"
+                inputText={dropoff}
+                onChangeText={onChangeDropoff}
+                addressError={dropoffError}
+            />
+        </View>
+    );
+};
+
+interface ErrorBoxProps {
+    message: string;
+}
+const ErrorBox = ({ message }: ErrorBoxProps) => {
+    return (
+        <View style={styles.errorBox}>
+            <Text style={styles.errorText} textStyle="body" styleSize="m">
+                {message}
+            </Text>
+        </View>
+    );
+};
 
 const DateTimeGroup = ({
     start,
@@ -227,17 +229,20 @@ const DateTimeGroup = ({
 }) => {
     return (
         <>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text textStyle="lineTitle">DATE</Text>
-                <Spacer direction="row" size={8} />
+            <View style={styles.formRow}>
+                <Text style={styles.lineTitle} textStyle="lineTitle">
+                    DATE
+                </Text>
                 <CustomDateTimePicker mode="date" date={start} onConfirm={onChangeStart} />
             </View>
-            <Spacer direction="column" size={16} />
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text textStyle="lineTitle">TIME</Text>
-                <Spacer direction="row" size={8} />
+            <View style={styles.formRow}>
+                <Text style={styles.lineTitle} textStyle="lineTitle">
+                    TIME
+                </Text>
                 <CustomDateTimePicker mode="time" date={start} onConfirm={onChangeStart} />
-                <Spacer direction="row" size={8} />
+                <Text style={styles.divider} textStyle="body">
+                    to
+                </Text>
                 <CustomDateTimePicker mode="time" date={end} onConfirm={onChangeEnd} />
             </View>
         </>
@@ -252,8 +257,41 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
         flexDirection: "column",
     },
+    tripDetails: {
+        marginVertical: 16,
+        alignItems: "flex-start",
+    },
+    formRow: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+    freeSeats: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 16,
+    },
+    header: {
+        marginTop: 24,
+    },
+    lineTitle: {
+        marginRight: 8,
+    },
+    divider: {
+        marginHorizontal: 8,
+    },
     message: {
         paddingVertical: 10,
         color: Colors.red.p,
+    },
+    notes: {
+        marginTop: 8,
+    },
+    errorBox: {
+        padding: 16,
+        borderRadius: 8,
+        backgroundColor: Colors.red[1],
+        opacity: 0.8,
+        marginTop: 16,
+    },
+    errorText: {
+        color: Colors.gray.w,
     },
 });

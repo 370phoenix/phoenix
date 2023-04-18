@@ -6,11 +6,10 @@
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MatchSublist } from "./components/matches/MatchList";
 
-import { PostType } from "./constants/DataTypes";
 import { UserInfo } from "./utils/auth";
 import { ChatHeader } from "./utils/chat";
+import { FBPostType } from "./utils/postValidation";
 
 declare global {
     namespace ReactNavigation {
@@ -32,12 +31,12 @@ export type RootStackParamList = {
 };
 
 export type ChatScreenParamList = {
-    post: PostType;
+    post: FBPostType;
     header: ChatHeader;
 };
 
 export type PostDetailsParamList = {
-    post: PostType;
+    post: FBPostType;
 };
 
 export type ChangeInfoParamList = {

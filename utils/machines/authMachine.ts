@@ -1,10 +1,11 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { UserID, PostType } from "../../constants/DataTypes";
-import { getUserUpdates, MessageType, UserInfo } from "../auth";
+import { getUserUpdates, UserInfo } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
+import { PostType } from "../postValidation";
+import { logError } from "../errorHandling";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -91,12 +92,19 @@ const AuthMachine = {
                                     target: "Posts Loaded",
                                 },
                                 onError: {
-                                    actions: "assignError",
+                                    actions: "logError",
                                     target: "Loading Failed",
                                 },
                             },
                         },
-                        "Posts Loaded": {},
+                        "Posts Loaded": {
+                            on: {
+                                "UPDATE POST": {
+                                    target: "Posts Loaded",
+                                    actions: "updatePost",
+                                },
+                            },
+                        },
                         "Loading Failed": {},
                         "Set Token in DB": {
                             invoke: {
@@ -145,7 +153,7 @@ const AuthMachine = {
         ranOnce: false,
         error: null,
         posts: null,
-        updatedToken: false
+        updatedToken: false,
     },
     schema: {
         context: {} as AuthMachineContext,
@@ -167,19 +175,21 @@ type AuthMachineContext = {
 type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
-    | { type: "SIGN OUT" };
+    | { type: "SIGN OUT" }
+    | { type: "UPDATE POST"; post: PostType };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
 export const needsInfoSelector = (state: any) =>
     ["FB Signed In.Needs Profile", "FB Signed In.Waiting"].some(state.matches);
 export const userIDSelector = (state: any) =>
-    state.context.user ? (state.context.user.uid as UserID) : null;
+    state.context.user ? (state.context.user.uid as string) : null;
 export const userInfoSelector = (state: any) =>
     state.context.userInfo ? (state.context.userInfo as UserInfo) : null;
 export const userPostsSelector = (state: any) =>
     state.context.posts ? (state.context.posts as PostType[]) : null;
-export const userSelector = (state: any) => state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
+export const userSelector = (state: any) =>
+    state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
 
 export const authMachine = createMachine(AuthMachine, {
     services: {
@@ -194,15 +204,16 @@ export const authMachine = createMachine(AuthMachine, {
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
                 console.log("MISSING USER IN FB SIGNED IN");
-                return () => {};
+                return () => { };
             }
-            const res = getUserUpdates(context.user.uid, (data) => {
-                callback({ type: "USER INFO CHANGED", userInfo: data });
-            });
-
-            if (typeof res === "string") return () => {};
-
-            return res;
+            try {
+                return getUserUpdates(context.user.uid, (data) => {
+                    callback({ type: "USER INFO CHANGED", userInfo: data });
+                });
+            } catch (e: any) {
+                logError(e);
+                return () => { };
+            }
         },
         loadUserPosts: async (context) => {
             const { user, userInfo } = context;
@@ -210,17 +221,14 @@ export const authMachine = createMachine(AuthMachine, {
             const { posts: postIDs } = userInfo;
             if (!postIDs) return [];
 
-            const res = await fetchSomePosts(postIDs);
-            if (res.type === MessageType.error) throw Error(res.message);
-            else return res.data;
+            return await fetchSomePosts(postIDs);
         },
         setToken: async (context) => {
             const { user, userInfo } = context;
             if (!user || !userInfo) throw Error("Missing User Information");
             try {
                 await registerForPushNotificationsAsync(user.uid, userInfo);
-            }
-            catch(e:any){
+            } catch (e: any) {
                 throw Error("Error registering for push notifications");
             }
         },
@@ -247,17 +255,30 @@ export const authMachine = createMachine(AuthMachine, {
         assignPosts: assign({
             posts: (_, event: any) => event.data,
         }),
-        updateUserInfoTokenSet: assign({
-            updatedToken: true
+        updatePost: assign({
+            posts: (context, event) => {
+                if (event.type !== "UPDATE POST") return context.posts;
+                if (!context.posts) return context.posts;
+
+                const i = context.posts.findIndex((post) => post.postID === event.post.postID);
+                if (i === -1) return context.posts;
+
+                const newPosts = [...context.posts];
+                newPosts[i] = event.post;
+                return newPosts;
+            },
         }),
-        logError: (_, event: any) => console.error(event.data),
+        updateUserInfoTokenSet: assign({
+            updatedToken: true,
+        }),
+        logError: (_, event: any) => logError(event.data),
     },
     guards: {
         userExists: (context) => (context.user ? true : false),
         userInfoExists: (context) => (context.userInfo ? true : false),
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
-        needTokenUpdate: (context) => context.updatedToken === false
+        needTokenUpdate: (context) => context.updatedToken === false,
     },
 });
 

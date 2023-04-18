@@ -1,7 +1,6 @@
 import { firebase } from "@react-native-firebase/database";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { get } from "http";
 import { Platform } from "react-native";
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -10,7 +9,7 @@ const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.
  *
  * @returns ExpoPushToken for current user
  */
-export async function registerForPushNotificationsAsync(userID: string, userInfo: any) {
+export async function registerForPushNotificationsAsync(userID: string, _userInfo: any) {
     let token;
     if (Device.isDevice) {
         const { status: existingStatus } = await Notifications.getPermissionsAsync();

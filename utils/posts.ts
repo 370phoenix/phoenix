@@ -1,15 +1,15 @@
 import { firebase } from "@react-native-firebase/database";
 
+import { getUserOnce, UserInfo, writeUser } from "./auth";
+import { safeRun } from "./errorHandling";
 import {
-    ErrorMessage,
-    getUserOnce,
-    MessageType,
-    SuccessMessage,
-    UserInfo,
-    writeUser,
-} from "./auth";
-import { NewPostType, PostID, PostType, UserID } from "../constants/DataTypes";
-import { ChatHeader } from "../utils/chat";
+    FBPostType,
+    FirebasePostSchema,
+    FreshPostType,
+    PostSchema,
+    PostToFBSchema,
+    PostType,
+} from "./postValidation";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
@@ -32,40 +32,12 @@ export type Unsubscribe = () => void;
  *
  * @param postID (PostID): ID to fetch
  * @returns Success with Post Data | Error
+ * @throws ZodError when validation fails
  */
-export async function fetchPost(postID: PostID): Promise<SuccessMessage<PostType> | ErrorMessage> {
-    try {
-        const snapshot = await db.ref("posts/" + postID).once("value");
-        const val = snapshot.val();
-        if (snapshot.exists())
-            return {
-                type: MessageType.success,
-                data: {
-                    ...val,
-                    riders: val.riders ? val.riders : [],
-                    pending: val.pending ? val.pending : [],
-                },
-            };
-        else return { type: MessageType.error, message: "Error: post missing or not found." };
-    } catch (e: any) {
-        return { message: `Error: ${e.message}`, type: MessageType.error };
-    }
-}
-
-/**
- * Fetch all posts once.
- *
- * @returns (PostType[] | string): Post Data array or error messgae
- */
-export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
-    try {
-        const snapshot = await db.ref("posts").once("value");
-        const data: PostType[] = Object.values(snapshot.val());
-        data.sort((a, b) => a.startTime - b.startTime);
-        return { type: MessageType.success, data: data };
-    } catch (e: any) {
-        return { type: MessageType.error, message: e.message };
-    }
+export async function fetchPost(postID: string): Promise<PostType> {
+    const snapshot = await db.ref("posts/" + postID).once("value");
+    if (snapshot.exists()) return valToPost(snapshot.val());
+    else throw Error("Post does not exist.");
 }
 
 /**
@@ -73,25 +45,25 @@ export async function fetchAllPosts(): Promise<SuccessMessage<PostType[]> | Erro
  *
  * @param ids (PostID[]): Array of ids to fetch
  * @returns (Success<PostType[] | ErrorMessage) Posts or an Error Message.
+ *
+ * @throws Error from Firebase
  */
-export async function fetchSomePosts(
-    ids: PostID[]
-): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
-    try {
-        const postsRef = db.ref("posts");
-        const posts: PostType[] = [];
+export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
+    const postsRef = db.ref("posts");
+    const posts: PostType[] = [];
 
-        for (const id of ids) {
-            if (!id) continue;
-            const postRef = postsRef.child(id);
-            const snapshot = await postRef.once("value");
-            if (snapshot.exists()) posts.push(snapshot.val());
+    for (const id of ids) {
+        if (!id) continue;
+        const postRef = postsRef.child(id);
+        const snapshot = await postRef.once("value");
+        if (snapshot.exists()) {
+            safeRun(() => {
+                posts.push(valToPost(snapshot.val()));
+            });
         }
-
-        return { type: MessageType.success, data: posts };
-    } catch (e: any) {
-        return { type: MessageType.error, message: e.message };
     }
+
+    return posts;
 }
 
 type PostUpdateParams = {
@@ -99,45 +71,60 @@ type PostUpdateParams = {
     onChildAdded: (data: PostType) => void;
     onChildRemoved: (data: PostType) => void;
 };
-
+/**
+ * Get all post updates.
+ *
+ * @param onChildAdded (PostType => void): Callback for when a post is added.
+ * @param onChildChanged (PostType => void): Callback for when a post is changed.
+ * @param onChildRemoved (PostType => void): Callback for when a post is removed.
+ *
+ * @returns (Unsubscribe): Function to unsubscribe from all updates.
+ * @throws Error from Firebase
+ */
 export function getAllPostUpdates({
     onChildAdded,
     onChildChanged,
     onChildRemoved,
-}: PostUpdateParams): SuccessMessage<Unsubscribe> | ErrorMessage {
+}: PostUpdateParams): Unsubscribe {
     const postsRef = db.ref("posts");
+
     const onAdd = postsRef.on(
         "child_added",
         (snapshot) => {
             if (snapshot.exists()) {
-                const data: PostType = snapshot.val();
-                onChildAdded(data);
+                safeRun(() => {
+                    onChildAdded(valToPost(snapshot.val()));
+                });
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
+
     const onChange = postsRef.on(
         "child_changed",
         (snapshot) => {
             if (snapshot.exists()) {
-                const data: PostType = snapshot.val();
-                onChildChanged(data);
+                safeRun(() => {
+                    onChildChanged(valToPost(snapshot.val()));
+                });
             }
         },
-        (_) => {} // TODO: HANDLE (ERROR) => {}
+        (_) => { } // TODO: HANDLE (ERROR) => {}
     );
+
     const onRemove = postsRef.on("child_removed", (snapshot) => {
         if (snapshot.exists()) {
-            const data: PostType = snapshot.val();
-            onChildRemoved(data);
+            safeRun(() => {
+                onChildRemoved(valToPost(snapshot.val()));
+            });
         }
     });
-    const unsub = () => {
+
+    return () => {
         postsRef.off("child_added", onAdd);
         postsRef.off("child_changed", onChange);
         postsRef.off("child_removed", onRemove);
     };
-    return { type: MessageType.success, data: unsub };
 }
 
 ///////////////////////////////////////////
@@ -151,47 +138,34 @@ export function getAllPostUpdates({
  *
  * @param post (PostType): The post data to create in the DB.
  * @param user (User): The user who is making the post.
+ *
  * @returns (SuccessMessage | ErrorMessage)
+ * @throws (FirebaseError | ZodError) from Firebase or validation
  */
-export async function createPost(
-    post: NewPostType,
-    userID: UserID | null,
-    userInfo: UserInfo | null
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        if (!userID) throw Error("No user signed in.");
-        if (!userInfo) throw Error("No user info found.");
+export async function createPost(post: FreshPostType, userInfo: UserInfo | null): Promise<void> {
+    if (!userInfo) throw Error("No user info found.");
+    const { user: userID } = post;
 
-        // Add post to DB
-        const postRef = db.ref("posts/").push();
-        if (!postRef.key) throw new Error("No key generated.");
-        const postID = postRef.key;
-        const newPost: PostType = {
-            ...post,
-            postID,
-        };
-        await postRef.set(newPost);
+    // Add post to DB
+    const postRef = db.ref("posts/").push();
+    if (!postRef.key) throw new Error("No key generated.");
+    const postID = postRef.key;
+    const newPost: FBPostType = FirebasePostSchema.parse({ postID, ...post });
+    await postRef.set(newPost);
 
-        // Add post to user info
-        const posts: PostID[] = userInfo.posts ? userInfo.posts : [];
-        posts.push(postID);
-        userInfo.posts = posts;
-        const r2 = await writeUser(userID, userInfo);
-        if (r2.type === MessageType.error) throw Error(`Error setting user data: ${r2.message}`);
+    // Add post to user info
+    const posts: string[] = userInfo.posts ? userInfo.posts : [];
+    posts.push(postID);
+    userInfo.posts = posts;
+    await writeUser(userID, userInfo);
 
-        // Add a chat header
-        await db.ref(`chats/${postID}`).set({
-            postID,
-            title: post.dropoff,
-            displayNames: { [userID]: userInfo.username },
-            lastMessage: undefined,
-        });
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        console.error("Error in create post: " + e.message);
-        return { message: "Error: " + e.message, type: MessageType.error };
-    }
+    // Add a chat header
+    await db.ref(`chats/${postID}`).set({
+        postID,
+        title: post.dropoff,
+        displayNames: { [userID]: userInfo.username },
+        lastMessage: undefined,
+    });
 }
 
 ///////////////////////////////////////////
@@ -204,25 +178,21 @@ export async function createPost(
  * Overwrites existing data for a post object.
  *
  * @param post (PostType): The post data to overwrite.
- * @returns (SuccesMessage | ErrorMessage)
+ * @returns (Promise<void>)
+ *
+ * @throws (FirebaseError) from Firebase
  */
-export async function writePostData(post: PostType): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        const postRef = db.ref("posts/" + post.postID);
-        await postRef.set(post);
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
+export async function writePostData(post: PostType): Promise<void> {
+    const postRef = db.ref("posts/" + post.postID);
+    await postRef.set(PostToFBSchema.parse(post));
 }
 
 type ARParams = {
     isAccept: boolean;
     userInfo: UserInfo | null;
-    requesterID: UserID;
+    requesterID: string;
     requesterInfo: UserInfo | null;
-    posterID: UserID;
+    posterID: string;
     post: PostType;
 };
 /**
@@ -235,7 +205,9 @@ type ARParams = {
  *      posterID (UserID): The ID of the user who made the post.
  *      postID (PostID): The ID of the post the requester is trying to join.
  * }
- * @returns (SuccessMessage | ErrorMessage)
+ *
+ * @returns (Proimse<PostType>) The new post data.
+ * @throws (FirebaseError | Error) from Firebase or validation
  */
 export async function handleAcceptReject({
     isAccept,
@@ -243,47 +215,39 @@ export async function handleAcceptReject({
     requesterID,
     requesterInfo,
     post,
-}: ARParams): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
+}: ARParams): Promise<PostType> {
+    if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
 
-        const { postID } = post;
+    const { postID } = post;
 
-        // Update Requester Info
-        // Remove from requester pending for accept or deny
-        if (requesterInfo.pending) {
-            const i = requesterInfo.pending.indexOf(postID);
-            if (i != -1 && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
-        }
-        // Add to matches for accept
-        if (isAccept)
-            requesterInfo.matches = requesterInfo.matches
-                ? [...requesterInfo.matches, postID]
-                : [postID];
-        const r2 = await writeUser(requesterID, requesterInfo);
-        if (r2.type === MessageType.error) throw new Error(r2.message);
-
-        // Update Post Info
-        // Remove from post pending for accept or deny
-        if (post.pending) {
-            const j = post.pending.indexOf(requesterID);
-            if (j != -1 && post.pending) post.pending.splice(j, 1);
-        }
-        // Add to post riders if accept
-        if (isAccept) post.riders = post.riders ? [...post.riders, requesterID] : [requesterID];
-        const r4 = await writePostData(post);
-        if (r4.type === MessageType.error) throw new Error(r4.message);
-
-        if (isAccept) {
-            console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
-            await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
-        }
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        console.error(e.message);
-        return { type: MessageType.error, message: `Error: ${e.message}` };
+    // Update Requester Info
+    // Remove from requester pending for accept or deny
+    if (requesterInfo.pending) {
+        const i = requesterInfo.pending.indexOf(postID);
+        if (i != -1 && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
     }
+    // Add to matches for accept
+    if (isAccept)
+        requesterInfo.matches = requesterInfo.matches
+            ? [...requesterInfo.matches, postID]
+            : [postID];
+    await writeUser(requesterID, requesterInfo);
+
+    // Update Post Info
+    // Remove from post pending for accept or deny
+    if (post.pending) {
+        const j = post.pending.indexOf(requesterID);
+        if (j != -1 && post.pending) post.pending.splice(j, 1);
+    }
+    // Add to post riders if accept
+    if (isAccept) post.riders = post.riders ? [...post.riders, requesterID] : [requesterID];
+    await writePostData(post);
+
+    if (isAccept) {
+        console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
+        await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+    }
+    return post;
 }
 
 /**
@@ -291,34 +255,24 @@ export async function handleAcceptReject({
  *
  * @param userID (UserID): The ID of the user requesting to match on the ride.
  * @param post (PostType): The post the user is trying to match on.
+ *
  * @returns (SuccessMessage | ErrorMessage)
+ * @throws (FirebaseError | Error) from Firebase or validation
  */
-export async function matchPost(
-    userID: UserID,
-    post: PostType
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        // Get Requester Info
-        const r2 = await getUserOnce(userID);
-        if (r2.type !== MessageType.success) throw new Error(r2.message);
-        const requesterInfo = r2.data;
+export async function matchPost(userID: string, post: PostType): Promise<void> {
+    // Get Requester Info
+    const requesterInfo = await getUserOnce(userID);
+    if (!requesterInfo) throw new Error("No requester info found.");
 
-        // Update requester to have pending
-        requesterInfo.pending = requesterInfo.pending
-            ? [...requesterInfo.pending, post.postID]
-            : [post.postID];
-        const r3 = await writeUser(userID, requesterInfo);
-        if (r3.type !== MessageType.success) throw new Error(r3.message);
+    // Update requester to have pending
+    requesterInfo.pending = requesterInfo.pending
+        ? [...requesterInfo.pending, post.postID]
+        : [post.postID];
+    await writeUser(userID, requesterInfo);
 
-        // Update Post Info to have pending
-        post.pending = post.pending ? [...post.pending, userID] : [userID];
-        const r5 = await writePostData(post);
-        if (r5.type !== MessageType.success) throw new Error(r5.message);
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
+    // Update Post Info to have pending
+    post.pending = post.pending ? [...post.pending, userID] : [userID];
+    await writePostData(post);
 }
 
 ///////////////////////////////////////////
@@ -333,121 +287,55 @@ export async function matchPost(
  * @param userID (UserID): The ID of the user requesting to unmatch from the ride.
  * @param post (PostType): The post the user is trying to unmatch from.
  * @returns (SuccessMessage | ErrorMessage)
- */
-export async function unmatchPost(
-    userID: UserID,
-    post: PostType
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        // remove postID from user.matches
-        const r1 = await getUserOnce(userID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const userInfo = r1.data;
-        const newMatches = userInfo.matches;
-        if (!userInfo || !newMatches) throw Error("Error fetching user info");
-        const postIndex = newMatches.indexOf(post.postID);
-        if (postIndex === -1) throw Error("Post not found in user matches");
-        if (newMatches.length === 1) newMatches.shift();
-        else newMatches.splice(postIndex, 1);
-        userInfo.matches = newMatches;
-
-        // update user to remove post
-        const r2 = await writeUser(userID, userInfo);
-        if (r2.type === MessageType.error) throw Error(r2.message);
-
-        // remove userID from post.riders
-        const newRiders = post.riders;
-        if (!newRiders) throw Error("Error fetching users from post");
-        const userIndex = newRiders.indexOf(userID);
-        if (userIndex === -1) throw Error("User not found in post riders");
-        if (newRiders.length === 1) newRiders.shift();
-        newRiders.splice(userIndex, 1);
-        post.riders = newRiders;
-
-        // update post to remove user
-        const r3 = await writePostData(post);
-        if (r3.type !== MessageType.success) throw new Error(r3.message);
-
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
-}
-
-/**
- * Initiates a request for a user to cancel pending match request from a post.
  *
- * @param userID (UserID): The ID of the user requesting to cancel a match request.
- * @param post (PostType): The post the user is trying to cancel a match request for.
- * @returns (SuccessMessage | ErrorMessage)
+ * @throws (FirebaseError | Error) from Firebase or validation
  */
-export async function cancelPendingMatch(
-    userID: UserID,
-    post: PostType
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        // remove postID from user.matches
-        const r1 = await getUserOnce(userID);
-        if (r1.type !== MessageType.success) throw new Error(r1.message);
-        const userInfo = r1.data;
-        const newPending = userInfo.pending;
-        if (!userInfo || !newPending) throw Error("Error fetching user info");
-        const postIndex = newPending.indexOf(post.postID);
-        if (postIndex === -1) throw Error("Post not found in user's pending rides");
-        if (newPending.length === 1) newPending.shift();
-        else newPending.splice(postIndex, 1);
-        userInfo.matches = newPending;
+export async function unmatchPost(userID: string, post: PostType): Promise<void> {
+    // remove postID from user.matches
+    const userInfo = await getUserOnce(userID);
+    if (!userInfo) throw new Error("No user info found.");
 
-        // remove userID from post.pending
-        const newRiders = post.pending;
-        if (!newRiders) throw Error("Error fetching users from post");
-        const userIndex = newRiders.indexOf(userID);
-        if (userIndex === -1) throw Error("User not found in post riders");
-        if (newRiders.length === 1) newRiders.shift();
-        newRiders.splice(userIndex, 1);
-        post.pending = newRiders;
+    const newMatches = userInfo.matches;
+    if (!newMatches) throw Error("Error fetching user matches");
 
-        // update user to remove post
-        const r3 = await writeUser(userID, userInfo);
-        if (r3.type === MessageType.error) throw Error(r3.message);
+    const postIndex = newMatches.indexOf(post.postID);
+    if (postIndex === -1) throw Error("Post not found in user matches");
 
-        // update post to remove user
-        const r5 = await writePostData(post);
-        if (r5.type !== MessageType.success) throw new Error(r5.message);
+    if (newMatches.length === 1) newMatches.shift();
+    else newMatches.splice(postIndex, 1);
+    userInfo.matches = newMatches;
 
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { type: MessageType.error, message: `Error: ${e.message}` };
-    }
+    // update user to remove post
+    await writeUser(userID, userInfo);
+
+    // remove userID from post.riders
+    const newRiders = post.riders;
+    if (!newRiders) throw Error("Error fetching users from post");
+
+    const userIndex = newRiders.indexOf(userID);
+    if (userIndex === -1) throw Error("User not found in post riders");
+    if (newRiders.length === 1) newRiders.shift();
+    newRiders.splice(userIndex, 1);
+    post.riders = newRiders;
+
+    // update post to remove user
+    await writePostData(post);
 }
 
-/**
- * Helper function that identifies a request in the request array.
- *
- * @param requests ([UserID, PostID][]): The requests to search for
- * @param request ([UserID, PostID]): The request to locate
- * @returns (number) -1 if not found, the index in requests if found.
- */
-export function findRequestIndex(requests: [UserID, PostID][], request: [UserID, PostID]) {
-    for (let i = 0; i < requests.length; i++) {
-        const req = requests[i];
-        if (req[0] == request[0] && req[1] == request[1]) return i;
-    }
-    return -1;
-}
-
-export function comparePosts(a: PostType, b: PostType) {
-    if (!compareLengths("riders")) return false;
-    if (!compareLengths("pending")) return false;
-    return true;
-
-    function compareLengths(att: keyof PostType) {
-        const arrA = a[att] as string[] | undefined;
-        const arrB = b[att] as string[] | undefined;
-        if (!arrA && arrB) return false;
-        if (!arrB && arrA) return false;
-        if (!arrA && !arrB) return true;
-        if (!arrA || !arrB) return false;
-        return arrA.length == arrB.length;
-    }
+function valToPost(val: any) {
+    return PostSchema.parse({
+        user: val.user,
+        postID: val.postID,
+        dropoff: val.dropoff,
+        pickup: val.pickup,
+        pickupCoords: val.pickupCoords,
+        dropoffCoords: val.dropoffCoords,
+        startTime: new Date(val.startTime),
+        endTime: new Date(val.endTime),
+        totalSpots: val.totalSpots,
+        notes: val.notes,
+        roundTrip: val.roundTrip,
+        riders: val.riders,
+        pending: val.pending,
+    });
 }

@@ -1,6 +1,5 @@
 import Filter from "bad-words";
 import Pronouns from "../constants/Pronouns.json";
-import { PostID, UserID } from "../constants/DataTypes";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
@@ -13,7 +12,7 @@ import firebase from "@react-native-firebase/app";
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 export type UserInfo = {
-    userID: UserID;
+    userID: string;
     username: string;
     phone: string;
     major: string;
@@ -21,9 +20,9 @@ export type UserInfo = {
     pronouns: string;
     chillIndex: number | undefined;
     ridesCompleted: number;
-    posts: PostID[] | undefined;
-    pending: PostID[] | undefined;
-    matches: PostID[] | undefined;
+    posts: string[] | undefined;
+    pending: string[] | undefined;
+    matches: string[] | undefined;
 };
 
 export type FBUserInfo = {
@@ -40,27 +39,6 @@ export type FBUserInfo = {
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
 };
 
-// MESSAGES //
-export enum MessageType {
-    error,
-    info,
-    success,
-}
-export type SuccessMessage<T = undefined> = {
-    message?: string;
-    data: T;
-    type: MessageType.success;
-};
-export type ErrorMessage = {
-    message: string;
-    type: MessageType.error;
-};
-export type InfoMessage = {
-    message: string;
-    type: MessageType.info;
-};
-export type Message<T> = SuccessMessage<T> | ErrorMessage | InfoMessage;
-
 // For helper method cleanUndefined
 type Clean<T> = {
     [K in keyof T]?: any;
@@ -76,7 +54,10 @@ type Clean<T> = {
  * Initiates the phone verification process
  *
  * @param phoneNumber (string): The user's phone number
- * @returns (SucessMessage<ConfirmationResult> | ErrorMessage): The confirm engine
+ *
+ * @returns (Promise<ConfirmationResult>): The confirm engine
+ * @throws (Error): If phone number is incorrect format
+ * @throws (FirebaseError): If Firebase error
  */
 export async function getConfirm(
     phoneNumber: string
@@ -95,7 +76,8 @@ export async function getConfirm(
  *
  * @param confirm (ConfirmationResult): The confirm engine
  * @param verificationCode (string): User-entered OTP
- * @returns (SuccessMessage | ErrorMessage)
+ *
+ * @returns (Promise<true>): True if successful
  */
 export async function signIn(
     confirm: FirebaseAuthTypes.ConfirmationResult,
@@ -114,26 +96,21 @@ export async function signIn(
 /**
  * Used to overwrite the user info.
  *
- * @param userID (UserID): The user ID
- * @param userInfo (UserInfo): The new user Info
- * @returns (SuccessMessage | ErrorMessage)
+ * @param userID (string | null): The user ID
+ * @param userInfo (UserInfo | null): The new user Info
+ *
+ * @returns (Promise<Void>)
+ * @throws (Error): If no user ID or user info
+ * @throws (FirebaseError): If Firebase error
  */
-export async function writeUser(
-    userID: string | null,
-    userInfo: UserInfo | null
-): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        if (!userID || !userInfo) throw new Error("No User ID or Info.");
+export async function writeUser(userID: string | null, userInfo: UserInfo | null): Promise<void> {
+    if (!userID || !userInfo) throw new Error("No User ID or Info.");
 
-        const userRef = database().ref("users/" + userID);
-        await userRef.set(cleanUndefined(userInfo));
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        return { message: `Error ${e.message}`, type: MessageType.error };
-    }
+    const userRef = database().ref("users/" + userID);
+    await userRef.set(cleanUndefined(userInfo));
 }
 
-function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
+function convertUserInfo(userID: string, data: FBUserInfo): UserInfo {
     return {
         ...data,
         userID,
@@ -148,95 +125,76 @@ function convertUserInfo(userID: UserID, data: FBUserInfo): UserInfo {
  *
  * @param user (User): The user to watch for updates on
  * @param onUpdate ((data: UserInfo) => void) callback to operate on the data
- * @returns (SuccessMessage<Unsubscribe> | ErrorMessage): An unsubscribe function
+ *
+ * @returns (Unsubcribe): An unsubscribe function
+ * @throws (Error): If no user ID
+ * @throws (FirebaseError): If Firebase error
  */
-export function getUserUpdates(
-    userID: UserID,
-    onUpdate: (data: UserInfo) => void
-): Unsubscribe | string {
-    try {
-        const userRef = database().ref("users/" + userID);
-        const onChange = userRef.on("value", (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const key = snapshot.key;
-                if (!key) throw Error("No userID key");
-                onUpdate(convertUserInfo(key, data));
-            }
-        });
-        const unsub = () => {
-            userRef.off("value", onChange);
-        };
-        return unsub;
-    } catch (e: any) {
-        return `Error ${e.message}`;
-    }
+export function getUserUpdates(userID: string, onUpdate: (data: UserInfo) => void): Unsubscribe {
+    const userRef = database().ref("users/" + userID);
+    const onChange = userRef.on("value", (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const key = snapshot.key;
+            if (!key) throw Error("No userID key");
+            onUpdate(convertUserInfo(key, data));
+        }
+    });
+    const unsub = () => {
+        userRef.off("value", onChange);
+    };
+    return unsub;
 }
 
-export async function getUsersOnce(users: UserID[]): Promise<UserInfo[] | string> {
-    try {
-        const info = [];
-        for (const user of users) {
-            const res = await getUserOnce(user);
-            if (res.type !== MessageType.success) throw Error(res.message);
-            info.push(res.data);
-        }
-        return info;
-    } catch (e: any) {
-        return e.message;
+/**
+ * Gets multiple users' info only once
+ *
+ * @param users (string[]): The users to get the info of
+ *
+ * @returns (Promise<UserInfo[]>): The users' info
+ * @throws (Error): If no user info found or Firebase error
+ */
+export async function getUsersOnce(users: string[]): Promise<UserInfo[]> {
+    const info = [];
+    for (const user of users) {
+        const userInfo = await getUserOnce(user);
+        if (!userInfo) throw Error("No user info");
+        info.push(userInfo);
     }
+    return info;
 }
 
 /**
  * Gets a user's info only once
  *
- * @param userID (UserID): The user to get the info of
+ * @param userID (string): The user to get the info of
+ *
  * @returns (SuccessMessage<UserInfo> | ErrorMessage | InfoMessage) Informs there is no data, or returns it if there is.
+ * @throws (Error): If no user ID or Firebase error
  */
-export async function getUserOnce(userID: UserID | null): Promise<Message<UserInfo>> {
-    try {
-        if (!userID) throw Error("No user ID.");
-        const userRef = database().ref("users/" + userID);
-        const snapshot = await userRef.once("value");
-        if (snapshot.exists())
-            return { data: { userID: userID, ...snapshot.val() }, type: MessageType.success };
-        return { message: "User does not have information stored.", type: MessageType.info };
-    } catch (e: any) {
-        return { message: `Error: ${e.message}`, type: MessageType.error };
-    }
-}
-
-export async function checkUserInfo(
-    userID: UserID | undefined
-): Promise<[UserID, UserInfo | undefined] | string> {
-    try {
-        let id = userID ? userID : auth().currentUser?.uid;
-        if (!id) throw Error("No User ID");
-
-        const userRef = database().ref("users/" + id);
-        const snapshot = await userRef.once("value");
-        if (snapshot.exists()) return [id, snapshot.val()];
-        else return [id, undefined];
-    } catch (e: any) {
-        return `Error: ${e.message}`;
-    }
+export async function getUserOnce(userID: string | null): Promise<UserInfo | null> {
+    if (!userID) throw Error("No user ID.");
+    const userRef = database().ref("users/" + userID);
+    const snapshot = await userRef.once("value");
+    if (snapshot.exists())
+        return {
+            userID: userID,
+            ...snapshot.val(),
+        };
+    return null;
 }
 
 /**
  * Delete a user's account info in the db.
  *
  * @param user (User): The user who's info to delete.
+ *
  * @returns (SuccessMessage | ErrorMessage)
+ * @throws (FirebaseError): If Firebase error
  */
-export async function deleteAccount(userID: UserID): Promise<SuccessMessage | ErrorMessage> {
-    try {
-        await functions().httpsCallable("deleteUser")();
-        await auth().signOut();
-        return { type: MessageType.success, data: undefined };
-    } catch (e: any) {
-        console.error(e.message);
-        return { message: `Error ${e.message}`, type: MessageType.error };
-    }
+export async function deleteAccount(): Promise<void> {
+    await functions().httpsCallable("deleteUser")();
+    await auth().signOut();
 }
 
 ///////////////////////////////////////////
@@ -258,7 +216,9 @@ type ValidateProfileParams = {
  * Checks to see if user info is valid, and returns a clean version.
  *
  * @param param0 (ValidateProfileParams): inputs to validate
- * @returns (SuccessMessage<UserInfo> | ErrorMessage)
+ * @returns (UserInfo): The cleaned user info
+ *
+ * @throws (Error): If validation fails
  */
 export function validateProfile({
     username,
@@ -268,59 +228,55 @@ export function validateProfile({
     userID = null,
     phone = null,
     userInfo = null,
-}: ValidateProfileParams): UserInfo | string {
-    try {
-        const noUserError = "Must supply either phone or previous user info.";
-        console.log(!phone && !userInfo);
-        if (!phone && !userInfo) throw new Error(noUserError);
+}: ValidateProfileParams): UserInfo {
+    const noUserError = "Must supply either phone or previous user info.";
+    console.log(!phone && !userInfo);
+    if (!phone && !userInfo) throw new Error(noUserError);
 
-        const filter = new Filter();
+    const filter = new Filter();
 
-        if (filter.isProfane(username)) throw new Error("Display name cannot be profane.");
+    if (filter.isProfane(username)) throw new Error("Display name cannot be profane.");
 
-        if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
+    if (filter.isProfane(major)) throw new Error("Major cannot be profane.");
 
-        if (!Pronouns.includes(pronouns))
-            throw new Error("Pronouns not accepted. Please email us if we've made a mistake.");
+    if (!Pronouns.includes(pronouns))
+        throw new Error("Pronouns not accepted. Please email us if we've made a mistake.");
 
-        if (gradString.match(/\D/g) !== null)
-            throw new Error("Please make sure grad year is all digits.");
+    if (gradString.match(/\D/g) !== null)
+        throw new Error("Please make sure grad year is all digits.");
 
-        const gradYear = Number(gradString);
-        if (userInfo)
-            // Changing Info
-            return {
-                username,
-                major,
-                pronouns,
-                gradYear,
-                userID: userInfo.userID,
-                phone: userInfo.phone,
-                chillIndex: userInfo.chillIndex,
-                ridesCompleted: userInfo.ridesCompleted,
-                posts: userInfo.posts ? userInfo.posts : [],
-                pending: userInfo.pending ? userInfo.pending : [],
-                matches: userInfo.matches ? userInfo.matches : [],
-            };
-        else if (phone && userID) {
-            // Inital Profile Setup
-            return {
-                userID,
-                chillIndex: undefined,
-                username,
-                major,
-                pronouns,
-                gradYear,
-                phone,
-                ridesCompleted: 0,
-                posts: [],
-                pending: [],
-                matches: [],
-            };
-        } else return noUserError;
-    } catch (e: any) {
-        return `Error: ${e.message}`;
-    }
+    const gradYear = Number(gradString);
+    if (userInfo)
+        // Changing Info
+        return {
+            username,
+            major,
+            pronouns,
+            gradYear,
+            userID: userInfo.userID,
+            phone: userInfo.phone,
+            chillIndex: userInfo.chillIndex,
+            ridesCompleted: userInfo.ridesCompleted,
+            posts: userInfo.posts ? userInfo.posts : [],
+            pending: userInfo.pending ? userInfo.pending : [],
+            matches: userInfo.matches ? userInfo.matches : [],
+        };
+    else if (phone && userID) {
+        // Inital Profile Setup
+        return {
+            userID,
+            chillIndex: undefined,
+            username,
+            major,
+            pronouns,
+            gradYear,
+            phone,
+            ridesCompleted: 0,
+            posts: [],
+            pending: [],
+            matches: [],
+        };
+    } else throw noUserError;
 }
 
 ///////////////////////////////////////////
