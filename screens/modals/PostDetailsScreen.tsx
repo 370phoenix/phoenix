@@ -8,20 +8,22 @@ import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../constants/DataTypes";
 import { RootStackParamList } from "../../types";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
-import { MessageType, UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import SuccessfulPost from "../../components/shared/SuccessPage";
+import { FBToPostSchema, PostType } from "../../utils/postValidation";
+import { logError } from "../../utils/errorHandling";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route, navigation }: Props) {
     if (!route.params) return <></>;
-    const post = route.params.post;
+    const serializedPost = route.params.post;
+    const post = FBToPostSchema.parse(serializedPost);
 
     const [message, setMessage] = useState<string | null>(null);
     const [matchComplete, setMatchComplete] = useState(false);
@@ -36,21 +38,22 @@ export default function DetailsModal({ route, navigation }: Props) {
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!userID) return;
-                    if (!post) return;
-                    if (post.riders?.includes(userID)) return;
-                    if (post.pending?.includes(userID)) return;
-                    const filled = post.riders
-                        ? post.riders.filter((val) => val != null).length + 1
-                        : 1;
-                    if (filled >= post.totalSpots) return;
+                    try {
+                        if (!userID) return;
+                        if (!post) return;
+                        if (post.riders?.includes(userID)) return;
+                        if (post.pending?.includes(userID)) return;
+                        const filled = post.riders
+                            ? post.riders.filter((val) => val != null).length + 1
+                            : 1;
+                        if (filled >= post.totalSpots) return;
 
-                    const res = await matchPost(userID, post);
-                    if (res.type === MessageType.error) setMessage(res.message);
-                    else {
+                        await matchPost(userID, post);
                         setMatchComplete(true);
                         setTimeout(() => navigation.goBack(), 1000);
-                        // TODO: Send notification to alert poster of new request
+                    } catch (e: any) {
+                        logError(e);
+                        setMessage(e.message);
                     }
                 },
             },

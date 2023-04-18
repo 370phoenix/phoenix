@@ -1,16 +1,16 @@
 export default {
     expo: {
-        name: "phoenix",
+        name: "FareShare - Save",
         slug: "phoenix",
-        version: "1.0.1",
+        version: "1.0.2",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
+        icon: "./assets/images/Icon_biggish.png",
         scheme: "fareshare",
         userInterfaceStyle: "automatic",
         splash: {
-            image: "./assets/images/splash.png",
+            image: "./assets/images/splash_carDark.png",
             resizeMode: "contain",
-            backgroundColor: "#ffffff",
+            backgroundColor: "#744a93",
         },
         jsEngine: "hermes",
         updates: {
@@ -23,34 +23,22 @@ export default {
                 : "./GoogleService-Info.plist",
             supportsTablet: true,
             bundleIdentifier: "com.willtheodore.phoenix",
-            infoPlist: {
-                CFBundleURLTypes: [
-                    {
-                        CFBundleTypeRole: "Editor",
-                        CFBundleURLSchemes: [
-                            "fareshare",
-                            "com.googleusercontent.apps.816203081042-dlkok6863f27oe8j4u2b29mgaf8jus6g",
-                        ],
-                    },
-                ],
-            },
         },
         android: {
             googleServicesFile: process.env.ANDROID_GOOGLE
                 ? process.env.ANDROID_GOOGLE
                 : "./google-services.json",
             adaptiveIcon: {
-                foregroundImage: "./assets/images/adaptive-icon.png",
-                backgroundColor: "#ffffff",
+                foregroundImage: "./assets/images/adaptive-icon_smallish.png",
+                backgroundColor: "#744a93",
             },
             package: "com.willtheodore.phoenix",
-        },
-        web: {
-            favicon: "./assets/images/favicon.png",
         },
         plugins: [
             "@react-native-firebase/auth",
             "@react-native-firebase/app",
+            "@react-native-firebase/crashlytics",
+            "@react-native-firebase/perf",
             [
                 "expo-build-properties",
                 {

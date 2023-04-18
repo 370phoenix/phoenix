@@ -4,7 +4,6 @@ import { StyleSheet, Pressable, Keyboard } from "react-native";
 import { View, Button, Text, Spacer, TextField } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 
-import auth from "@react-native-firebase/auth";
 import { useMachine, useSelector } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
 import Dropdown from "../../components/shared/Dropdown";
@@ -14,7 +13,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthContext, userSelector } from "../../utils/machines/authMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-export default function CreateProfileScreen({}: Props) {
+export default function CreateProfileScreen({ }: Props) {
     const authService = useContext(AuthContext);
     const user = useSelector(authService, userSelector);
 

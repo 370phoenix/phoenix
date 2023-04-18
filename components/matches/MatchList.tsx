@@ -1,19 +1,19 @@
 import { useContext, useEffect } from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, ScrollView } from "react-native";
 
 import MatchCard from "./MatchCard";
 import RequestCard from "./RequestCard";
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType, UserID } from "../../constants/DataTypes";
 import { AuthContext, userInfoSelector, userPostsSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import * as Notifications from "expo-notifications";
 import PendingCard from "./PendingCard";
 import MatchCardWrapper from "./MatchCardWrapper";
+import { PostType } from "../../utils/postValidation";
 
 type Props = {
-    userID: UserID;
+    userID: string;
 };
 
 export default function MatchList({ userID }: Props) {
@@ -48,14 +48,14 @@ export default function MatchList({ userID }: Props) {
     }
 
     return (
-        <View style={{ marginTop: 20 }}>
-            <Text textStyle="header" styleSize="l" style={styles.title}>
+        <ScrollView style={{ marginTop: 20, height: "100%" }}>
+            <Text textStyle="header" styleSize="l" style={[styles.title, { marginTop: 20 }]}>
                 Requests
             </Text>
             <FlatList
                 data={requests}
                 scrollEnabled={false}
-                style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
+                style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                     return (
@@ -74,7 +74,7 @@ export default function MatchList({ userID }: Props) {
             <FlatList
                 scrollEnabled={false}
                 data={userPosts}
-                style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
+                style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                     return <MatchCard post={item} userID={userID} />;
@@ -83,7 +83,7 @@ export default function MatchList({ userID }: Props) {
             <FlatList
                 scrollEnabled={false}
                 data={matches}
-                style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
+                style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                     return <MatchCardWrapper postID={item} userID={userID} />;
@@ -95,13 +95,13 @@ export default function MatchList({ userID }: Props) {
             <FlatList
                 scrollEnabled={false}
                 data={pending}
-                style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
+                style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                     return <PendingCard postID={item} />;
                 }}
             />
-        </View>
+        </ScrollView>
     );
 }
 
@@ -110,8 +110,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 0,
         marginBottom: 0,
-        marginTop: 8,
-        color: Colors.gray[1],
+        color: Colors.gray[4],
+    },
+    list: {
+        marginVertical: 8,
     },
 });
 

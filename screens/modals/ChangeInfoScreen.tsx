@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { Button, Spacer, Text, TextField, View } from "../../components/shared/Themed";
-import { deleteAccount, MessageType } from "../../utils/auth";
+import { deleteAccount } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useEffect, useState } from "react";
@@ -37,11 +37,11 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [grad, setGrad] = useState(userInfo ? String(userInfo.gradYear) : "");
     const [pronouns, setPronouns] = useState(
         Pronouns[
-            userInfo
-                ? Pronouns.indexOf(userInfo.pronouns) != -1
-                    ? Pronouns.indexOf(userInfo.pronouns)
-                    : 0
+        userInfo
+            ? Pronouns.indexOf(userInfo.pronouns) != -1
+                ? Pronouns.indexOf(userInfo.pronouns)
                 : 0
+            : 0
         ]
     );
 
@@ -68,7 +68,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
                 text: "Cancel",
-                onPress: () => {},
+                onPress: () => { },
             },
             {
                 text: "Confirm",
@@ -84,17 +84,16 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to delete your account?", [
             {
                 text: "Cancel",
-                onPress: () => {},
+                onPress: () => { },
             },
             {
                 text: "Confirm",
                 onPress: async () => {
-                    if (!userID) {
-                        setMessage("Error: no user found.");
-                        return;
+                    try {
+                        await deleteAccount();
+                    } catch (e: any) {
+                        setMessage(e.message);
                     }
-                    const res = await deleteAccount(userID);
-                    if (res.type === MessageType.error) setMessage(res.message);
                 },
             },
         ]);

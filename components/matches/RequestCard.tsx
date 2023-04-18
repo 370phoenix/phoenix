@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
@@ -5,18 +6,20 @@ import Colors from "../../constants/Colors";
 import { UserInfo } from "../../utils/auth";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
-import { PostType, UserID } from "../../constants/DataTypes";
 import { useMachine } from "@xstate/react";
 import { requestCardMachine } from "../../utils/machines/requestCardMachine";
+import { PostType } from "../../utils/postValidation";
+import { AuthContext } from "../../utils/machines/authMachine";
 
 export type Props = {
-    requesterID: UserID;
-    posterID: UserID;
+    requesterID: string;
+    posterID: string;
     userInfo: UserInfo | null;
     post: PostType;
 };
 export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
     const [state, send] = useMachine(requestCardMachine);
+    const authService = useContext(AuthContext);
     const { requesterInfo } = state.context;
     let shouldRender = true;
 
@@ -30,7 +33,14 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                 {
                     text: "Confirm",
                     onPress: () => {
-                        send(isAccept ? "ACCEPT" : "REJECT", { post, posterID, userInfo });
+                        send(isAccept ? "ACCEPT" : "REJECT", {
+                            post,
+                            posterID,
+                            userInfo,
+                            onSuccessful: (post: PostType) => {
+                                authService.send("UPDATE POST", { post });
+                            },
+                        });
                         shouldRender = false;
                         // TODO: Send notification to alert requester of accepted/rejected ride
                         // TODO: If accept, notification to alert matched riders of new match
@@ -45,38 +55,32 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
 
     if (!shouldRender) return <></>;
 
-    if (["Start", "Loading"].some(state.matches))
-        return (
-            <View style={styles.cardContainer}>
-                <Text textStyle="header" styleSize="m" style={styles.name}>
-                    Loading...
+    if (!requesterInfo) return <></>;
+
+    const textPart = ["Start", "Loading"].some(state.matches) ? (
+        <Text textStyle="header" styleSize="m" style={styles.name}>
+            Loading...
+        </Text>
+    ) : (
+        <View style={styles.textPart}>
+            <View style={styles.headerContainer}>
+                <Text textStyle="header" styleSize="s" style={styles.name}>
+                    {requesterInfo.username}
+                </Text>
+                <Text textStyle="body" styleSize="s" style={styles.subtext}>
+                    {requesterInfo.pronouns}
                 </Text>
             </View>
-        );
+
+            <Text textStyle="body" styleSize="s">
+                {requesterInfo.major} {requesterInfo.gradYear}
+            </Text>
+        </View>
+    );
 
     return (
         <View style={styles.cardContainer}>
-            <View style={styles.textPart}>
-                {requesterInfo ? (
-                    <>
-                        <View style={styles.headerContainer}>
-                            <Text textStyle="header" styleSize="m" style={styles.name}>
-                                {requesterInfo.username}
-                            </Text>
-                            <Text textStyle="label" style={styles.subtext}>
-                                {requesterInfo.pronouns}
-                            </Text>
-                        </View>
-
-                        <Text textStyle="body" styleSize="m">
-                            {requesterInfo.major} {requesterInfo.gradYear}
-                        </Text>
-                    </>
-                ) : (
-                    <Text>No Info.</Text>
-                )}
-            </View>
-
+            {textPart}
             <AcceptDenyButton
                 isAccept={false}
                 handleAction={() => {
@@ -98,12 +102,14 @@ function AcceptDenyButton({ isAccept, handleAction }: ADProps) {
         width: 40,
     };
 
+    const pressedColor = isAccept ? Colors.green[3] : Colors.red[3];
+
     return (
         <Pressable
             style={({ pressed }) => [
                 styles.button,
                 {
-                    opacity: pressed ? 0.5 : 1,
+                    backgroundColor: pressed ? pressedColor : Colors.gray.w,
                 },
             ]}
             onPress={() => handleAction(isAccept)}>
@@ -114,10 +120,12 @@ function AcceptDenyButton({ isAccept, handleAction }: ADProps) {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        paddingLeft: 16,
+        marginHorizontal: 16,
+        marginBottom: 8,
+        borderRadius: 8,
+        padding: 16,
         flexDirection: "row",
         alignItems: "center",
-        borderTopWidth: 1,
         backgroundColor: Colors.gray.w,
     },
     body: { flex: 1 },
@@ -137,8 +145,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 16,
-        borderLeftWidth: 1,
-        height: "100%",
+        paddingVertical: 4,
+        borderRadius: 8,
     },
-    textPart: { flex: 1, paddingVertical: 16 },
+    textPart: { flex: 1 },
 });
