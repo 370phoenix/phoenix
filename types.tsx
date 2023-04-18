@@ -9,11 +9,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { UserInfo } from "./utils/auth";
 import { ChatHeader } from "./utils/chat";
-import { FBPostType } from "./utils/postValidation";
+import { FBPostType, PostType } from "./utils/postValidation";
 
 declare global {
     namespace ReactNavigation {
-        interface RootParamList extends RootStackParamList {}
+        interface RootParamList extends RootStackParamList { }
     }
 }
 
@@ -26,14 +26,11 @@ export type RootStackParamList = {
     SignIn: undefined;
     CreateProfile: CreateProfileParamList | undefined;
     PostDetails: PostDetailsParamList | undefined;
-    PastPostDetails: PostDetailsParamList | undefined;
+    PastPostDetails: PastPostDetailsParamList | undefined;
     CreatePost: undefined;
-<<<<<<< HEAD
-    MatchDetails: MatchDetailsParamList | undefined;
+    //MatchDetails: MatchDetailsParamList | undefined;
     PastRides: undefined;
-=======
     ChatScreen: ChatScreenParamList | undefined;
->>>>>>> main
 };
 
 export type ChatScreenParamList = {
@@ -44,6 +41,10 @@ export type ChatScreenParamList = {
 export type PostDetailsParamList = {
     post: FBPostType;
 };
+
+export type PastPostDetailsParamList = {
+    post: PostType;
+}
 
 export type ChangeInfoParamList = {
     userInfo: UserInfo;

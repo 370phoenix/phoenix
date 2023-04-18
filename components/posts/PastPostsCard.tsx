@@ -3,8 +3,8 @@ import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text, Spacer } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../constants/DataTypes";
-import { convertDate, convertLocation } from "../../utils/convertPostTypes";
+import { PostType } from "../../utils/postValidation";
+import { convertDate } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import FeedbackExclaim from "../../assets/icons/feedbackExclaim";
@@ -21,7 +21,7 @@ export default function PastPostsCard({ post }: Props) {
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PastPostDetails", { post })} //need to switch this to PastPostDetails
+            onPress={() => navigation.navigate("PastPostDetails", { post })}
             style={({ pressed }) => [
                 styles.cardContainer,
                 {
@@ -32,7 +32,7 @@ export default function PastPostsCard({ post }: Props) {
             ]}>
             <View style={styles.body}>
                 <Text textStyle="header" styleSize="s" style={{ color: colorPurple }}>
-                    {convertLocation(post.pickup)}
+                    {post.pickup}
                 </Text>
                 <View style={styles.headerContainer}>
                     {post.roundTrip ? (
@@ -41,7 +41,7 @@ export default function PastPostsCard({ post }: Props) {
                         <Right color={colorPurple} height={20} />
                     )}
                     <Text textStyle="header" styleSize="s" style={{ color: colorPurple }}>
-                        {convertLocation(post.dropoff)}
+                        {post.dropoff}
                     </Text>
                 </View>
                 {/* <Spacer direction="column" size={16} /> */}

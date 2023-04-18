@@ -24,7 +24,7 @@ export type UserInfo = {
     posts: string[] | undefined;
     pending: string[] | undefined;
     matches: string[] | undefined;
-    completed: PostID[] | undefined;
+    completed: string[] | undefined;
 };
 
 export type FBUserInfo = {
@@ -38,8 +38,16 @@ export type FBUserInfo = {
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
-    completed: PostID[] | undefined;
+    completed: { [key: number]: string } | undefined;
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
+    hasPushToken: boolean;
+};
+
+export type FeedbackEntryType = {
+    message: string;
+    postID: string;
+    userID: string;
+    timestamp: number;
 };
 
 // For helper method cleanUndefined
@@ -120,6 +128,7 @@ function convertUserInfo(userID: string, data: FBUserInfo): UserInfo {
         posts: data.posts ? Object.values(data.posts) : [],
         pending: data.pending ? Object.values(data.pending) : [],
         matches: data.matches ? Object.values(data.matches) : [],
+        completed: data.completed ? Object.values(data.completed) : [],
     };
 }
 
@@ -283,10 +292,7 @@ export function validateProfile({
             matches: [],
             completed: [],
         };
-    } else return noUserError;
-} catch (e: any) {
-    return `Error: ${e.message}`;
-}
+    } else throw noUserError;
 }
 
 ///////////////////////////////////////////

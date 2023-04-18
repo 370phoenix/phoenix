@@ -1,7 +1,8 @@
 import { createMachine, assign } from "xstate";
-import { PostType } from "../../constants/DataTypes";
-import { MessageType } from "../auth";
+import { PostType } from "../postValidation";
+//import { MessageType } from "../auth";
 import { fetchSomeCompleted } from "../posts";
+import { logError } from "../errorHandling";
 
 const MutlipleCompletedMachine = {
     id: "multiplePosts",
@@ -69,9 +70,13 @@ type MultiplePostsEvents = { type: "LOAD"; postIDs: string[] } | { type: "CLOSE"
 export const multipleCompletedMachine = createMachine(MutlipleCompletedMachine, {
     services: {
         loadPosts: async (context: MultiplePostsContext) => {
-            const res = await fetchSomeCompleted(context.postIDs);
-            if (res.type === MessageType.error) throw Error(res.message);
-            else return res.data;
+            //const res = await fetchSomeCompleted(context.postIDs);
+            try {
+                let posts = await fetchSomeCompleted(context.postIDs);
+                return posts;
+            } catch (error: any) {
+                logError(error);
+            }
         },
     },
     actions: {

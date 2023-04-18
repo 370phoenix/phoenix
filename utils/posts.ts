@@ -65,25 +65,22 @@ export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
 
     return posts;
 }
+export async function fetchSomeCompleted(ids: string[]): Promise<PostType[]> {
+    const postsRef = db.ref("completed");
+    const posts: PostType[] = [];
 
-export async function fetchSomeCompleted(
-    ids: PostID[]
-): Promise<SuccessMessage<PostType[]> | ErrorMessage> {
-    try {
-        const postsRef = db.ref("completed");
-        const posts: PostType[] = [];
-
-        for (const id of ids) {
-            if (!id) continue;
-            const postRef = postsRef.child(id);
-            const snapshot = await postRef.once("value");
-            if (snapshot.exists()) posts.push(snapshot.val());
+    for (const id of ids) {
+        if (!id) continue;
+        const postRef = postsRef.child(id);
+        const snapshot = await postRef.once("value");
+        if (snapshot.exists()) {
+            safeRun(() => {
+                posts.push(valToPost(snapshot.val()));
+            });
         }
-
-        return { type: MessageType.success, data: posts };
-    } catch (e: any) {
-        return { type: MessageType.error, message: e.message };
     }
+
+    return posts;
 }
 
 type PostUpdateParams = {
@@ -117,7 +114,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
 
     const onChange = postsRef.on(
@@ -129,7 +126,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
 
     const onRemove = postsRef.on("child_removed", (snapshot) => {

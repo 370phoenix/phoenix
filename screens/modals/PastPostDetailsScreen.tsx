@@ -8,22 +8,24 @@ import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../constants/DataTypes";
+//import { PostType } from "../../constants/";
 import { RootStackParamList } from "../../types";
-import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
-import { MessageType, UserInfo } from "../../utils/auth";
+// import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
+import { UserInfo, FeedbackEntryType } from "../../utils/auth";
+import { PostType } from "../../utils/postValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import { pushFeedback } from "../../utils/feedback";
-import { FeedbackEntryType } from "../../constants/DataTypes";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">; //change to "PastPostDetails"
 export default function DetailsModal({ route }: Props) {
     if (!route.params) return <></>;
     const post = route.params.post;
+
+    //if (!post) return <></>;
 
     const [message, setMessage] = useState<string | null>(null);
     const authService = useContext(AuthContext);
