@@ -1,4 +1,4 @@
-import { Alert, Pressable, View, StyleSheet } from "react-native";
+import { Alert, Pressable, View, StyleSheet, TouchableOpacity } from "react-native";
 import functions from "@react-native-firebase/functions";
 
 import Colors from "../../constants/Colors";
@@ -10,6 +10,7 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
+import { copyToClipboard } from "../../utils/posts";
 
 interface PostCardGutsProps {
     post: PostType;
@@ -29,18 +30,22 @@ export function PostCardGuts({ post, isProfile, isMatched, userInfo }: PostCardG
     return (
         <>
             <View style={styles.body}>
-                <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
-                    {pickup}
-                </Text>
+                <TouchableOpacity onPress={() => copyToClipboard(post.pickup)}>
+                    <Text textStyle="header" styleSize="s">
+                        {pickup}
+                    </Text>
+                </TouchableOpacity>
                 <View style={styles.headerContainer}>
                     {post.roundTrip ? (
                         <RoundTrip color={color.p} height={20} />
                     ) : (
                         <Right color={color.p} height={20} />
                     )}
-                    <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
+                    <TouchableOpacity onPress={() => copyToClipboard(post.dropoff)}>
+                    <Text textStyle="header" styleSize="s">
                         {dropoff}
                     </Text>
+                </TouchableOpacity>
                 </View>
                 <Spacer direction="column" size={16} />
 

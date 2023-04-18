@@ -2,7 +2,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMachine, useSelector } from "@xstate/react";
 import React, { useContext, useState } from "react";
-import { StyleSheet, ScrollView, Alert } from "react-native";
+import { StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -12,7 +12,7 @@ import { RootStackParamList } from "../../types";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { UserInfo } from "../../utils/auth";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { matchPost } from "../../utils/posts";
+import { copyToClipboard, matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import SuccessfulPost from "../../components/shared/SuccessPage";
@@ -120,9 +120,11 @@ function MoreInfo({ post }: { post: PostType }) {
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text textStyle="header" styleSize="s">
-                    {pickup}
-                </Text>
+                <TouchableOpacity onPress={() => copyToClipboard(post.pickup)}>
+                    <Text textStyle="header" styleSize="s">
+                        {pickup}
+                    </Text>
+                </TouchableOpacity>
                 <Spacer direction="row" size={4} />
 
                 {post.roundTrip ? (
@@ -131,9 +133,11 @@ function MoreInfo({ post }: { post: PostType }) {
                     <Right color={Colors.gray.b} height={20} />
                 )}
             </View>
-            <Text textStyle="header" styleSize="s">
-                {dropoff}
-            </Text>
+            <TouchableOpacity onPress={() => copyToClipboard(post.dropoff)}>
+                <Text textStyle="header" styleSize="s">
+                    {dropoff}
+                </Text>
+            </TouchableOpacity>
             <Spacer direction="column" size={16} />
             <Text textStyle="label" styleSize="l">
                 {date}

@@ -10,6 +10,7 @@ import { useMachine } from "@xstate/react";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 import { PostToFBSchema, PostType } from "../../utils/postValidation";
 import Calendar from "../../assets/icons/Calendar";
+import { copyToClipboard } from "../../utils/posts";
 
 export type Props = {
     post: PostType;
@@ -61,7 +62,7 @@ export function MatchCardGuts({ post, color }: MatchCardGutsProps) {
         <>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => copyToClipboard(post.pickup)}>
                         <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
                             {post.pickup}
                         </Text>
@@ -73,7 +74,7 @@ export function MatchCardGuts({ post, color }: MatchCardGutsProps) {
                     ) : (
                         <Right color={color} height={20} />
                     )}
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => copyToClipboard(post.dropoff)}>
                         <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
                             {post.dropoff}
                         </Text>
