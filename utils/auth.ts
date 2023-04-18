@@ -23,6 +23,7 @@ export type UserInfo = {
     posts: string[] | undefined;
     pending: string[] | undefined;
     matches: string[] | undefined;
+    completed: string[] | undefined;
 };
 
 export type FBUserInfo = {
@@ -36,9 +37,7 @@ export type FBUserInfo = {
     posts: { [key: number]: string } | undefined;
     pending: { [key: number]: string } | undefined;
     matches: { [key: number]: string } | undefined;
-<<<<<<< HEAD
-    completed: PostID[] | undefined;
-=======
+    completed: { [key: number]: string } | undefined;
     requests: { [key: number]: { 0: string; 1: string } } | undefined;
     hasPushToken: boolean;
 };
@@ -121,6 +120,7 @@ function convertUserInfo(userID: string, data: FBUserInfo): UserInfo {
         posts: data.posts ? Object.values(data.posts) : [],
         pending: data.pending ? Object.values(data.pending) : [],
         matches: data.matches ? Object.values(data.matches) : [],
+        completed: data.completed ? Object.values(data.completed) : [],
     };
 }
 
@@ -264,6 +264,7 @@ export function validateProfile({
             posts: userInfo.posts ? userInfo.posts : [],
             pending: userInfo.pending ? userInfo.pending : [],
             matches: userInfo.matches ? userInfo.matches : [],
+            completed: userInfo.completed ? userInfo.completed : [],
         };
     else if (phone && userID) {
         // Inital Profile Setup
@@ -279,6 +280,7 @@ export function validateProfile({
             posts: [],
             pending: [],
             matches: [],
+            completed: [],
         };
     } else throw noUserError;
 }
