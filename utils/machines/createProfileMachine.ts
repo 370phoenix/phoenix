@@ -81,7 +81,7 @@ const CreateProfileMachine = {
     },
     schema: {
         context: {} as {
-            error: string;
+            error: Error | null;
             phone: string | null;
             prevInfo: UserInfo | null;
             rawInfo: {
@@ -90,7 +90,6 @@ const CreateProfileMachine = {
                 gradString: string;
                 pronouns: string;
                 phone: string | null;
-                hasPushToken: boolean | null;
             } | null;
             userInfo: UserInfo | null;
             userID: string | null;
@@ -100,20 +99,20 @@ const CreateProfileMachine = {
             | { type: "SUBMIT" }
             | { type: "ADVANCE"; prevInfo: UserInfo | null }
             | {
-                  type: "UPDATE INFO";
-                  userID: string;
-                  info: {
-                      username: string;
-                      major: string;
-                      gradString: string;
-                      pronouns: string;
-                      phone: string | null;
-                  };
-              }
+                type: "UPDATE INFO";
+                userID: string;
+                info: {
+                    username: string;
+                    major: string;
+                    gradString: string;
+                    pronouns: string;
+                    phone: string | null;
+                };
+            }
             | DoneInvokeEvent<UserInfo>,
     },
     context: {
-        error: "",
+        error: null,
         rawInfo: null,
         userInfo: null,
         phone: null,
@@ -127,16 +126,15 @@ const CreateProfileMachine = {
 
 export const createProfileMachine = createMachine(CreateProfileMachine, {
     services: {
-        writeUser: (context: { userID: string | null; userInfo: UserInfo | null }) =>
-            writeUser(context.userID, context.userInfo),
+        writeUser: async (context: { userID: string | null; userInfo: UserInfo | null }) => {
+            await writeUser(context.userID, context.userInfo);
+        },
         validateInfo: async (context: any) => {
-            const res = validateProfile({
+            return validateProfile({
                 ...context.rawInfo,
                 userInfo: context.prevInfo,
                 userID: context.userID,
             });
-            if (typeof res == "string") throw new Error(res);
-            else return res;
         },
     },
     actions: {
@@ -154,7 +152,7 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
             userID: (_, event: any) => event.userID,
         }),
         assignError: assign({
-            error: (_, event: any) => ("message" in event.data ? event.data.message : event.data),
+            error: (_, event: any) => event.data,
         }),
     },
     guards: {

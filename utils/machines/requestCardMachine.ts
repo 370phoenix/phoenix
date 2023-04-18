@@ -1,7 +1,8 @@
 import { assign, createMachine } from "xstate";
-import { PostType, UserID } from "../../constants/DataTypes";
-import { getUserOnce, MessageType, UserInfo } from "../auth";
+import { getUserOnce, UserInfo } from "../auth";
+import { logError } from "../errorHandling";
 import { handleAcceptReject } from "../posts";
+import { PostType } from "../postValidation";
 
 const RequestCardMachine = {
     id: "Request Card Machine",
@@ -28,7 +29,7 @@ const RequestCardMachine = {
                 onError: [
                     {
                         target: "Failed",
-                        actions: "logError",
+                        actions: "logRequestError",
                     },
                 ],
             },
@@ -52,7 +53,7 @@ const RequestCardMachine = {
                 },
                 onError: {
                     target: "Prompt",
-                    actions: "logError",
+                    actions: "logRequestError",
                 },
             },
         },
@@ -68,7 +69,7 @@ const RequestCardMachine = {
                 onError: [
                     {
                         target: "Prompt",
-                        actions: "logError",
+                        actions: "logRequestError",
                     },
                 ],
             },
@@ -83,12 +84,24 @@ const RequestCardMachine = {
     schema: {
         context: {} as {
             requesterInfo: UserInfo | null;
-            userID: UserID | null;
+            userID: string | null;
         },
         events: {} as
             | { type: "LOAD INFO"; id: string }
-            | { type: "ACCEPT"; post: PostType; posterID: string; userInfo: UserInfo }
-            | { type: "REJECT"; post: PostType; posterID: string; userInfo: UserInfo },
+            | {
+                type: "ACCEPT";
+                post: PostType;
+                posterID: string;
+                userInfo: UserInfo;
+                onSuccessful: (post: PostType) => void;
+            }
+            | {
+                type: "REJECT";
+                post: PostType;
+                posterID: string;
+                userInfo: UserInfo;
+                onSuccessful: (post: PostType) => void;
+            },
     },
     context: { requesterInfo: null, userID: null },
     predictableActionArguments: true,
@@ -98,13 +111,11 @@ const RequestCardMachine = {
 export const requestCardMachine = createMachine(RequestCardMachine, {
     services: {
         getUserInfo: async (context) => {
-            const r1 = await getUserOnce(context.userID);
-            if (r1.type !== MessageType.success) throw Error(r1.message);
-            else return r1.data;
+            return await getUserOnce(context.userID);
         },
         acceptUser: async (context, event) => {
             if (context.userID && event.type === "ACCEPT") {
-                const r1 = await handleAcceptReject({
+                const newPost = await handleAcceptReject({
                     isAccept: true,
                     userInfo: event.userInfo,
                     requesterID: context.userID,
@@ -112,13 +123,12 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     post: event.post,
                     posterID: event.posterID,
                 });
-                if (r1.type !== MessageType.success) throw Error(r1.message);
-                else return;
+                event.onSuccessful(newPost);
             } else throw Error("No info attached to event or Missing ID.");
         },
         rejectUser: async (context, event) => {
             if (context.userID && event.type === "REJECT") {
-                const r1 = await handleAcceptReject({
+                const newPost = await handleAcceptReject({
                     isAccept: false,
                     userInfo: event.userInfo,
                     requesterID: context.userID,
@@ -126,18 +136,14 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
                     post: event.post,
                     posterID: event.posterID,
                 });
-                if (r1.type !== MessageType.success) throw Error(r1.message);
-                else return;
+                event.onSuccessful(newPost);
             } else throw Error("No info attached to event or Missing ID.");
         },
     },
     actions: {
-        logError: (_, event) =>
-            console.log(
-                `ERROR in request machine ${event.type}: ${
-                    "data" in event ? event.data : "no message"
-                }`
-            ),
+        logRequestError: (_, event: any) => {
+            logError(event.data);
+        },
         assignID: assign((_, event: any) => ({ userID: event.id })),
         assignRequesterInfo: assign({ requesterInfo: (_, event: any) => event.data }),
     },

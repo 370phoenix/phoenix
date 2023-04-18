@@ -1,7 +1,7 @@
 import { assign, createMachine } from "xstate";
-import { PostID, PostType } from "../../constants/DataTypes";
-import { MessageType } from "../auth";
+import { logError } from "../errorHandling";
 import { fetchPost } from "../posts";
+import { PostType } from "../postValidation";
 
 const PostInfoMachine = {
     id: "Post Info Machine",
@@ -29,7 +29,7 @@ const PostInfoMachine = {
                 onError: [
                     {
                         target: "Failed",
-                        actions: "logError",
+                        actions: "logPostError",
                         description: "console log error",
                     },
                 ],
@@ -52,7 +52,7 @@ const PostInfoMachine = {
     schema: {
         context: {} as {
             post: PostType | null;
-            postID: PostID | null;
+            postID: string | null;
         },
         events: {} as { type: "EXIT" } | { type: "LOAD"; id: string },
     },
@@ -65,15 +65,12 @@ export const postInfoMachine = createMachine(PostInfoMachine, {
     services: {
         getPost: async (context) => {
             if (!context.postID) throw Error("No post ID");
-            const res = await fetchPost(context.postID);
-            if (res.type !== MessageType.success) throw Error(res.message);
-            if (!res.data) throw Error("WTF");
-            return res.data;
+            return await fetchPost(context.postID);
         },
     },
     actions: {
         assignID: assign({ postID: (_, event: any) => event.id }),
         assignPost: assign({ post: (_, event: any) => event.data }),
-        logError: (_, event: any) => console.log(event.data),
+        logPostError: (_, event: any) => logError(event.data),
     },
 });

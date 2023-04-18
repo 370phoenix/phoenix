@@ -11,9 +11,8 @@ import {
     ChatHeader,
     ChatMessage,
 } from "../chat";
-import { MessageType } from "../auth";
 import { unmatchPost } from "../posts";
-import { PostType } from "../../constants/DataTypes";
+import { PostType } from "../postValidation";
 
 const ChatMachine = {
     id: "Chat Machine",
@@ -211,8 +210,7 @@ export const chatMachine = createMachine(ChatMachine, {
             const { post, userID } = context;
             if (!post) throw Error("No Post found");
 
-            const res = await unmatchPost(userID, post);
-            if (res.type === MessageType.error) throw new Error(res.message);
+            await unmatchPost(userID, post);
             return true;
         },
     },
@@ -256,7 +254,7 @@ type ChatMachineContext = {
     post: PostType | null;
     messages: ChatMessage[];
     header: ChatHeader | null;
-    error: string | null;
+    error: Error | null;
     navigation: NativeStackNavigationProp<RootStackParamList, "ChatScreen", undefined> | null;
 };
 type TryMessage = { type: "TRY MESSAGE"; message: ChatMessage };
