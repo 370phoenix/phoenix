@@ -1,7 +1,6 @@
 import { useMachine } from "@xstate/react";
 import { useRef } from "react";
-import { View, StyleSheet, Pressable, FlatList } from "react-native";
-import { ViewProps } from "react-native";
+import { View, StyleSheet, Pressable, FlatList, ViewProps } from "react-native";
 import { Down, Right } from "../../assets/icons/Chevron";
 import Colors from "../../constants/Colors";
 import { dropdownMachine } from "../../utils/machines/dropdownMachine";
@@ -75,7 +74,7 @@ export default function Dropdown({
             </View>
             {isOpen && (
                 <FlatList
-                    style={[styles.dropdown, { top: top }, props.style]}
+                    style={[styles.dropdown, { top }, props.style]}
                     data={options}
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={({ item, index }) => (
@@ -96,7 +95,7 @@ export default function Dropdown({
 type ListItemProps = {
     item: string;
     index: number;
-    onPress: (newIndex: number) => {};
+    onPress: (newIndex: number) => object;
 };
 function ListItem({ item, onPress, index }: ListItemProps) {
     return (

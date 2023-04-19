@@ -2,21 +2,6 @@ import Filter from "bad-words";
 import { z } from "zod";
 import geocodeAddress from "./geocode";
 
-export enum MessageType {
-    error,
-    success,
-}
-
-export type SuccessMessage = {
-    message?: string;
-    type: MessageType.success;
-};
-
-export type ErrorMessage = {
-    message: string;
-    type: MessageType.error;
-};
-
 export const CoordsSchema = z
     .object({
         lat: z.number(),
@@ -48,8 +33,8 @@ export const PostSchemaBase = z
             .refine((val) => !isProfane(val))
             .optional(),
         roundTrip: z.coerce.boolean(),
-        riders: z.array(z.string()).optional(),
-        pending: z.array(z.string()).optional(),
+        pending: z.object({}).catchall(z.literal(true).nullable()).optional(),
+        riders: z.object({}).catchall(z.literal(true).nullable()).optional(),
     })
     .strict();
 

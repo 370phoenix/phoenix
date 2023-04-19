@@ -22,10 +22,10 @@ export default function FeedCard({ post }: Props) {
     const { userID } = userInfo;
 
     if (post.user === userID) return <></>;
-    if (post.pending?.includes(userID)) return <></>;
+    if (post.pending && post.pending[userID]) return <></>;
     if (!post.dropoff) return <></>;
 
-    const isMatched = post.riders?.includes(userID);
+    const isMatched = post.riders && post.riders[userID];
 
     return (
         <Pressable

@@ -10,7 +10,7 @@ import { View, Text, Spacer, Button } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
-import { UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/userValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { copyToClipboard, matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
@@ -30,7 +30,7 @@ export default function DetailsModal({ route, navigation }: Props) {
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
-    const filled = post.riders ? post.riders.filter((val) => val != null).length + 1 : 1;
+    const filled = post.riders ? Object.keys(post.riders).length + 1 : 1;
 
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
@@ -43,8 +43,9 @@ export default function DetailsModal({ route, navigation }: Props) {
                     try {
                         if (!userID) return;
                         if (!post) return;
-                        if (post.riders?.includes(userID)) return;
-                        if (post.pending?.includes(userID)) return;
+                        if (post.riders && post.riders[userID] === true) return;
+                        if (post.pending && post.pending[userID] === true) return;
+                        const filled = post.riders ? Object.keys(post.riders).length + 1 : 1;
                         if (filled >= post.totalSpots) return;
 
                         await matchPost(userID, post);
@@ -107,9 +108,8 @@ function MoreInfo({ post }: { post: PostType }) {
     const endTime = convertTime(post.endTime);
 
     if (state.matches("Start")) {
-        const ids = post.riders ? post.riders : [];
-        if (!ids.includes(post.user)) ids.push(post.user);
-        send("LOAD", { ids });
+        if (!post.riders) send("LOAD", { ids: [post.user] });
+        else send("LOAD", { ids: Object.keys(post.riders).push(post.user) });
     }
 
     return (
@@ -146,8 +146,8 @@ function MoreInfo({ post }: { post: PostType }) {
                 Pickup window: {startTime}-{endTime}
             </Text>
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                {post.riders ? post.riders.filter((val) => val != null).length + 1 : 1}/
-                {post.totalSpots} spots filled
+                {post.riders ? Object.keys(post.riders).length + 1 : 1}/{post.totalSpots} spots
+                filled
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
@@ -167,7 +167,7 @@ function MoreInfo({ post }: { post: PostType }) {
                 {post.notes}
             </Text>
             <Spacer direction="column" size={48} />
-            {riders && <UserList riders={riders} message={error} />}
+            {riders && <UserList riders={riders} message={error ? error.message : ""} />}
         </View>
     );
 }

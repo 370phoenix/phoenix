@@ -1,5 +1,6 @@
 import { assign, createMachine, DoneInvokeEvent } from "xstate";
-import { UserInfo, validateProfile, writeUser } from "../auth";
+import { writeUser } from "../auth";
+import { validateProfile, UserInfo } from "../userValidation";
 
 const CreateProfileMachine = {
     id: "Create Profile Machine",
@@ -82,7 +83,6 @@ const CreateProfileMachine = {
     schema: {
         context: {} as {
             error: Error | null;
-            phone: string | null;
             prevInfo: UserInfo | null;
             rawInfo: {
                 username: string;
@@ -99,23 +99,22 @@ const CreateProfileMachine = {
             | { type: "SUBMIT" }
             | { type: "ADVANCE"; prevInfo: UserInfo | null }
             | {
-                type: "UPDATE INFO";
-                userID: string;
-                info: {
-                    username: string;
-                    major: string;
-                    gradString: string;
-                    pronouns: string;
-                    phone: string | null;
-                };
-            }
+                  type: "UPDATE INFO";
+                  userID: string;
+                  info: {
+                      username: string;
+                      major: string;
+                      gradString: string;
+                      pronouns: string;
+                      phone: string | null;
+                  };
+              }
             | DoneInvokeEvent<UserInfo>,
     },
     context: {
         error: null,
         rawInfo: null,
         userInfo: null,
-        phone: null,
         userID: null,
         prevInfo: null,
         infoChanged: false,
@@ -132,7 +131,6 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
         validateInfo: async (context: any) => {
             return validateProfile({
                 ...context.rawInfo,
-                userInfo: context.prevInfo,
                 userID: context.userID,
             });
         },
@@ -166,9 +164,9 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
 
 // CAUTION: Only compares 1 level deep
 function isDifferent(o1: UserInfo, o2: UserInfo) {
-    if (o1.major != o2.major) return true;
-    if (o1.pronouns != o2.pronouns) return true;
-    if (o1.username != o2.username) return true;
-    if (o1.gradYear != o2.gradYear) return true;
+    if (o1.major !== o2.major) return true;
+    if (o1.pronouns !== o2.pronouns) return true;
+    if (o1.username !== o2.username) return true;
+    if (o1.gradYear !== o2.gradYear) return true;
     return false;
 }

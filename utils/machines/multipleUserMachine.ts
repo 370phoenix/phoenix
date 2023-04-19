@@ -1,5 +1,6 @@
 import { assign, createMachine } from "xstate";
-import { getUsersOnce, UserInfo } from "../auth";
+import { getUsersOnce } from "../auth";
+import { UserInfo } from "../userValidation";
 
 const MultipleUserMachine = {
     id: "Multiple User Info Machine",
@@ -46,7 +47,7 @@ const MultipleUserMachine = {
         context: {} as {
             riders: UserInfo[];
             ids: string[];
-            error: string | null;
+            error: Error | null;
         },
         events: {} as { type: "EXIT" } | { type: "LOAD"; ids: string[] },
     },

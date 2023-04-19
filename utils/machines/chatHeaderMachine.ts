@@ -44,15 +44,15 @@ const ChatHeaderMachine = {
         error: null,
     },
     schema: {
-        context: {} as { header: ChatHeader | null; postID: string; error: string | null },
-        events: {} as Init | Error | Leave | Update,
+        context: {} as { header: ChatHeader | null; postID: string; error: Error | null },
+        events: {} as Init | ErrorEvent | Leave | Update,
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
 };
 type Init = { type: "INIT"; postID: string };
 type Update = { type: "UPDATE"; data: ChatHeader };
-type Error = { type: "ERROR"; error: string };
+type ErrorEvent = { type: "ERROR"; error: Error };
 type Leave = { type: "LEAVE" };
 
 export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
@@ -66,7 +66,7 @@ export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
                         const header = snapshot.val();
                         callback({ type: "UPDATE", data: header });
                     } else {
-                        callback({ type: "ERROR", error: "Chat does not exist" });
+                        callback({ type: "ERROR", error: new Error("Chat does not exist") });
                     }
                 });
 
@@ -83,7 +83,7 @@ export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
             header: (_, event) => (event as Update).data,
         }),
         assignError: assign({
-            error: (_, event) => (event as Error).error,
+            error: (_, event) => (event as ErrorEvent).error,
         }),
     },
 });

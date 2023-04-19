@@ -48,7 +48,7 @@ export default function SignInScreen({ navigation }: Props) {
                     {confirm === null ? "Enter Phone Number" : "Enter verification code"}
                 </Text>
 
-                {error ? <Text style={[styles.message]}>{error}</Text> : ""}
+                {error ? <Text style={[styles.message]}>{error.message}</Text> : ""}
 
                 {loading ? (
                     <Text textStyle="header" styleSize="m" style={styles.loading}>
