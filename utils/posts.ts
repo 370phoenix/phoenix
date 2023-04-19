@@ -12,8 +12,13 @@ import {
     PostType,
 } from "./postValidation";
 
-
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+export const getDB = () => {
+    if (__DEV__) {
+        return firebase.app().database("https://phoenix-370-test.firebaseio.com");
+    } else {
+        return firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+    }
+};
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -37,7 +42,9 @@ export type Unsubscribe = () => void;
  * @throws ZodError when validation fails
  */
 export async function fetchPost(postID: string): Promise<PostType> {
-    const snapshot = await db.ref("posts/" + postID).once("value");
+    const snapshot = await getDB()
+        .ref("posts/" + postID)
+        .once("value");
     if (snapshot.exists()) return valToPost(snapshot.val());
     else throw Error("Post does not exist.");
 }
@@ -51,7 +58,7 @@ export async function fetchPost(postID: string): Promise<PostType> {
  * @throws Error from Firebase
  */
 export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
-    const postsRef = db.ref("posts");
+    const postsRef = getDB().ref("posts");
     const posts: PostType[] = [];
 
     for (const id of ids) {
@@ -88,7 +95,7 @@ export function getAllPostUpdates({
     onChildChanged,
     onChildRemoved,
 }: PostUpdateParams): Unsubscribe {
-    const postsRef = db.ref("posts");
+    const postsRef = getDB().ref("posts");
 
     const onAdd = postsRef.on(
         "child_added",
@@ -99,7 +106,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
 
     const onChange = postsRef.on(
@@ -111,7 +118,7 @@ export function getAllPostUpdates({
                 });
             }
         },
-        (_) => { } // TODO: HANDLE (ERROR) => {}
+        (_) => {} // TODO: HANDLE (ERROR) => {}
     );
 
     const onRemove = postsRef.on("child_removed", (snapshot) => {
@@ -149,7 +156,7 @@ export async function createPost(post: FreshPostType, userInfo: UserInfo | null)
     const { user: userID } = post;
 
     // Add post to DB
-    const postRef = db.ref("posts/").push();
+    const postRef = getDB().ref("posts/").push();
     if (!postRef.key) throw new Error("No key generated.");
     const postID = postRef.key;
     const newPost: FBPostType = FirebasePostSchema.parse({ postID, ...post });
@@ -162,12 +169,14 @@ export async function createPost(post: FreshPostType, userInfo: UserInfo | null)
     await writeUser(userID, userInfo);
 
     // Add a chat header
-    await db.ref(`chats/${postID}`).set({
-        postID,
-        title: post.dropoff,
-        displayNames: { [userID]: userInfo.username },
-        lastMessage: undefined,
-    });
+    await getDB()
+        .ref(`chats/${postID}`)
+        .set({
+            postID,
+            title: post.dropoff,
+            displayNames: { [userID]: userInfo.username },
+            lastMessage: undefined,
+        });
 }
 
 ///////////////////////////////////////////
@@ -185,7 +194,7 @@ export async function createPost(post: FreshPostType, userInfo: UserInfo | null)
  * @throws (FirebaseError) from Firebase
  */
 export async function writePostData(post: PostType): Promise<void> {
-    const postRef = db.ref("posts/" + post.postID);
+    const postRef = getDB().ref("posts/" + post.postID);
     await postRef.set(PostToFBSchema.parse(post));
 }
 
@@ -247,7 +256,9 @@ export async function handleAcceptReject({
 
     if (isAccept) {
         console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
-        await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+        await getDB()
+            .ref(`chats/${postID}/displayNames/${requesterID}`)
+            .set(requesterInfo.username);
     }
     return post;
 }
@@ -342,6 +353,6 @@ function valToPost(val: any) {
     });
 }
 
-export async function copyToClipboard(text: string){
+export async function copyToClipboard(text: string) {
     await Clipboard.setStringAsync(text);
 }

@@ -1,16 +1,15 @@
 import Filter from "bad-words";
 import Pronouns from "../constants/Pronouns.json";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
-import { Unsubscribe } from "./posts";
-import firebase from "@react-native-firebase/app";
+import { getDB, Unsubscribe } from "./posts";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 //////////////// TYPES ////////////////////
 ///////////////////////////////////////////
 ///////////////////////////////////////////
+
 export type UserInfo = {
     userID: string;
     username: string;
@@ -106,7 +105,7 @@ export async function signIn(
 export async function writeUser(userID: string | null, userInfo: UserInfo | null): Promise<void> {
     if (!userID || !userInfo) throw new Error("No User ID or Info.");
 
-    const userRef = database().ref("users/" + userID);
+    const userRef = getDB().ref("users/" + userID);
     await userRef.set(cleanUndefined(userInfo));
 }
 
@@ -131,7 +130,7 @@ function convertUserInfo(userID: string, data: FBUserInfo): UserInfo {
  * @throws (FirebaseError): If Firebase error
  */
 export function getUserUpdates(userID: string, onUpdate: (data: UserInfo) => void): Unsubscribe {
-    const userRef = database().ref("users/" + userID);
+    const userRef = getDB().ref("users/" + userID);
     const onChange = userRef.on("value", (snapshot) => {
         if (snapshot.exists()) {
             const data = snapshot.val();
@@ -174,7 +173,7 @@ export async function getUsersOnce(users: string[]): Promise<UserInfo[]> {
  */
 export async function getUserOnce(userID: string | null): Promise<UserInfo | null> {
     if (!userID) throw Error("No user ID.");
-    const userRef = database().ref("users/" + userID);
+    const userRef = getDB().ref("users/" + userID);
     const snapshot = await userRef.once("value");
     if (snapshot.exists())
         return {
