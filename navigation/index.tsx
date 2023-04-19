@@ -54,6 +54,24 @@ function RootNavigator() {
     const needsInfo = useSelector(authService, needsInfoSelector);
     const waiting = useSelector(authService, waitingSelector);
 
+    const welcome = (
+        <>
+            <Stack.Screen
+                name="Welcome"
+                component={WelcomeScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="SignIn"
+                component={SignInScreen}
+                options={{
+                    headerShown: false,
+                    animationTypeForReplace: signedIn ? "push" : "pop",
+                }}
+            />
+        </>
+    );
+
     return (
         <Stack.Navigator
             screenOptions={{
@@ -64,7 +82,7 @@ function RootNavigator() {
             }}>
             {signedIn ? (
                 waiting ? (
-                    <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                    welcome
                 ) : needsInfo ? (
                     <Stack.Screen name="CreateProfile">
                         {(props) => <CreateProfileScreen {...props} />}
@@ -130,21 +148,7 @@ function RootNavigator() {
                     </>
                 )
             ) : (
-                <>
-                    <Stack.Screen
-                        name="Welcome"
-                        component={WelcomeScreen}
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="SignIn"
-                        component={SignInScreen}
-                        options={{
-                            headerShown: false,
-                            animationTypeForReplace: signedIn ? "push" : "pop",
-                        }}
-                    />
-                </>
+                welcome
             )}
         </Stack.Navigator>
     );
