@@ -26,26 +26,47 @@ const AuthMachine = {
                 },
             ],
         },
+        "FB Signed Out": {
+            on: {
+                "USER CHANGED": {
+                    target: "Init",
+                    actions: "assignUser",
+                },
+            },
+        },
         "FB Signed In": {
             invoke: {
                 src: "setUserInfoListener",
                 id: "setUserInfoListener",
             },
             on: {
-                "USER CHANGED": {
-                    target: "#New Authentication Machine.Init",
-                    actions: "assignUser",
-                },
                 "SIGN OUT": {
                     target: "#New Authentication Machine.Init",
                     actions: "clearInfo",
                 },
+                "USER CHANGED": {
+                    target: "#New Authentication Machine.Init",
+                    actions: "assignUserInfo",
+                },
             },
-            initial: "Init",
+            initial: "SignedInit",
             states: {
-                "Init": {
+                "SignedInit": {
                     always: [
-                        { target: "Waiting", cond: "noRunYet" },
+                        {
+                            target: "Waiting",
+                            actions: "assignWaitingEmail",
+                            cond: "sentNotVerified",
+                        },
+                        {
+                            target: "Needs Email Verification",
+                            cond: "needToSendEmail",
+                        },
+                        {
+                            target: "Waiting",
+                            actions: "assignWaitingUserInfo",
+                            cond: "noRunYet",
+                        },
                         {
                             target: "Info Updated",
                             cond: "userInfoExists",
@@ -58,7 +79,32 @@ const AuthMachine = {
                 "Waiting": {
                     on: {
                         "USER INFO CHANGED": {
-                            target: "Init",
+                            target: "SignedInit",
+                            actions: "assignUserInfo",
+                        },
+                    },
+                },
+                "Needs Email Verification": {
+                    invoke: {
+                        src: "sendEmailVerification",
+                        id: "sendEmailVerification",
+                        onDone: [
+                            {
+                                target: "SignedInit",
+                                actions: "assignWaitingEmail",
+                            },
+                        ],
+                        onError: [
+                            {
+                                target: "SignedInit",
+                            },
+                        ],
+                    },
+                },
+                "Needs Profile": {
+                    on: {
+                        "USER INFO CHANGED": {
+                            target: "SignedInit",
                             actions: "assignUserInfo",
                         },
                     },
@@ -67,7 +113,7 @@ const AuthMachine = {
                     initial: "Start",
                     on: {
                         "USER INFO CHANGED": {
-                            target: "Init",
+                            target: "SignedInit",
                             actions: "assignUserInfo",
                         },
                     },
@@ -87,18 +133,40 @@ const AuthMachine = {
                                 },
                             ],
                         },
+                        "Set Token in DB": {
+                            invoke: {
+                                src: "setToken",
+                                id: "setToken",
+                                onDone: [
+                                    {
+                                        target: "Start",
+                                        actions: "updateUserInfoTokenSet",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        target: "Start",
+                                        actions: "logError",
+                                    },
+                                ],
+                            },
+                        },
                         "Loading User Posts": {
                             invoke: {
                                 id: "loadUsersPosts",
                                 src: "loadUserPosts",
-                                onDone: {
-                                    actions: "assignPosts",
-                                    target: "Posts Loaded",
-                                },
-                                onError: {
-                                    actions: "logError",
-                                    target: "Loading Failed",
-                                },
+                                onDone: [
+                                    {
+                                        actions: "assignPosts",
+                                        target: "Posts Loaded",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        actions: "logError",
+                                        target: "Loading Failed",
+                                    },
+                                ],
                             },
                         },
                         "Posts Loaded": {
@@ -106,47 +174,12 @@ const AuthMachine = {
                                 "UPDATE POST": {
                                     target: "Posts Loaded",
                                     actions: "updatePost",
+                                    internal: false,
                                 },
                             },
                         },
                         "Loading Failed": {},
-                        "Set Token in DB": {
-                            invoke: {
-                                src: "setToken",
-                                id: "setToken",
-                                onDone: {
-                                    target: "Start",
-                                    actions: "updateUserInfoTokenSet",
-                                },
-                                onError: {
-                                    target: "Start",
-                                    actions: "logError",
-                                },
-                            },
-                            on: {
-                                "USER INFO CHANGED": {
-                                    target: "#New Authentication Machine.Init",
-                                    actions: "assignUserInfo",
-                                },
-                            },
-                        },
                     },
-                },
-                "Needs Profile": {
-                    on: {
-                        "USER INFO CHANGED": {
-                            target: "Init",
-                            actions: "assignUserInfo",
-                        },
-                    },
-                },
-            },
-        },
-        "FB Signed Out": {
-            on: {
-                "USER CHANGED": {
-                    target: "Init",
-                    actions: "assignUser",
                 },
             },
         },
@@ -155,6 +188,7 @@ const AuthMachine = {
         user: null,
         userInfo: null,
         ranOnce: false,
+        waiting: null,
         error: null,
         posts: null,
         updatedToken: false,
@@ -171,6 +205,7 @@ type AuthMachineContext = {
     user: FirebaseAuthTypes.User | null;
     userInfo: UserInfo | null;
     ranOnce: boolean;
+    waiting: "email" | "userInfo" | null;
     error: string | null;
     posts: PostType[] | null;
     updatedToken: boolean;
@@ -219,6 +254,10 @@ export const authMachine = createMachine(AuthMachine, {
                 return () => {};
             }
         },
+        sendEmailVerification: async (context) => {
+            if (!context.user) throw Error("Missing User Information");
+            await context.user.sendEmailVerification();
+        },
         loadUserPosts: async (context) => {
             const { user, userInfo } = context;
             if (!user || !userInfo) throw Error("Missing User Information");
@@ -244,16 +283,26 @@ export const authMachine = createMachine(AuthMachine, {
                 console.log("ASSIGNING USER", event.user);
                 return event.user;
             },
+            waiting: null,
         }),
         assignUserInfo: assign({
             ranOnce: true,
+            waiting: null,
             userInfo: (context, event) =>
                 event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
+        }),
+        assignWaitingEmail: assign({
+            waiting: "email",
+        }),
+        assignWaitingUserInfo: assign({
+            waiting: "userInfo",
         }),
         clearInfo: assign({
             user: null,
             userInfo: null,
             ranOnce: false,
+            waiting: null,
+            error: null,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
@@ -282,6 +331,10 @@ export const authMachine = createMachine(AuthMachine, {
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
         needTokenUpdate: (context) => context.updatedToken === false,
+        needToSendEmail: (context) => (context.user ? context.user.emailVerified === false : false),
+        sentNotVerified: (context) =>
+            (context.user ? context.user.emailVerified === false : false) &&
+            context.waiting === "email",
     },
 });
 
