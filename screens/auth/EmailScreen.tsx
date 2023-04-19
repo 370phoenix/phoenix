@@ -61,6 +61,7 @@ function EmailForm({ emailError }: FormProps) {
                 label={"email"}
                 inputState={emailState}
                 inputMode="email"
+                autoComplete="email"
                 keyboardType="email-address"
             />
 

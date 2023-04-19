@@ -73,8 +73,7 @@ const AuthMachine = {
                 "SignedInit": {
                     always: [
                         {
-                            target: "#New Authentication Machine.Init",
-                            actions: "signOut",
+                            target: "#New Authentication Machine.Signing Out",
                             cond: "needsResign",
                         },
                         {
@@ -300,10 +299,8 @@ export const authMachine = createMachine(AuthMachine, {
         },
         sendEmailVerification: async (context) => {
             if (!context.user) throw Error("Missing User Information");
-            if (!context.user.email) throw Error("Missing Email");
-            const email = emailSchema.parse(context.user.email);
+            const email = emailSchema.parse(context.email);
             await context.user.updateEmail(email);
-            console.log(context.user.email);
             await context.user.sendEmailVerification();
         },
         loadUserPosts: async (context) => {
@@ -389,7 +386,7 @@ export const authMachine = createMachine(AuthMachine, {
             if (context.user.emailVerified) return false;
             if (!context.user.metadata.lastSignInTime) return true;
             const lastSign = new Date(context.user.metadata.lastSignInTime);
-            return Date.now() - lastSign.getTime() > 1000 * 60 * 60;
+            return Date.now() - lastSign.getTime() > 1000 * 60 * 5;
         },
     },
 });
