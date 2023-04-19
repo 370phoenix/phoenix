@@ -111,10 +111,6 @@ const AuthMachine = {
                                     target: "Send Verification",
                                     actions: "assignEmail",
                                 },
-                                "EMAIL ERROR": {
-                                    target: "Start",
-                                    actions: "assignEmailError",
-                                },
                             },
                         },
                         "Send Verification": {
@@ -129,7 +125,7 @@ const AuthMachine = {
                                 onError: [
                                     {
                                         target: "#New Authentication Machine.FB Signed In.SignedInit",
-                                        actions: "assignEmailError",
+                                        actions: ["logError", "assignEmailError"],
                                     },
                                 ],
                             },

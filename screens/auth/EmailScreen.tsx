@@ -3,11 +3,12 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 import { Button, Text, TextField } from "../../components/shared/Themed";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext, userSelector } from "../../utils/machines/authMachine";
 import { useSelector } from "@xstate/react";
 import { z } from "zod";
 import { ErrorBox } from "../../utils/errorHandling";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Email">;
 export default function EmailScreen({}: Props) {
@@ -19,7 +20,7 @@ export default function EmailScreen({}: Props) {
 
     return (
         <View style={styles.container}>
-            {user.email ? <Waiting /> : <EmailForm emailError={emailError} />}
+            {user.email ? <Waiting user={user} /> : <EmailForm emailError={emailError} />}
         </View>
     );
 }
@@ -72,12 +73,42 @@ function EmailForm({ emailError }: FormProps) {
     );
 }
 
-function Waiting() {
+interface WaitingProps {
+    user: FirebaseAuthTypes.User;
+}
+function Waiting({ user }: WaitingProps) {
+    const [timer, setTimer] = useState(0);
+    const timerRef = useRef<NodeJS.Timer | null>(null);
+
+    const retry = async () => {
+        if (timer > 0) return;
+
+        try {
+            await user.sendEmailVerification();
+            setTimer(300);
+            const x = setInterval(() => {
+                setTimer((t) => t - 1);
+            }, 1000);
+            timerRef.current = x;
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    useEffect(() => {
+        if (timerRef.current) {
+            if (timer <= 0) {
+                clearInterval(timerRef.current);
+            }
+        }
+    }, [timerRef]);
+
     return (
         <View style={styles.form}>
             <Text style={[styles.text, styles.header]} textStyle="header" styleSize="m">
                 Please check your email and click the link we sent!
             </Text>
+            <Button onPress={retry} title="Retry?" disabled={timer > 0} color="purple" />
         </View>
     );
 }
