@@ -4,7 +4,7 @@ import { assign, createMachine, InterpreterFrom } from "xstate";
 import { getUserUpdates } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
-import {UserInfo} from "../userValidation";
+import { UserInfo } from "../userValidation";
 import { PostType } from "../postValidation";
 import { logError } from "../errorHandling";
 
@@ -62,6 +62,10 @@ const AuthMachine = {
                             target: "Init",
                             actions: "assignUserInfo",
                         },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
+                        },
                     },
                 },
                 "Info Updated": {
@@ -70,6 +74,10 @@ const AuthMachine = {
                         "USER INFO CHANGED": {
                             target: "Init",
                             actions: "assignUserInfo",
+                        },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
                         },
                     },
                     states: {
@@ -121,13 +129,7 @@ const AuthMachine = {
                                 },
                                 onError: {
                                     target: "Start",
-                                    actions: "logError",
-                                },
-                            },
-                            on: {
-                                "USER INFO CHANGED": {
-                                    target: "#New Authentication Machine.Init",
-                                    actions: "assignUserInfo",
+                                    actions: "assignError",
                                 },
                             },
                         },
@@ -138,6 +140,10 @@ const AuthMachine = {
                         "USER INFO CHANGED": {
                             target: "Init",
                             actions: "assignUserInfo",
+                        },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
                         },
                     },
                 },
@@ -172,7 +178,7 @@ type AuthMachineContext = {
     user: FirebaseAuthTypes.User | null;
     userInfo: UserInfo | null;
     ranOnce: boolean;
-    error: string | null;
+    error: Error | null;
     posts: PostType[] | null;
     updatedToken: boolean;
 };
@@ -181,7 +187,8 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
-    | { type: "UPDATE POST"; post: PostType };
+    | { type: "UPDATE POST"; post: PostType }
+    | { type: "ERROR"; error: Error };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
@@ -212,9 +219,13 @@ export const authMachine = createMachine(AuthMachine, {
                 return () => {};
             }
             try {
-                return getUserUpdates(context.user.uid, (data) => {
-                    callback({ type: "USER INFO CHANGED", userInfo: data });
-                });
+                return getUserUpdates(
+                    context.user.uid,
+                    (data) => {
+                        callback({ type: "USER INFO CHANGED", userInfo: data });
+                    },
+                    (error) => callback({ type: "ERROR", error })
+                );
             } catch (e: any) {
                 logError(e);
                 return () => {};
@@ -242,7 +253,7 @@ export const authMachine = createMachine(AuthMachine, {
         assignUser: assign({
             user: (_, event) => {
                 if (event.type !== "USER CHANGED") return null;
-                console.log("ASSIGNING USER", event.user);
+                console.log("ASSIGNING USER: ", event.user ? event.user.uid : "null");
                 return event.user;
             },
         }),
@@ -274,6 +285,12 @@ export const authMachine = createMachine(AuthMachine, {
         }),
         updateUserInfoTokenSet: assign({
             updatedToken: true,
+        }),
+        assignError: assign({
+            ranOnce: true,
+            userInfo: null,
+            updatedToken: true,
+            error: (_, event: any) => (event.type === "ERROR" ? event.error : null),
         }),
         logError: (_, event: any) => logError(event.data),
     },

@@ -33,6 +33,8 @@ import {
     signedInSelector,
     waitingSelector,
 } from "../utils/machines/authMachine";
+import ErrorScreen from "../screens/ErrorScreen";
+import WaitingScreen from "../screens/WaitingScreen";
 
 export default function Navigation() {
     return (
@@ -53,6 +55,7 @@ function RootNavigator() {
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
     const waiting = useSelector(authService, waitingSelector);
+    const error = useSelector(authService, (state) => state.context.error);
 
     const welcome = (
         <>
@@ -72,6 +75,84 @@ function RootNavigator() {
         </>
     );
 
+    const waitingContent = <Stack.Screen name="Waiting" component={WaitingScreen} />;
+
+    const needsInfoContent = (
+        <Stack.Screen name="CreateProfile">
+            {(props) => <CreateProfileScreen {...props} />}
+        </Stack.Screen>
+    );
+
+    const errorContent = <Stack.Screen name="Error" component={ErrorScreen} />;
+
+    let content;
+    console.log(error);
+    if (error) content = errorContent;
+    else if (!signedIn) content = welcome;
+    else if (waiting) content = waitingContent;
+    else if (needsInfo) content = needsInfoContent;
+    else
+        content = (
+            <>
+                <Stack.Screen
+                    name="Root"
+                    component={BottomTabNavigator}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="NotFound"
+                    component={NotFoundScreen}
+                    options={{ title: "Oops!" }}
+                />
+                <Stack.Screen
+                    name="Matches"
+                    component={MatchesScreen}
+                    options={({ navigation }) => ({
+                        title: "Matches",
+                        headerLeft: () => (
+                            <Button
+                                title="Go back"
+                                onPress={() => navigation.goBack()}
+                                leftIcon={Left}
+                                color="purple"
+                                light
+                                short
+                                clear
+                            />
+                        ),
+                    })}
+                />
+                <Stack.Screen
+                    name="ChatScreen"
+                    component={ChatScreen}
+                    options={({ navigation }) => ({
+                        title: "Chat Screen",
+                        headerLeft: () => (
+                            <Button
+                                title="Go back"
+                                onPress={() => navigation.goBack()}
+                                leftIcon={Left}
+                                color="purple"
+                                light
+                                short
+                                clear
+                            />
+                        ),
+                    })}
+                />
+
+                <Stack.Group
+                    screenOptions={{
+                        presentation: "modal",
+                        header: ({ navigation }) => <ModalHeader navigation={navigation} />,
+                    }}>
+                    <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
+                    <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+                    <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+                </Stack.Group>
+            </>
+        );
+
     return (
         <Stack.Navigator
             screenOptions={{
@@ -80,76 +161,7 @@ function RootNavigator() {
                     return <Header title={title} options={options} />;
                 },
             }}>
-            {signedIn ? (
-                waiting ? (
-                    welcome
-                ) : needsInfo ? (
-                    <Stack.Screen name="CreateProfile">
-                        {(props) => <CreateProfileScreen {...props} />}
-                    </Stack.Screen>
-                ) : (
-                    <>
-                        <Stack.Screen
-                            name="Root"
-                            component={BottomTabNavigator}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="NotFound"
-                            component={NotFoundScreen}
-                            options={{ title: "Oops!" }}
-                        />
-                        <Stack.Screen
-                            name="Matches"
-                            component={MatchesScreen}
-                            options={({ navigation }) => ({
-                                title: "Matches",
-                                headerLeft: () => (
-                                    <Button
-                                        title="Go back"
-                                        onPress={() => navigation.goBack()}
-                                        leftIcon={Left}
-                                        color="purple"
-                                        light
-                                        short
-                                        clear
-                                    />
-                                ),
-                            })}
-                        />
-                        <Stack.Screen
-                            name="ChatScreen"
-                            component={ChatScreen}
-                            options={({ navigation }) => ({
-                                title: "Chat Screen",
-                                headerLeft: () => (
-                                    <Button
-                                        title="Go back"
-                                        onPress={() => navigation.goBack()}
-                                        leftIcon={Left}
-                                        color="purple"
-                                        light
-                                        short
-                                        clear
-                                    />
-                                ),
-                            })}
-                        />
-
-                        <Stack.Group
-                            screenOptions={{
-                                presentation: "modal",
-                                header: ({ navigation }) => <ModalHeader navigation={navigation} />,
-                            }}>
-                            <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
-                            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-                            <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
-                        </Stack.Group>
-                    </>
-                )
-            ) : (
-                welcome
-            )}
+            {content}
         </Stack.Navigator>
     );
 }

@@ -1,6 +1,7 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
+import { logError } from "./errorHandling";
 import { Unsubscribe } from "./posts";
 
 import { UserInfo, UserSchema } from "./userValidation";
@@ -81,12 +82,20 @@ export async function writeUser(userID: string | null, userInfo: UserInfo | null
  * @throws (Error): If no user ID
  * @throws (FirebaseError): If Firebase error
  */
-export function getUserUpdates(userID: string, onUpdate: (data: UserInfo) => void): Unsubscribe {
+export function getUserUpdates(
+    userID: string,
+    onUpdate: (data: UserInfo) => void,
+    onError: (error: Error) => void
+): Unsubscribe {
     const userRef = database().ref("users/" + userID);
     const onChange = userRef.on("value", (snapshot) => {
         if (snapshot.exists()) {
-            const userInfo = UserSchema.parse(snapshot.val());
-            onUpdate(userInfo);
+            try {
+                const userInfo = UserSchema.parse(snapshot.val());
+                onUpdate(userInfo);
+            } catch (e: any) {
+                onError(e);
+            }
         }
     });
     const unsub = () => {
