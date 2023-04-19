@@ -27,7 +27,12 @@ import ModalHeader from "../components/shared/ModalHeader";
 import ChatScreen from "../screens/matches/ChatScreen";
 import auth from "@react-native-firebase/auth";
 import { useSelector } from "@xstate/react";
-import { AuthContext, needsInfoSelector, signedInSelector } from "../utils/machines/authMachine";
+import {
+    AuthContext,
+    needsInfoSelector,
+    signedInSelector,
+    waitingSelector,
+} from "../utils/machines/authMachine";
 
 export default function Navigation() {
     return (
@@ -47,6 +52,7 @@ function RootNavigator() {
     const authService = React.useContext(AuthContext);
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
+    const waiting = useSelector(authService, waitingSelector);
 
     return (
         <Stack.Navigator
@@ -57,7 +63,9 @@ function RootNavigator() {
                 },
             }}>
             {signedIn ? (
-                needsInfo ? (
+                waiting ? (
+                    <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                ) : needsInfo ? (
                     <Stack.Screen name="CreateProfile">
                         {(props) => <CreateProfileScreen {...props} />}
                     </Stack.Screen>
