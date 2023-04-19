@@ -13,7 +13,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthContext, userSelector } from "../../utils/machines/authMachine";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreateProfile">;
-export default function CreateProfileScreen({ }: Props) {
+export default function CreateProfileScreen({}: Props) {
     const authService = useContext(AuthContext);
     const user = useSelector(authService, userSelector);
 
@@ -59,7 +59,7 @@ export default function CreateProfileScreen({ }: Props) {
                 </Text>
                 {error && (
                     <Text textStyle="label" styleSize="m" style={{ color: Colors.red.p }}>
-                        {error}
+                        {error.message}
                     </Text>
                 )}
                 <TextField

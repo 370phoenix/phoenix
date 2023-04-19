@@ -6,6 +6,7 @@ import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
 import { PostType } from "../postValidation";
 import { logError } from "../errorHandling";
+import { z } from "zod";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -15,6 +16,24 @@ const AuthMachine = {
     },
     initial: "Init",
     states: {
+        "Signing Out": {
+            invoke: {
+                src: "signOut",
+                id: "signOut",
+                onDone: [
+                    {
+                        actions: "clearInfo",
+                        target: "FB Signed Out",
+                    },
+                ],
+                onError: [
+                    {
+                        actions: "logError",
+                        target: "Init",
+                    },
+                ],
+            },
+        },
         "Init": {
             always: [
                 {
@@ -26,26 +45,46 @@ const AuthMachine = {
                 },
             ],
         },
+        "FB Signed Out": {
+            on: {
+                "USER CHANGED": {
+                    target: "Init",
+                    actions: "assignUser",
+                },
+            },
+        },
         "FB Signed In": {
             invoke: {
                 src: "setUserInfoListener",
                 id: "setUserInfoListener",
             },
             on: {
-                "USER CHANGED": {
-                    target: "#New Authentication Machine.Init",
-                    actions: "assignUser",
-                },
                 "SIGN OUT": {
                     target: "#New Authentication Machine.Init",
                     actions: "clearInfo",
                 },
+                "USER CHANGED": {
+                    target: "#New Authentication Machine.Init",
+                    actions: "assignUserInfo",
+                },
             },
-            initial: "Init",
+            initial: "SignedInit",
             states: {
-                "Init": {
+                "SignedInit": {
                     always: [
-                        { target: "Waiting", cond: "noRunYet" },
+                        {
+                            target: "#New Authentication Machine.Signing Out",
+                            cond: "needsResign",
+                        },
+                        {
+                            target: "Needs Email Verification",
+                            cond: "needToSendEmail",
+                        },
+                        {
+                            target: "Waiting",
+                            actions: "assignWaitingUserInfo",
+                            cond: "noRunYet",
+                        },
                         {
                             target: "Info Updated",
                             cond: "userInfoExists",
@@ -58,7 +97,45 @@ const AuthMachine = {
                 "Waiting": {
                     on: {
                         "USER INFO CHANGED": {
-                            target: "Init",
+                            target: "SignedInit",
+                            actions: "assignUserInfo",
+                        },
+                    },
+                },
+                "Needs Email Verification": {
+                    initial: "Start",
+                    states: {
+                        "Start": {
+                            on: {
+                                "SET EMAIL": {
+                                    target: "Send Verification",
+                                    actions: "assignEmail",
+                                },
+                            },
+                        },
+                        "Send Verification": {
+                            invoke: {
+                                src: "sendEmailVerification",
+                                id: "sendEmailVerification",
+                                onDone: [
+                                    {
+                                        target: "#New Authentication Machine.FB Signed In.SignedInit",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        target: "#New Authentication Machine.FB Signed In.SignedInit",
+                                        actions: ["logError", "assignEmailError"],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                },
+                "Needs Profile": {
+                    on: {
+                        "USER INFO CHANGED": {
+                            target: "SignedInit",
                             actions: "assignUserInfo",
                         },
                     },
@@ -67,7 +144,7 @@ const AuthMachine = {
                     initial: "Start",
                     on: {
                         "USER INFO CHANGED": {
-                            target: "Init",
+                            target: "SignedInit",
                             actions: "assignUserInfo",
                         },
                     },
@@ -87,18 +164,40 @@ const AuthMachine = {
                                 },
                             ],
                         },
+                        "Set Token in DB": {
+                            invoke: {
+                                src: "setToken",
+                                id: "setToken",
+                                onDone: [
+                                    {
+                                        target: "Start",
+                                        actions: "updateUserInfoTokenSet",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        target: "Start",
+                                        actions: "logError",
+                                    },
+                                ],
+                            },
+                        },
                         "Loading User Posts": {
                             invoke: {
                                 id: "loadUsersPosts",
                                 src: "loadUserPosts",
-                                onDone: {
-                                    actions: "assignPosts",
-                                    target: "Posts Loaded",
-                                },
-                                onError: {
-                                    actions: "logError",
-                                    target: "Loading Failed",
-                                },
+                                onDone: [
+                                    {
+                                        actions: "assignPosts",
+                                        target: "Posts Loaded",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        actions: "logError",
+                                        target: "Loading Failed",
+                                    },
+                                ],
                             },
                         },
                         "Posts Loaded": {
@@ -106,47 +205,12 @@ const AuthMachine = {
                                 "UPDATE POST": {
                                     target: "Posts Loaded",
                                     actions: "updatePost",
+                                    internal: false,
                                 },
                             },
                         },
                         "Loading Failed": {},
-                        "Set Token in DB": {
-                            invoke: {
-                                src: "setToken",
-                                id: "setToken",
-                                onDone: {
-                                    target: "Start",
-                                    actions: "updateUserInfoTokenSet",
-                                },
-                                onError: {
-                                    target: "Start",
-                                    actions: "logError",
-                                },
-                            },
-                            on: {
-                                "USER INFO CHANGED": {
-                                    target: "#New Authentication Machine.Init",
-                                    actions: "assignUserInfo",
-                                },
-                            },
-                        },
                     },
-                },
-                "Needs Profile": {
-                    on: {
-                        "USER INFO CHANGED": {
-                            target: "Init",
-                            actions: "assignUserInfo",
-                        },
-                    },
-                },
-            },
-        },
-        "FB Signed Out": {
-            on: {
-                "USER CHANGED": {
-                    target: "Init",
-                    actions: "assignUser",
                 },
             },
         },
@@ -155,7 +219,10 @@ const AuthMachine = {
         user: null,
         userInfo: null,
         ranOnce: false,
+        waiting: null,
         error: null,
+        email: null,
+        emailError: null,
         posts: null,
         updatedToken: false,
     },
@@ -172,6 +239,8 @@ type AuthMachineContext = {
     userInfo: UserInfo | null;
     ranOnce: boolean;
     error: string | null;
+    email: string | null;
+    emailError: Error | null;
     posts: PostType[] | null;
     updatedToken: boolean;
 };
@@ -180,11 +249,14 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
+    | { type: "SET EMAIL"; email: string }
     | { type: "UPDATE POST"; post: PostType };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
 export const needsInfoSelector = (state: any) => state.matches("FB Signed In.Needs Profile");
+export const needsEmailSelector = (state: any) =>
+    state.matches("FB Signed In.Needs Email Verification");
 export const waitingSelector = (state: any) => state.matches("FB Signed In.Waiting");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user.uid as string) : null;
@@ -194,6 +266,8 @@ export const userPostsSelector = (state: any) =>
     state.context.posts ? (state.context.posts as PostType[]) : null;
 export const userSelector = (state: any) =>
     state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
+
+const emailSchema = z.string().trim().email().endsWith("@emory.edu");
 
 export const authMachine = createMachine(AuthMachine, {
     services: {
@@ -219,6 +293,12 @@ export const authMachine = createMachine(AuthMachine, {
                 return () => {};
             }
         },
+        sendEmailVerification: async (context) => {
+            if (!context.user) throw Error("Missing User Information");
+            const email = emailSchema.parse(context.email);
+            await context.user.updateEmail(email);
+            await context.user.sendEmailVerification();
+        },
         loadUserPosts: async (context) => {
             const { user, userInfo } = context;
             if (!user || !userInfo) throw Error("Missing User Information");
@@ -236,13 +316,26 @@ export const authMachine = createMachine(AuthMachine, {
                 throw Error("Error registering for push notifications");
             }
         },
+        signOut: async (context) => {
+            if (!context.user) return;
+            await auth().signOut();
+        },
     },
     actions: {
         assignUser: assign({
             user: (_, event) => {
                 if (event.type !== "USER CHANGED") return null;
-                console.log("ASSIGNING USER", event.user);
+                console.log("ASSIGNING USER", event.user ? event.user.uid : "null");
                 return event.user;
+            },
+        }),
+        assignEmail: assign({
+            email: (_, event) => (event.type === "SET EMAIL" ? event.email : null),
+        }),
+        assignEmailError: assign({
+            emailError: (_, event) => {
+                console.log((event as any).data);
+                return (event as any).data;
             },
         }),
         assignUserInfo: assign({
@@ -254,6 +347,7 @@ export const authMachine = createMachine(AuthMachine, {
             user: null,
             userInfo: null,
             ranOnce: false,
+            error: null,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
@@ -282,6 +376,14 @@ export const authMachine = createMachine(AuthMachine, {
         noRunYet: (context) => context.ranOnce === false,
         postsChanged: (context) => checkPostChanges(context),
         needTokenUpdate: (context) => context.updatedToken === false,
+        needToSendEmail: (context) => (context.user ? context.user.emailVerified === false : false),
+        needsResign: (context) => {
+            if (!context.user) return true;
+            if (context.user.emailVerified) return false;
+            if (!context.user.metadata.lastSignInTime) return true;
+            const lastSign = new Date(context.user.metadata.lastSignInTime);
+            return Date.now() - lastSign.getTime() > 1000 * 60 * 5;
+        },
     },
 });
 

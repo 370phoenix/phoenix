@@ -29,10 +29,12 @@ import auth from "@react-native-firebase/auth";
 import { useSelector } from "@xstate/react";
 import {
     AuthContext,
+    needsEmailSelector,
     needsInfoSelector,
     signedInSelector,
     waitingSelector,
 } from "../utils/machines/authMachine";
+import EmailScreen from "../screens/auth/EmailScreen";
 
 export default function Navigation() {
     return (
@@ -53,6 +55,7 @@ function RootNavigator() {
     const signedIn = useSelector(authService, signedInSelector);
     const needsInfo = useSelector(authService, needsInfoSelector);
     const waiting = useSelector(authService, waitingSelector);
+    const needsEmail = useSelector(authService, needsEmailSelector);
 
     const welcome = (
         <>
@@ -83,6 +86,8 @@ function RootNavigator() {
             {signedIn ? (
                 waiting ? (
                     welcome
+                ) : needsEmail ? (
+                    <Stack.Screen name="Email" component={EmailScreen} />
                 ) : needsInfo ? (
                     <Stack.Screen name="CreateProfile">
                         {(props) => <CreateProfileScreen {...props} />}
