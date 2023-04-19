@@ -16,7 +16,7 @@ export default function ProfileView({ userInfo }: Props) {
                 <>
                     <ProfileInfo label="DISPLAY NAME:" value={userInfo.username} />
                     <Spacer direction="column" size={8} />
-                    <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted)} />
+                    <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted ?? 0)} />
                     <Spacer direction="column" size={32} />
                     <Button
                         title="Preferences"
