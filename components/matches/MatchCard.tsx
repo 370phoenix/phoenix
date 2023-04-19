@@ -61,9 +61,9 @@ export function MatchCardGuts({ post, color }: MatchCardGutsProps) {
         <>
             <View style={styles.textPart}>
                 <View style={styles.headerContainer}>
-                    <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        {post.pickup}
-                    </Text>
+                        <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
+                            {post.pickup}
+                        </Text>
                 </View>
                 <View style={styles.bodyContainer}>
                     {post.roundTrip ? (
@@ -71,9 +71,9 @@ export function MatchCardGuts({ post, color }: MatchCardGutsProps) {
                     ) : (
                         <Right color={color} height={20} />
                     )}
-                    <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
-                        {post.dropoff}
-                    </Text>
+                        <Text textStyle="label" styleSize="l" style={[styles.name, { color }]}>
+                            {post.dropoff}
+                        </Text>
                 </View>
             </View>
             <View style={styles.riderGroup}>

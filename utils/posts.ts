@@ -1,6 +1,8 @@
 import { firebase } from "@react-native-firebase/database";
 import { UserInfo } from "./userValidation";
 import { getUserOnce, writeUser } from "./auth";
+import * as Clipboard from "expo-clipboard";
+
 import { safeRun } from "./errorHandling";
 import {
     FBPostType,
@@ -11,9 +13,7 @@ import {
     PostType,
 } from "./postValidation";
 
-const db = __DEV__
-    ? firebase.app().database()
-    : firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
 export type Unsubscribe = () => void;
 
@@ -222,8 +222,7 @@ export async function handleAcceptReject({
 
     // Add to matches for accept
     if (isAccept) {
-        if (requesterInfo.matches)
-            requesterInfo.matches[postID] = true;
+        if (requesterInfo.matches) requesterInfo.matches[postID] = true;
         else requesterInfo.matches = { [postID]: true };
     }
     await writeUser(requesterID, requesterInfo);
@@ -321,4 +320,8 @@ function valToPost(val: any) {
         riders: val.riders,
         pending: val.pending,
     });
+}
+
+export async function copyToClipboard(text: string) {
+    await Clipboard.setStringAsync(text);
 }

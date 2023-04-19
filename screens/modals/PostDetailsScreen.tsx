@@ -2,7 +2,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMachine, useSelector } from "@xstate/react";
 import React, { useContext, useState } from "react";
-import { StyleSheet, ScrollView, Alert } from "react-native";
+import { StyleSheet, ScrollView, Alert, TouchableOpacity } from "react-native";
 
 import { Right } from "../../assets/icons/Arrow";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -12,7 +12,7 @@ import { RootStackParamList } from "../../types";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { UserInfo } from "../../utils/userValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { matchPost } from "../../utils/posts";
+import { copyToClipboard, matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import SuccessfulPost from "../../components/shared/SuccessPage";
@@ -30,6 +30,8 @@ export default function DetailsModal({ route, navigation }: Props) {
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
+    const filled = post.riders ? Object.keys(post.riders).length + 1 : 1;
+
     const handleMatch = () => {
         Alert.alert("Confirm Match", "Are you sure you want to match with this post?", [
             {
@@ -43,7 +45,7 @@ export default function DetailsModal({ route, navigation }: Props) {
                         if (!post) return;
                         if (post.riders && post.riders[userID] === true) return;
                         if (post.pending && post.pending[userID] === true) return;
-                        const filled = post.riders ? Object.keys(post.riders).length + 1 : 1
+                        const filled = post.riders ? Object.keys(post.riders).length + 1 : 1;
                         if (filled >= post.totalSpots) return;
 
                         await matchPost(userID, post);
@@ -81,7 +83,12 @@ export default function DetailsModal({ route, navigation }: Props) {
                             height: useHeaderHeight() + 16,
                             padding: 16,
                         }}>
-                        <Button title="Match!" onPress={handleMatch} color="purple" />
+                        <Button
+                            title="Match!"
+                            onPress={handleMatch}
+                            color="purple"
+                            disabled={filled >= post.totalSpots}
+                        />
                         <Spacer direction="column" size={24} />
                     </View>
                 </>
@@ -113,9 +120,11 @@ function MoreInfo({ post }: { post: PostType }) {
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text textStyle="header" styleSize="s">
-                    {pickup}
-                </Text>
+                <TouchableOpacity onPress={() => copyToClipboard(post.pickup)}>
+                    <Text textStyle="header" styleSize="s">
+                        {pickup}
+                    </Text>
+                </TouchableOpacity>
                 <Spacer direction="row" size={4} />
 
                 {post.roundTrip ? (
@@ -124,9 +133,11 @@ function MoreInfo({ post }: { post: PostType }) {
                     <Right color={Colors.gray.b} height={20} />
                 )}
             </View>
-            <Text textStyle="header" styleSize="s">
-                {dropoff}
-            </Text>
+            <TouchableOpacity onPress={() => copyToClipboard(post.dropoff)}>
+                <Text textStyle="header" styleSize="s">
+                    {dropoff}
+                </Text>
+            </TouchableOpacity>
             <Spacer direction="column" size={16} />
             <Text textStyle="label" styleSize="l">
                 {date}
@@ -135,8 +146,8 @@ function MoreInfo({ post }: { post: PostType }) {
                 Pickup window: {startTime}-{endTime}
             </Text>
             <Text textStyle="body" styleSize="s" style={{ color: Colors.purple.p }}>
-                {post.riders ? Object.keys(post.riders).length + 1 : 1}/
-                {post.totalSpots} spots filled
+                {post.riders ? Object.keys(post.riders).length + 1 : 1}/{post.totalSpots} spots
+                filled
             </Text>
             <Spacer direction="column" size={16} />
             <View style={{ flexDirection: "row" }}>
