@@ -86,7 +86,6 @@ function RootNavigator() {
     const errorContent = <Stack.Screen name="Error" component={ErrorScreen} />;
 
     let content;
-    console.log(error);
     if (error) content = errorContent;
     else if (!signedIn) content = welcome;
     else if (waiting) content = waitingContent;
