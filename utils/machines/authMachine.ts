@@ -261,11 +261,13 @@ export const authMachine = createMachine(AuthMachine, {
             ranOnce: true,
             userInfo: (context, event) =>
                 event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
+            error: null,
         }),
         clearInfo: assign({
             user: null,
             userInfo: null,
             ranOnce: false,
+            error: null,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
