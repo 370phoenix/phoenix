@@ -19,8 +19,8 @@ authService.start();
 export default function App() {
     const isLoadingComplete = useCachedResources();
     const initialized = useRef(false);
-    const state = useSelector(authService, (state) => state);
-    console.log(state.value);
+    const userInfo = useSelector(authService, (state) => state.context.userInfo);
+    console.log("userInfo", userInfo);
 
     // Initialize App Check
     useEffect(() => {
