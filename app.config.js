@@ -14,7 +14,10 @@ export default {
         },
         jsEngine: "hermes",
         updates: {
-            fallbackToCacheTimeout: 0,
+            url: "https://u.expo.dev/4a57037e-bdc6-4bca-9d01-81d13c8e96e9",
+        },
+        runtimeVersion: {
+            policy: "sdkVersion",
         },
         assetBundlePatterns: ["**/*"],
         ios: {
