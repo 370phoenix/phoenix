@@ -1,6 +1,9 @@
 import crashlytics from "@react-native-firebase/crashlytics";
+import { View, StyleSheet } from "react-native";
+import { Text } from "../components/shared/Themed";
 import { State } from "xstate";
 import { z } from "zod";
+import Colors from "../constants/Colors";
 
 export function logError(error: Error) {
     const isZodError = error instanceof z.ZodError;
@@ -34,3 +37,29 @@ export function logAuthState(state: State<any, any>) {
     console.log("  error: ", state.context.error ? state.context.error : "null");
     console.log("  ranOnce: ", state.context.ranOnce ? state.context.ranOnce : "null");
 }
+
+interface ErrorBoxProps {
+    message: string;
+}
+export function ErrorBox({ message }: ErrorBoxProps) {
+    return (
+        <View style={styles.errorBox}>
+            <Text style={styles.errorText} textStyle={"body"} styleSize={"m"}>
+                {message}
+            </Text>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    errorBox: {
+        padding: 16,
+        borderRadius: 8,
+        backgroundColor: Colors.red[1],
+        opacity: 0.8,
+        marginTop: 16,
+    },
+    errorText: {
+        color: Colors.gray.w,
+    },
+});

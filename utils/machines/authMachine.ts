@@ -6,6 +6,7 @@ import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
 import { PostType } from "../postValidation";
 import { logError } from "../errorHandling";
+import { z } from "zod";
 
 const AuthMachine = {
     id: "New Authentication Machine",
@@ -15,6 +16,24 @@ const AuthMachine = {
     },
     initial: "Init",
     states: {
+        "Signing Out": {
+            invoke: {
+                src: "signOut",
+                id: "signOut",
+                onDone: [
+                    {
+                        actions: "clearInfo",
+                        target: "FB Signed Out",
+                    },
+                ],
+                onError: [
+                    {
+                        actions: "logError",
+                        target: "Init",
+                    },
+                ],
+            },
+        },
         "Init": {
             always: [
                 {
@@ -54,9 +73,9 @@ const AuthMachine = {
                 "SignedInit": {
                     always: [
                         {
-                            target: "Waiting",
-                            actions: "assignWaitingEmail",
-                            cond: "sentNotVerified",
+                            target: "#New Authentication Machine.Init",
+                            actions: "signOut",
+                            cond: "needsResign",
                         },
                         {
                             target: "Needs Email Verification",
@@ -85,20 +104,37 @@ const AuthMachine = {
                     },
                 },
                 "Needs Email Verification": {
-                    invoke: {
-                        src: "sendEmailVerification",
-                        id: "sendEmailVerification",
-                        onDone: [
-                            {
-                                target: "SignedInit",
-                                actions: "assignWaitingEmail",
+                    initial: "Start",
+                    states: {
+                        "Start": {
+                            on: {
+                                "SET EMAIL": {
+                                    target: "Send Verification",
+                                    actions: "assignEmail",
+                                },
+                                "EMAIL ERROR": {
+                                    target: "Start",
+                                    actions: "assignEmailError",
+                                },
                             },
-                        ],
-                        onError: [
-                            {
-                                target: "SignedInit",
+                        },
+                        "Send Verification": {
+                            invoke: {
+                                src: "sendEmailVerification",
+                                id: "sendEmailVerification",
+                                onDone: [
+                                    {
+                                        target: "#New Authentication Machine.FB Signed In.SignedInit",
+                                    },
+                                ],
+                                onError: [
+                                    {
+                                        target: "#New Authentication Machine.FB Signed In.SignedInit",
+                                        actions: "assignEmailError",
+                                    },
+                                ],
                             },
-                        ],
+                        },
                     },
                 },
                 "Needs Profile": {
@@ -190,6 +226,8 @@ const AuthMachine = {
         ranOnce: false,
         waiting: null,
         error: null,
+        email: null,
+        emailError: null,
         posts: null,
         updatedToken: false,
     },
@@ -205,8 +243,9 @@ type AuthMachineContext = {
     user: FirebaseAuthTypes.User | null;
     userInfo: UserInfo | null;
     ranOnce: boolean;
-    waiting: "email" | "userInfo" | null;
     error: string | null;
+    email: string | null;
+    emailError: Error | null;
     posts: PostType[] | null;
     updatedToken: boolean;
 };
@@ -215,11 +254,14 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
+    | { type: "SET EMAIL"; email: string }
     | { type: "UPDATE POST"; post: PostType };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
 export const needsInfoSelector = (state: any) => state.matches("FB Signed In.Needs Profile");
+export const needsEmailSelector = (state: any) =>
+    state.matches("FB Signed In.Needs Email Verification");
 export const waitingSelector = (state: any) => state.matches("FB Signed In.Waiting");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user.uid as string) : null;
@@ -229,6 +271,8 @@ export const userPostsSelector = (state: any) =>
     state.context.posts ? (state.context.posts as PostType[]) : null;
 export const userSelector = (state: any) =>
     state.context.user ? (state.context.user as FirebaseAuthTypes.User) : null;
+
+const emailSchema = z.string().trim().email().endsWith("@emory.edu");
 
 export const authMachine = createMachine(AuthMachine, {
     services: {
@@ -256,6 +300,10 @@ export const authMachine = createMachine(AuthMachine, {
         },
         sendEmailVerification: async (context) => {
             if (!context.user) throw Error("Missing User Information");
+            if (!context.user.email) throw Error("Missing Email");
+            const email = emailSchema.parse(context.user.email);
+            await context.user.updateEmail(email);
+            console.log(context.user.email);
             await context.user.sendEmailVerification();
         },
         loadUserPosts: async (context) => {
@@ -275,33 +323,37 @@ export const authMachine = createMachine(AuthMachine, {
                 throw Error("Error registering for push notifications");
             }
         },
+        signOut: async (context) => {
+            if (!context.user) return;
+            await auth().signOut();
+        },
     },
     actions: {
         assignUser: assign({
             user: (_, event) => {
                 if (event.type !== "USER CHANGED") return null;
-                console.log("ASSIGNING USER", event.user);
+                console.log("ASSIGNING USER", event.user ? event.user.uid : "null");
                 return event.user;
             },
-            waiting: null,
+        }),
+        assignEmail: assign({
+            email: (_, event) => (event.type === "SET EMAIL" ? event.email : null),
+        }),
+        assignEmailError: assign({
+            emailError: (_, event) => {
+                console.log((event as any).data);
+                return (event as any).data;
+            },
         }),
         assignUserInfo: assign({
             ranOnce: true,
-            waiting: null,
             userInfo: (context, event) =>
                 event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
-        }),
-        assignWaitingEmail: assign({
-            waiting: "email",
-        }),
-        assignWaitingUserInfo: assign({
-            waiting: "userInfo",
         }),
         clearInfo: assign({
             user: null,
             userInfo: null,
             ranOnce: false,
-            waiting: null,
             error: null,
         }),
         assignPosts: assign({
@@ -332,9 +384,13 @@ export const authMachine = createMachine(AuthMachine, {
         postsChanged: (context) => checkPostChanges(context),
         needTokenUpdate: (context) => context.updatedToken === false,
         needToSendEmail: (context) => (context.user ? context.user.emailVerified === false : false),
-        sentNotVerified: (context) =>
-            (context.user ? context.user.emailVerified === false : false) &&
-            context.waiting === "email",
+        needsResign: (context) => {
+            if (!context.user) return true;
+            if (context.user.emailVerified) return false;
+            if (!context.user.metadata.lastSignInTime) return true;
+            const lastSign = new Date(context.user.metadata.lastSignInTime);
+            return Date.now() - lastSign.getTime() > 1000 * 60 * 60;
+        },
     },
 });
 

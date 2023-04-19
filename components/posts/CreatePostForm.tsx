@@ -14,6 +14,7 @@ import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine"
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
 import { z } from "zod";
+import { ErrorBox } from "../../utils/errorHandling";
 
 // FIXME: too much state going on here
 export default function CreatePostForm({ navigation }: { navigation: any }) {
@@ -203,19 +204,6 @@ const TripDetails = ({
     );
 };
 
-interface ErrorBoxProps {
-    message: string;
-}
-const ErrorBox = ({ message }: ErrorBoxProps) => {
-    return (
-        <View style={styles.errorBox}>
-            <Text style={styles.errorText} textStyle="body" styleSize="m">
-                {message}
-            </Text>
-        </View>
-    );
-};
-
 const DateTimeGroup = ({
     start,
     onChangeStart,
@@ -283,15 +271,5 @@ const styles = StyleSheet.create({
     },
     notes: {
         marginTop: 8,
-    },
-    errorBox: {
-        padding: 16,
-        borderRadius: 8,
-        backgroundColor: Colors.red[1],
-        opacity: 0.8,
-        marginTop: 16,
-    },
-    errorText: {
-        color: Colors.gray.w,
     },
 });
