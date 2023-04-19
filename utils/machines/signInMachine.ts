@@ -61,7 +61,7 @@ const SignInMachine = {
             phone: string;
             otp: string;
             confirm: FirebaseAuthTypes.ConfirmationResult | null;
-            error: string | null;
+            error: Error | null;
         },
         events: {} as
             | { type: "CHECK PHONE"; phone: string }

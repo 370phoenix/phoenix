@@ -1,8 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebase } from "@react-native-firebase/database";
 
-import { PostID } from "../constants/DataTypes";
-
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 
 /////////////////////////////////
@@ -35,7 +33,7 @@ export type ChatHeader = {
 /////////////////////////////////
 /////////////////////////////////
 
-export async function loadCache(postID: PostID, header: ChatHeader | null) {
+export async function loadCache(postID: string, header: ChatHeader | null) {
     if (!header) throw new Error("No chat header");
 
     const keys = await AsyncStorage.getAllKeys();
@@ -56,7 +54,7 @@ export async function loadCache(postID: PostID, header: ChatHeader | null) {
 }
 
 export async function cacheMessages(
-    postID: PostID,
+    postID: string,
     messages: ChatMessage[],
     header: ChatHeader | null
 ) {
@@ -74,7 +72,7 @@ export async function cacheMessages(
 /////////////////////////////////
 /////////////////////////////////
 
-export async function loadMessages(postID: PostID) {
+export async function loadMessages(postID: string) {
     const messages = await db.ref(`messages/${postID}`).once("value");
     if (!messages.exists()) return [];
 
@@ -83,7 +81,7 @@ export async function loadMessages(postID: PostID) {
     return messageList;
 }
 
-export async function sendMessage(postID: PostID, message: ChatMessage) {
+export async function sendMessage(postID: string, message: ChatMessage) {
     try {
         // Add message to database
         await db.ref(`messages/${postID}`).push().set(message);

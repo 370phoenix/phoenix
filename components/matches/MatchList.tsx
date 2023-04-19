@@ -44,7 +44,9 @@ export default function MatchList({ userID }: Props) {
     const requests: [PostType, string][] = [];
     for (const post of userPosts) {
         if (post.pending)
-            requests.push(...post.pending.map((userID) => [post, userID] as [PostType, string]));
+            requests.push(
+                ...Object.keys(post.pending).map((userID) => [post, userID] as [PostType, string])
+            );
     }
 
     return (
@@ -82,7 +84,7 @@ export default function MatchList({ userID }: Props) {
             />
             <FlatList
                 scrollEnabled={false}
-                data={matches}
+                data={matches ? Object.keys(matches) : []}
                 style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
@@ -94,7 +96,7 @@ export default function MatchList({ userID }: Props) {
             </Text>
             <FlatList
                 scrollEnabled={false}
-                data={pending}
+                data={pending ? Object.keys(pending) : []}
                 style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {

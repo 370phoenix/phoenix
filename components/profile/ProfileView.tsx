@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/userValidation";
 import { View, Text, Spacer, Button } from "../shared/Themed";
 
 type Props = {
@@ -16,12 +16,7 @@ export default function ProfileView({ userInfo }: Props) {
                 <>
                     <ProfileInfo label="DISPLAY NAME:" value={userInfo.username} />
                     <Spacer direction="column" size={8} />
-                    <ProfileInfo
-                        label="CHILL INDEX:"
-                        value={userInfo.chillIndex ? String(userInfo.chillIndex) : "none yet!"}
-                    />
-                    <Spacer direction="column" size={8} />
-                    <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted)} />
+                    <ProfileInfo label="RIDES COMPLETED:" value={String(userInfo.ridesCompleted ?? 0)} />
                     <Spacer direction="column" size={32} />
                     <Button
                         title="Preferences"

@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native";
 import { View, Text } from "../shared/Themed";
-import { UserInfo } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import GradCap from "../../assets/icons/GradCap";
 import Gender from "../../assets/icons/Gender";
 import Book from "../../assets/icons/Book";
 import { SvgProps } from "react-native-svg";
+import { UserInfo } from "../../utils/userValidation";
 
 type Props = {
     userInfo: UserInfo;
