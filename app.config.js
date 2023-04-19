@@ -2,7 +2,7 @@ export default {
     expo: {
         name: "FareShare - Save",
         slug: "phoenix",
-        version: "1.0.2",
+        version: "1.0.3",
         orientation: "portrait",
         icon: "./assets/images/Icon_biggish.png",
         scheme: "fareshare",
