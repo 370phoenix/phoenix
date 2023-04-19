@@ -1,9 +1,7 @@
-import { firebase } from "@react-native-firebase/database";
 import { createMachine, assign } from "xstate";
 
 import { ChatHeader } from "../chat";
-
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+import { getDB } from "../db";
 
 const ChatHeaderMachine = {
     initial: "Start",
@@ -61,17 +59,19 @@ export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
     services: {
         loadHeader: (context) => (callback) => {
             const { postID } = context;
-            const res = db.ref(`chats/${postID}`).on("value", (snapshot) => {
-                if (snapshot.exists()) {
-                    const header = snapshot.val();
-                    callback({ type: "UPDATE", data: header });
-                } else {
-                    callback({ type: "ERROR", error: new Error("Chat does not exist") });
-                }
-            });
+            const res = getDB()
+                .ref(`chats/${postID}`)
+                .on("value", (snapshot) => {
+                    if (snapshot.exists()) {
+                        const header = snapshot.val();
+                        callback({ type: "UPDATE", data: header });
+                    } else {
+                        callback({ type: "ERROR", error: new Error("Chat does not exist") });
+                    }
+                });
 
             return () => {
-                db.ref(`chats/${postID}`).off("value", res);
+                getDB().ref(`chats/${postID}`).off("value", res);
             };
         },
     },
@@ -83,7 +83,7 @@ export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
             header: (_, event) => (event as Update).data,
         }),
         assignError: assign({
-            error: (_, event) => (event as ErrorEvent).error
+            error: (_, event) => (event as ErrorEvent).error,
         }),
     },
 });

@@ -1,8 +1,7 @@
-import { firebase } from "@react-native-firebase/database";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+import { getDB } from "./db";
 
 /**
  * Register current user for push notifications
@@ -54,7 +53,7 @@ async function getPushToken(userID: string): Promise<any> {
     try {
         if (!userID) throw new Error("No User ID for get push token");
 
-        const userRef = db.ref("pushTokens/" + userID);
+        const userRef = getDB().ref("pushTokens/" + userID);
         const snapshot = await userRef.once("value");
         if (snapshot.exists()) {
             const token = snapshot.val();
@@ -71,7 +70,7 @@ async function writePushTokenOnce(userID: string | null, pushToken: string | nul
     try {
         if (!userID || !pushToken) throw new Error("No User ID or Push Token.");
 
-        const userRef = db.ref("pushTokens/" + userID);
+        const userRef = getDB().ref("pushTokens/" + userID);
         await userRef.set(pushToken);
         return { type: "Success", data: undefined };
     } catch (e: any) {

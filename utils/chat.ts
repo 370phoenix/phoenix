@@ -1,7 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { firebase } from "@react-native-firebase/database";
-
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+import { getDB } from "./db";
 
 /////////////////////////////////
 /////////////////////////////////
@@ -73,7 +71,7 @@ export async function cacheMessages(
 /////////////////////////////////
 
 export async function loadMessages(postID: string) {
-    const messages = await db.ref(`messages/${postID}`).once("value");
+    const messages = await getDB().ref(`messages/${postID}`).once("value");
     if (!messages.exists()) return [];
 
     const messageList = Object.values(messages.val()) as ChatMessage[];
@@ -84,10 +82,10 @@ export async function loadMessages(postID: string) {
 export async function sendMessage(postID: string, message: ChatMessage) {
     try {
         // Add message to database
-        await db.ref(`messages/${postID}`).push().set(message);
+        await getDB().ref(`messages/${postID}`).push().set(message);
 
         // Update last message
-        await db.ref(`chats/${postID}`).update({ lastMessage: message });
+        await getDB().ref(`chats/${postID}`).update({ lastMessage: message });
         return message;
     } catch (error: any) {
         return error.message;
