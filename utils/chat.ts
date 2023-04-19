@@ -44,7 +44,6 @@ export async function loadCache(postID: string, header: ChatHeader | null) {
     const stringed = await AsyncStorage.getItem(postID);
     if (!stringed) return false;
     const messageCache = JSON.parse(stringed) as MessageCache;
-    console.log(messageCache);
 
     // Check cache freshness
     if (!header.lastMessage) return [];

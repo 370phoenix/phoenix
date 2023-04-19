@@ -33,6 +33,10 @@ const AuthMachine = {
                 id: "setUserInfoListener",
             },
             on: {
+                "USER CHANGED": {
+                    target: "#New Authentication Machine.Init",
+                    actions: "assignUser",
+                },
                 "SIGN OUT": {
                     target: "#New Authentication Machine.Init",
                     actions: "clearInfo",
@@ -181,8 +185,8 @@ type AuthMachineEvents =
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
-export const needsInfoSelector = (state: any) =>
-    ["FB Signed In.Needs Profile", "FB Signed In.Waiting"].some(state.matches);
+export const needsInfoSelector = (state: any) => state.matches("FB Signed In.Needs Profile");
+export const waitingSelector = (state: any) => state.matches("FB Signed In.Waiting");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user.uid as string) : null;
 export const userInfoSelector = (state: any) =>
@@ -205,7 +209,7 @@ export const authMachine = createMachine(AuthMachine, {
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
                 console.log("MISSING USER IN FB SIGNED IN");
-                return () => { };
+                return () => {};
             }
             try {
                 return getUserUpdates(context.user.uid, (data) => {
@@ -213,7 +217,7 @@ export const authMachine = createMachine(AuthMachine, {
                 });
             } catch (e: any) {
                 logError(e);
-                return () => { };
+                return () => {};
             }
         },
         loadUserPosts: async (context) => {
@@ -236,12 +240,11 @@ export const authMachine = createMachine(AuthMachine, {
     },
     actions: {
         assignUser: assign({
-            user: (context, event) =>
-                event.type === "USER CHANGED"
-                    ? event.user
-                        ? event.user
-                        : context.user
-                    : context.user,
+            user: (_, event) => {
+                if (event.type !== "USER CHANGED") return null;
+                console.log("ASSIGNING USER", event.user);
+                return event.user;
+            },
         }),
         assignUserInfo: assign({
             ranOnce: true,

@@ -2,7 +2,6 @@
 import "expo-dev-client";
 
 import { firebase } from "@react-native-firebase/app-check";
-import { useInterpret } from "@xstate/react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -11,15 +10,19 @@ import Navigation from "./navigation";
 import { AuthContext, authMachine } from "./utils/machines/authMachine";
 import { useEffect, useRef } from "react";
 import { rnfbProvider } from "./utils/appCheck";
+import { interpret } from "xstate";
+
+const authService = interpret(authMachine);
+authService.start();
 
 export default function App() {
     const isLoadingComplete = useCachedResources();
-    const authService = useInterpret(authMachine);
     const initialized = useRef(false);
 
     // Initialize App Check
     useEffect(() => {
         if (initialized.current === false) {
+            console.log("Initializing App Check");
             firebase.appCheck().initializeAppCheck({
                 provider: rnfbProvider,
             });
