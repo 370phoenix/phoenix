@@ -179,8 +179,8 @@ const TripDetails = ({
     error,
 }: TripDetailsProps) => {
     // TOOD: UPDATE ADDRESS ERROR
-    const pickupError = (error?.message.includes("pickup")) ?? false;
-    const dropoffError = (error?.message.includes("dropoff")) ?? false;
+    const pickupError = error?.message.includes("pickup") ?? false;
+    const dropoffError = error?.message.includes("dropoff") ?? false;
     return (
         <View style={styles.tripDetails}>
             <LocationPicker
@@ -206,7 +206,7 @@ const TripDetails = ({
 interface ErrorBoxProps {
     message: string;
 }
-const ErrorBox = ({ message }: ErrorBoxProps) => {
+export const ErrorBox = ({ message }: ErrorBoxProps) => {
     return (
         <View style={styles.errorBox}>
             <Text style={styles.errorText} textStyle="body" styleSize="m">

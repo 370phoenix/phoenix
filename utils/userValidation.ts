@@ -56,7 +56,6 @@ export function validateProfile({
     userInfo = null,
 }: ValidateProfileParams): UserInfo {
     const noUserError = "Must supply either phone or previous user info.";
-    console.log(!phone && !userInfo);
     if (!phone && !userInfo) throw new Error(noUserError);
 
     const gradYear = Number(gradString);
