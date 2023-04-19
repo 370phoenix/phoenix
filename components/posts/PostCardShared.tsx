@@ -29,7 +29,7 @@ export function PostCardGuts({ post, isProfile, isMatched, userInfo }: PostCardG
     return (
         <>
             <View style={styles.body}>
-                <Text textStyle="header" styleSize="s">
+                <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                     {pickup}
                 </Text>
                 <View style={styles.headerContainer}>
@@ -38,7 +38,7 @@ export function PostCardGuts({ post, isProfile, isMatched, userInfo }: PostCardG
                     ) : (
                         <Right color={color.p} height={20} />
                     )}
-                    <Text textStyle="header" styleSize="s">
+                    <Text textStyle="header" styleSize="s" style={{ color: color.p }}>
                         {dropoff}
                     </Text>
                 </View>
