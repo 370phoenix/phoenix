@@ -157,7 +157,6 @@ export const createProfileMachine = createMachine(CreateProfileMachine, {
         isValid: (_, event: any) => typeof event.data !== "string",
         hasChanged: (context, event: any) => {
             if (!context.prevInfo) return true;
-            console.log(isDifferent(context.prevInfo, event.data));
             return isDifferent(context.prevInfo, event.data);
         },
     },
