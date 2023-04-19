@@ -2,7 +2,8 @@ import Filter from "bad-words";
 import Pronouns from "../constants/Pronouns.json";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import functions from "@react-native-firebase/functions";
-import { getDB, Unsubscribe } from "./posts";
+import { Unsubscribe } from "./posts";
+import { getDB } from "./db";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////

@@ -45,7 +45,6 @@ const AuthMachine = {
             states: {
                 "Init": {
                     always: [
-                        { target: "Waiting", cond: "noRunYet" },
                         {
                             target: "Info Updated",
                             cond: "userInfoExists",

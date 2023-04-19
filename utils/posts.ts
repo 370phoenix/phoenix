@@ -1,7 +1,7 @@
-import { firebase } from "@react-native-firebase/database";
 import * as Clipboard from "expo-clipboard";
 
 import { getUserOnce, UserInfo, writeUser } from "./auth";
+import { getDB } from "./db";
 import { safeRun } from "./errorHandling";
 import {
     FBPostType,
@@ -11,14 +11,6 @@ import {
     PostToFBSchema,
     PostType,
 } from "./postValidation";
-
-export const getDB = () => {
-    if (__DEV__) {
-        return firebase.app().database("https://phoenix-370-test.firebaseio.com");
-    } else {
-        return firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
-    }
-};
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////

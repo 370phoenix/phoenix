@@ -1,7 +1,7 @@
 import { createMachine, assign } from "xstate";
 
 import { ChatHeader } from "../chat";
-import { getDB } from "../posts";
+import { getDB } from "../db";
 
 const ChatHeaderMachine = {
     initial: "Start",
