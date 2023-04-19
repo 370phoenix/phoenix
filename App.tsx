@@ -11,7 +11,6 @@ import { AuthContext, authMachine } from "./utils/machines/authMachine";
 import { useEffect, useRef } from "react";
 import { rnfbProvider } from "./utils/appCheck";
 import { interpret } from "xstate";
-import { useSelector } from "@xstate/react";
 
 const authService = interpret(authMachine);
 authService.start();
@@ -19,8 +18,6 @@ authService.start();
 export default function App() {
     const isLoadingComplete = useCachedResources();
     const initialized = useRef(false);
-    const state = useSelector(authService, (state) => state.value);
-    console.log(state);
 
     // Initialize App Check
     useEffect(() => {
