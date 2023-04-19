@@ -212,6 +212,9 @@ function BottomTabNavigator() {
                             light
                             short
                             clear
+                            style={{
+                                height: 17,
+                            }}
                         />
                     ),
                     headerRight: () => (

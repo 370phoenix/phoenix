@@ -263,7 +263,7 @@ export function validateProfile({
         return {
             username,
             major,
-            hasPushToken,
+            //hasPushToken,
             pronouns,
             gradYear,
             userID: userInfo.userID,
@@ -285,7 +285,7 @@ export function validateProfile({
             pronouns,
             gradYear,
             phone,
-            hasPushToken,
+            //hasPushToken,
             ridesCompleted: 0,
             posts: [],
             pending: [],

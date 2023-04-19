@@ -109,31 +109,31 @@ export function Button({
                 ? Colors.gray.w
                 : baseColor["4"]
             : gray
-            ? Colors.gray.b
-            : baseColor["p"]
+                ? Colors.gray.b
+                : baseColor["p"]
         : light
-        ? gray
-            ? Colors.gray.b
-            : baseColor["p"]
-        : Colors.gray.w;
+            ? gray
+                ? Colors.gray.b
+                : baseColor["p"]
+            : Colors.gray.w;
     const bgColor = clear
         ? "transparent"
         : light
-        ? gray
-            ? Colors.gray["5"]
-            : baseColor["4"]
-        : gray
-        ? Colors.gray["1"]
-        : baseColor["p"];
+            ? gray
+                ? Colors.gray["5"]
+                : baseColor["4"]
+            : gray
+                ? Colors.gray["1"]
+                : baseColor["p"];
     const highlight = clear
         ? Colors.gray["5"]
         : light
-        ? gray
-            ? Colors.gray["4"]
-            : baseColor["3"]
-        : gray
-        ? Colors.gray["2"]
-        : baseColor["m"];
+            ? gray
+                ? Colors.gray["4"]
+                : baseColor["3"]
+            : gray
+                ? Colors.gray["2"]
+                : baseColor["m"];
 
     textStyles.color = textColor;
     textStyles.fontSize = fontSize ? fontSize : undefined;

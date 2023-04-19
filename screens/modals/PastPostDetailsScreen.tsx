@@ -52,7 +52,7 @@ export default function DetailsModal({ route }: Props) {
                     height: useHeaderHeight() + 16,
                     padding: 16,
                 }}>
-                <Button title="Submit" onPress={onSubmit} color="purple" />
+
                 <Spacer direction="column" size={24} />
             </View>
         </View>
@@ -69,6 +69,8 @@ function MoreInfo({ post }: { post: PostType }) {
     const userID = id ? id : "No user found";
 
     const [buttonText, setButtonText] = useState("Submit");
+
+    //const [buttonColor, setButtonColor] = useState({color: "purple"});
 
     const postID = post.postID;
 
@@ -89,6 +91,7 @@ function MoreInfo({ post }: { post: PostType }) {
         };
 
         setButtonText("Submitted");
+        //setButtonColor({color: "gray"});
 
         pushFeedback(feedback);
     };
@@ -114,7 +117,6 @@ function MoreInfo({ post }: { post: PostType }) {
             />
             <Button onPress={onSubmit} title={buttonText} color="purple" />
             <Spacer direction="column" size={48} />
-
             {riders && <UserList riders={riders} message={error} post={post} />}
         </View>
     );
@@ -160,7 +162,10 @@ function UserDetails({ user, num, post }: { user: UserInfo; num: number; post: P
 
     const rnsRef = db.ref("noShow").child(userID).child(postID);
 
+    const [title, setTitle] = useState("REPORT NO SHOW");
+
     const onSubmit = async () => {
+        setTitle("REPORTED");
         rnsRef.set(true);
     };
 
@@ -168,7 +173,7 @@ function UserDetails({ user, num, post }: { user: UserInfo; num: number; post: P
         <View>
             <Text textStyle="header">{user.username}</Text>
             <Spacer direction="row" size={16} />
-            <Button title="REPORT NO SHOW" onPress={onSubmit} color="purple" />
+            <Button title={title} onPress={onSubmit} color="purple" />
         </View>
     );
 }
