@@ -1,4 +1,5 @@
 import crashlytics from "@react-native-firebase/crashlytics";
+import { State } from "xstate";
 import { z } from "zod";
 
 export function logError(error: Error) {
@@ -22,4 +23,14 @@ export function safeRun(fn: () => void) {
     } catch (error: any) {
         logError(error);
     }
+}
+
+export function logAuthState(state: State<any, any>) {
+    console.log(state.event.type);
+    console.log("  ", state.value);
+    console.log("  numPosts: ", state.context.posts ? state.context.posts.length : 0);
+    console.log("  user: ", state.context.user ? state.context.user.uid : "null");
+    console.log("  userInfo: ", state.context.userInfo ? state.context.userInfo : "null");
+    console.log("  error: ", state.context.error ? state.context.error : "null");
+    console.log("  ranOnce: ", state.context.ranOnce ? state.context.ranOnce : "null");
 }

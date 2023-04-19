@@ -104,7 +104,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
         Alert.alert("Confirm Delete", "Are you sure you want to delete this post?", [
             {
                 text: "Confirm",
-                onPress: async () => {
+                onPress: () => {
                     const { userID } = userInfo;
                     if (userID) {
                         const fullPostDelete = functions().httpsCallable("fullPostDelete");
@@ -112,7 +112,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                             postID: post.postID,
                         })
                             .then(() => {
-                                console.log("Post Deleted");
+                                console.log(`Post (${post.postID}) Deleted`);
                             })
                             .catch((e) => {
                                 console.error(e);
