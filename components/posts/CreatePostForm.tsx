@@ -1,6 +1,6 @@
+import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useState, useRef } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 
 import CustomDateTimePicker from "../shared/CustomDateTimePicker";
 import CustomSwitch from "../shared/CustomSwitch";
@@ -21,9 +21,6 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const authService: any = useContext(AuthContext);
     const userInfo = useSelector(authService, userInfoSelector);
 
-    if (!userInfo) return <></>;
-    const { userID } = userInfo;
-
     // date time state
     const [startTime, setStartTime] = useState(new Date());
     const [endTime, setEndTime] = useState(new Date());
@@ -38,6 +35,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const [submitting, setSubmitting] = useState(false);
 
     const [error, setError] = useState<Error | null>(null);
+    const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
 
     // contains constraints for modifying seats
     const addTotalSpots = () => {
@@ -57,7 +55,9 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const roundtripSwitch = () => setRoundTrip((previousState) => !previousState);
 
     //error message
-    const [writeComplete, setWriteComplete] = useState<boolean | string>(false);
+
+    if (!userInfo) return <></>;
+    const { userID } = userInfo;
 
     // create object from form inputs on submit event
     const onSubmit = async () => {
@@ -147,7 +147,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                     />
                 </View>
 
-                <Spacer direction={"column"} size={120} style={{ flex: 1 }} />
+                <Spacer direction="column" size={120} style={{ flex: 1 }} />
 
                 <Button
                     disabled={submitting}
@@ -179,8 +179,8 @@ const TripDetails = ({
     error,
 }: TripDetailsProps) => {
     // TOOD: UPDATE ADDRESS ERROR
-    const pickupError = (error && error.message.includes("pickup")) || false;
-    const dropoffError = (error && error.message.includes("dropoff")) || false;
+    const pickupError = (error?.message.includes("pickup")) ?? false;
+    const dropoffError = (error?.message.includes("dropoff")) ?? false;
     return (
         <View style={styles.tripDetails}>
             <LocationPicker

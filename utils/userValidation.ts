@@ -19,7 +19,7 @@ export const UserSchema = z
             message: "Pronouns not accepted. Please email us if we've made a mistake.",
         }),
         gradYear: z.coerce.number(),
-        ridesCompleted: z.number(),
+        ridesCompleted: z.number().optional(),
         posts: z.object({}).catchall(z.literal(true).nullable()).optional(),
         matches: z.object({}).catchall(z.literal(true).nullable()).optional(),
         pending: z.object({}).catchall(z.literal(true).nullable()).optional(),
