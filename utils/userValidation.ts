@@ -15,11 +15,9 @@ export const UserSchema = z
             .string()
             .trim()
             .refine((val) => !isProfane(val), { message: "major cannot be profane." }),
-        pronouns: z
-            .string()
-            .refine((val) => Pronouns.includes(val), {
-                message: "Pronouns not accepted. Please email us if we've made a mistake.",
-            }),
+        pronouns: z.string().refine((val) => Pronouns.includes(val), {
+            message: "Pronouns not accepted. Please email us if we've made a mistake.",
+        }),
         gradYear: z.coerce.number(),
         ridesCompleted: z.number(),
         posts: z.object({}).catchall(z.literal(true).nullable()).optional(),

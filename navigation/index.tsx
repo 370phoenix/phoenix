@@ -155,7 +155,7 @@ function BottomTabNavigator() {
             tabBar={(props) => <TabBar {...props} />}
             backBehavior="none"
             screenOptions={{
-                header: ({ navigation, route, options }) => {
+                header: ({ route, options }) => {
                     const title = getHeaderTitle(options, route.name);
                     return <Header title={title} options={options} />;
                 },

@@ -1,23 +1,9 @@
-import Filter from "bad-words";
-import Pronouns from "../constants/Pronouns.json";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
-import firebase from "@react-native-firebase/app";
 
-import {UserInfo, UserSchema} from "./userValidation"
-
-///////////////////////////////////////////
-///////////////////////////////////////////
-//////////////// TYPES ////////////////////
-///////////////////////////////////////////
-///////////////////////////////////////////
-
-// For helper method cleanUndefined
-type Clean<T> = {
-    [K in keyof T]?: any;
-};
+import { UserInfo, UserSchema } from "./userValidation";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -85,7 +71,6 @@ export async function writeUser(userID: string | null, userInfo: UserInfo | null
     await userRef.set(userInfo);
 }
 
-
 /**
  * Get instant updates for user info
  *
@@ -140,8 +125,7 @@ export async function getUserOnce(userID: string | null): Promise<UserInfo | nul
     if (!userID) throw Error("No user ID.");
     const userRef = database().ref("users/" + userID);
     const snapshot = await userRef.once("value");
-    if (snapshot.exists())
-        return UserSchema.parse(snapshot.val());
+    if (snapshot.exists()) return UserSchema.parse(snapshot.val());
     return null;
 }
 
