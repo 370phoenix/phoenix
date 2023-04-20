@@ -4,28 +4,21 @@ import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 import { firebase } from "@react-native-firebase/database";
 
-import { Right } from "../../assets/icons/Arrow";
-import RoundTrip from "../../assets/icons/RoundTrip";
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-//import { PostType } from "../../constants/";
 import { RootStackParamList } from "../../types";
-// import { convertDate, convertLocation, convertTime } from "../../utils/convertPostTypes";
 import { UserInfo, FeedbackEntryType } from "../../utils/auth";
 import { PostType } from "../../utils/postValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { matchPost } from "../../utils/posts";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import { pushFeedback } from "../../utils/feedback";
 
-type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">; //change to "PastPostDetails"
+type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">;
 export default function DetailsModal({ route }: Props) {
     if (!route.params) return <></>;
     const post = route.params.post;
-
-    //if (!post) return <></>;
 
     const [message, setMessage] = useState<string | null>(null);
     const authService = useContext(AuthContext);
@@ -52,7 +45,6 @@ export default function DetailsModal({ route }: Props) {
                     height: useHeaderHeight() + 16,
                     padding: 16,
                 }}>
-
                 <Spacer direction="column" size={24} />
             </View>
         </View>
@@ -69,8 +61,6 @@ function MoreInfo({ post }: { post: PostType }) {
     const userID = id ? id : "No user found";
 
     const [buttonText, setButtonText] = useState("Submit");
-
-    //const [buttonColor, setButtonColor] = useState({color: "purple"});
 
     const postID = post.postID;
 
@@ -91,7 +81,6 @@ function MoreInfo({ post }: { post: PostType }) {
         };
 
         setButtonText("Submitted");
-        //setButtonColor({color: "gray"});
 
         pushFeedback(feedback);
     };

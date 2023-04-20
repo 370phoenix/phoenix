@@ -9,11 +9,12 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import FeedbackExclaim from "../../assets/icons/feedbackExclaim";
 
-export type Props = {
-    post: PostType;
-};
+// export type Props = {
+//     post: PostType;
+// };
 
 export default function PastPostsCard({ post }: Props) {
+    //what do we use instead of props?
     const navigation = useNavigation();
     const colorPurple = Colors.purple.p;
 
