@@ -172,6 +172,8 @@ function RootNavigator() {
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
+    const authService = React.useContext(AuthContext);
+    const canSignOut = useSelector(authService, (state) => state.can("SIGN OUT"));
     return (
         <BottomTab.Navigator
             initialRouteName="Feed"
@@ -223,7 +225,7 @@ function BottomTabNavigator() {
                         <Button
                             title="Sign out"
                             onPress={() => {
-                                auth().signOut();
+                                if (canSignOut) authService.send({ type: "SIGN OUT" });
                             }}
                             color="purple"
                             fontSize={16}

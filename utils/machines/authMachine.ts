@@ -27,6 +27,18 @@ const AuthMachine = {
                 },
             ],
         },
+        "Signing Out": {
+            invoke: {
+                src: "signOut",
+                id: "signOut",
+                onDone: {
+                    target: "FB Signed Out",
+                },
+                onError: {
+                    target: "FB Signed Out",
+                },
+            },
+        },
         "FB Signed In": {
             invoke: {
                 src: "setUserInfoListener",
@@ -38,7 +50,7 @@ const AuthMachine = {
                     actions: "assignUser",
                 },
                 "SIGN OUT": {
-                    target: "#New Authentication Machine.Init",
+                    target: "#New Authentication Machine.Signing Out",
                     actions: "clearInfo",
                 },
             },
@@ -212,6 +224,9 @@ export const authMachine = createMachine(AuthMachine, {
 
             return authSubscriber;
         },
+        signOut: () => async () => {
+            await auth().signOut();
+        },
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
                 console.log("MISSING USER IN FB SIGNED IN");
@@ -267,6 +282,8 @@ export const authMachine = createMachine(AuthMachine, {
             userInfo: null,
             ranOnce: false,
             error: null,
+            posts: null,
+            updatedToken: false,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,

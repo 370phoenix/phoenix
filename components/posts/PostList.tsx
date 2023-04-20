@@ -1,18 +1,21 @@
-import { useMachine } from "@xstate/react";
+import { useContext } from "react";
+import { useMachine, useSelector } from "@xstate/react";
 import { FlatList } from "react-native";
 
 import { postListMachine } from "../../utils/machines/postListMachine";
 import { View } from "../shared/Themed";
-import auth from "@react-native-firebase/auth";
 import FeedCard from "./FeedCard";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 
 export default function PostList() {
+    const authService = useContext(AuthContext);
     const [state, _] = useMachine(postListMachine);
     let { posts } = state.context;
 
-    const user = auth().currentUser;
+    const userID = useSelector(authService, userIDSelector);
     // filter out matched posts from feed
-    if (user) posts = posts.filter((post) => post.user !== user.uid);
+    if (userID) posts = posts.filter((post) => post.user !== userID);
+    else throw new Error("userID is undefined");
 
     return (
         <View style={{ marginTop: 20 }}>
