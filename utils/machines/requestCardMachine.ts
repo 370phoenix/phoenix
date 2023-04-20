@@ -95,6 +95,7 @@ const RequestCardMachine = {
                   posterID: string;
                   userInfo: UserInfo;
                   onSuccessful: (post: FBPostType) => void;
+                  onError: (error: Error) => void;
               }
             | {
                   type: "REJECT";
@@ -102,6 +103,7 @@ const RequestCardMachine = {
                   posterID: string;
                   userInfo: UserInfo;
                   onSuccessful: (post: PostType) => void;
+                  onError: (error: Error) => void;
               },
     },
     context: { requesterInfo: null, userID: null },
@@ -116,25 +118,31 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
         },
         acceptUser: async (context, event) => {
             if (context.userID && event.type === "ACCEPT") {
-                const acceptUser = getFunctions().httpsCallable("acceptUser");
-                const res = await acceptUser({
-                    requesterID: context.userID,
-                    post: event.post,
-                });
-                console.log(res);
-                event.onSuccessful(res.data);
-            } else throw Error("No info attached to event or Missing ID.");
+                try {
+                    const acceptUser = getFunctions().httpsCallable("acceptUser");
+                    const res = await acceptUser({
+                        requesterID: context.userID,
+                        post: event.post,
+                    });
+                    event.onSuccessful(res.data);
+                } catch (e: any) {
+                    event.onError(e);
+                }
+            } else throw new Error("No info attached to event or Missing ID.");
         },
         rejectUser: async (context, event) => {
-            if (context.userID && event.type === "REJECT") {
-                const rejectUser = getFunctions().httpsCallable("rejectUser");
-                const res = await rejectUser({
-                    requesterID: context.userID,
-                    post: event.post,
-                });
-                console.log(res);
-                event.onSuccessful(res.data);
-            } else throw Error("No info attached to event or Missing ID.");
+            if (context.userID && event.type === "ACCEPT") {
+                try {
+                    const rejectUser = getFunctions().httpsCallable("rejectUser");
+                    const res = await rejectUser({
+                        requesterID: context.userID,
+                        post: event.post,
+                    });
+                    event.onSuccessful(res.data);
+                } catch (e: any) {
+                    event.onError(e);
+                }
+            } else throw new Error("No info attached to event or Missing ID.");
         },
     },
     actions: {
