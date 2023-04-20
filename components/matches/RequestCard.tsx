@@ -3,7 +3,6 @@ import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/userValidation";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";
@@ -13,11 +12,9 @@ import { AuthContext } from "../../utils/machines/authMachine";
 
 export type Props = {
     requesterID: string;
-    posterID: string;
-    userInfo: UserInfo | null;
     post: PostType;
 };
-export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
+export default function RequestCard({ requesterID, post }: Props) {
     const machine = useRef(getRequestCardMachine());
     const [state, send] = useMachine(machine.current);
     const authService = useContext(AuthContext);
