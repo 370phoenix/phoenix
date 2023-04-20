@@ -30,7 +30,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
     const pickupCoords = useRef<Coords | null>(null);
 
     const [roundTrip, setRoundTrip] = useState(false);
-    const [totalSpots, setTotalSpots] = useState(1);
+    const [freeSpots, setFreeSpots] = useState(1);
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
@@ -39,10 +39,10 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
 
     // contains constraints for modifying seats
     const addTotalSpots = () => {
-        if (totalSpots < 6) setTotalSpots((totalSpots) => totalSpots + 1);
+        if (freeSpots < 6) setFreeSpots((freeSpots) => freeSpots + 1);
     };
     const deleteTotalSpots = () => {
-        if (totalSpots > 1) setTotalSpots((totalSpots) => totalSpots - 1);
+        if (freeSpots > 1) setFreeSpots((freeSpots) => freeSpots - 1);
     };
 
     const onChangePickup = (text: any) => {
@@ -71,7 +71,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                 dropoff,
                 startTime,
                 endTime,
-                totalSpots,
+                totalSpots: freeSpots + 1,
                 notes,
                 roundTrip,
             });
@@ -141,7 +141,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
                 <View style={styles.freeSeats}>
                     <Text textStyle="lineTitle">NUMBER OF FREE SEATS?</Text>
                     <NumberPicker
-                        count={totalSpots}
+                        count={freeSpots}
                         handlePlus={addTotalSpots}
                         handleMinus={deleteTotalSpots}
                     />

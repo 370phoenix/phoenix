@@ -272,8 +272,11 @@ export const authMachine = createMachine(AuthMachine, {
             posts: (_, event: any) => event.data,
         }),
         updatePost: assign({
+            error: (_, event) =>
+                event.type === "UPDATE POST" && !event.post ? Error("Missing Post") : null,
             posts: (context, event) => {
                 if (event.type !== "UPDATE POST") return context.posts;
+                if (!event.post) return context.posts;
                 if (!context.posts) return context.posts;
 
                 const i = context.posts.findIndex((post) => post.postID === event.post.postID);

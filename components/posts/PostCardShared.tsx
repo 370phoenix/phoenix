@@ -1,5 +1,4 @@
 import { Alert, Pressable, View, StyleSheet } from "react-native";
-import functions from "@react-native-firebase/functions";
 
 import Colors from "../../constants/Colors";
 import { Spacer, Text } from "../shared/Themed";
@@ -10,6 +9,7 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import Trash from "../../assets/icons/Trash";
 import { Full, Outline } from "../../assets/icons/User";
+import { getFunctions } from "../../utils/functions";
 
 interface PostCardGutsProps {
     post: PostType;
@@ -107,9 +107,9 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                 onPress: () => {
                     const { userID } = userInfo;
                     if (userID) {
-                        const fullPostDelete = functions().httpsCallable("fullPostDelete");
+                        const fullPostDelete = getFunctions().httpsCallable("fullPostDelete");
                         fullPostDelete({
-                            postID: post.postID,
+                            post,
                         })
                             .then(() => {
                                 console.log(`Post (${post.postID}) Deleted`);
@@ -136,7 +136,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                         <View style={styles.riderIndicator} key={Math.random()}>
                             {rider > 0 ? (
                                 rider === 3 ? (
-                                    <Full color={color[1]} height={20} />
+                                    <Full color={color.m} height={20} />
                                 ) : (
                                     <Full color={rider === 1 ? color.m : color.p} height={20} />
                                 )

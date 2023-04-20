@@ -8,7 +8,7 @@ import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";
 import { requestCardMachine } from "../../utils/machines/requestCardMachine";
-import { PostType } from "../../utils/postValidation";
+import { FBPostType, FBToPostSchema, PostType } from "../../utils/postValidation";
 import { AuthContext } from "../../utils/machines/authMachine";
 
 export type Props = {
@@ -37,13 +37,13 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                             post,
                             posterID,
                             userInfo,
-                            onSuccessful: (post: PostType) => {
-                                authService.send("UPDATE POST", { post });
+                            onSuccessful: (post: FBPostType) => {
+                                authService.send("UPDATE POST", {
+                                    post: FBToPostSchema.parse(post),
+                                });
                             },
                         });
                         shouldRender = false;
-                        // TODO: Send notification to alert requester of accepted/rejected ride
-                        // TODO: If accept, notification to alert matched riders of new match
                     },
                 },
                 {

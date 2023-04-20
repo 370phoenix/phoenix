@@ -11,8 +11,8 @@ import {
     ChatHeader,
     ChatMessage,
 } from "../chat";
-import { unmatchPost } from "../posts";
 import { PostType } from "../postValidation";
+import { getFunctions } from "../functions";
 
 const ChatMachine = {
     id: "Chat Machine",
@@ -210,7 +210,8 @@ export const chatMachine = createMachine(ChatMachine, {
             const { post, userID } = context;
             if (!post) throw Error("No Post found");
 
-            await unmatchPost(userID, post);
+            const unmatchPost = getFunctions().httpsCallable("unmatchPost");
+            await unmatchPost({ userID, post });
             return true;
         },
     },

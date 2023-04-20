@@ -1,8 +1,8 @@
 import { assign, createMachine } from "xstate";
 import { getUserOnce } from "../auth";
 import { logError } from "../errorHandling";
-import { handleAcceptReject } from "../posts";
-import { PostType } from "../postValidation";
+import { getFunctions } from "../functions";
+import { FBPostType, PostType } from "../postValidation";
 import { UserInfo } from "../userValidation";
 
 const RequestCardMachine = {
@@ -94,7 +94,7 @@ const RequestCardMachine = {
                   post: PostType;
                   posterID: string;
                   userInfo: UserInfo;
-                  onSuccessful: (post: PostType) => void;
+                  onSuccessful: (post: FBPostType) => void;
               }
             | {
                   type: "REJECT";
@@ -116,28 +116,24 @@ export const requestCardMachine = createMachine(RequestCardMachine, {
         },
         acceptUser: async (context, event) => {
             if (context.userID && event.type === "ACCEPT") {
-                const newPost = await handleAcceptReject({
-                    isAccept: true,
-                    userInfo: event.userInfo,
+                const acceptUser = getFunctions().httpsCallable("acceptUser");
+                const res = await acceptUser({
                     requesterID: context.userID,
-                    requesterInfo: context.requesterInfo,
                     post: event.post,
-                    posterID: event.posterID,
                 });
-                event.onSuccessful(newPost);
+                console.log(res);
+                event.onSuccessful(res.data);
             } else throw Error("No info attached to event or Missing ID.");
         },
         rejectUser: async (context, event) => {
             if (context.userID && event.type === "REJECT") {
-                const newPost = await handleAcceptReject({
-                    isAccept: false,
-                    userInfo: event.userInfo,
+                const rejectUser = getFunctions().httpsCallable("rejectUser");
+                const res = await rejectUser({
                     requesterID: context.userID,
-                    requesterInfo: context.requesterInfo,
                     post: event.post,
-                    posterID: event.posterID,
                 });
-                event.onSuccessful(newPost);
+                console.log(res);
+                event.onSuccessful(res.data);
             } else throw Error("No info attached to event or Missing ID.");
         },
     },
