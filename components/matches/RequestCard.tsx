@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
@@ -18,7 +18,8 @@ export type Props = {
     post: PostType;
 };
 export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
-    const [state, send] = useMachine(getRequestCardMachine());
+    const machine = useRef(getRequestCardMachine());
+    const [state, send] = useMachine(machine.current);
     const authService = useContext(AuthContext);
     const { requesterInfo } = state.context;
     let shouldRender = true;
