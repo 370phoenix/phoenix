@@ -33,7 +33,8 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                 {
                     text: "Confirm",
                     onPress: () => {
-                        send(isAccept ? "ACCEPT" : "REJECT", {
+                        const type = isAccept ? "ACCEPT" : "REJECT";
+                        send(type, {
                             post,
                             posterID,
                             userInfo,
@@ -42,6 +43,7 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                                     post: FBToPostSchema.parse(post),
                                 });
                             },
+                            onError: (error: Error) => Alert.alert("Error", error.message),
                         });
                         shouldRender = false;
                     },
