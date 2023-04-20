@@ -57,6 +57,8 @@ const MutlipleCompletedMachine = {
         context: {} as MultiplePostsContext,
         events: {} as MultiplePostsEvents,
     },
+    preserveActionOrder: true,
+    predictableActionArguments: true,
 };
 
 type MultiplePostsContext = {

@@ -70,6 +70,8 @@ type ButtonOnly = {
     clear?: boolean;
     short?: boolean;
     fontSize?: number;
+    iconSize?: number | null;
+    iconReduce?: number | null;
     leftIcon?: (props: SvgProps) => React.ReactElement;
     rightIcon?: (props: SvgProps) => React.ReactElement;
     color: "purple" | "navy" | "gold" | "gray" | "red" | "green";
@@ -85,6 +87,8 @@ export function Button({
     color,
     clear,
     short = false,
+    iconSize = null,
+    iconReduce = null,
     light,
     leftIcon,
     rightIcon,
@@ -109,36 +113,41 @@ export function Button({
                 ? Colors.gray.w
                 : baseColor["4"]
             : gray
-                ? Colors.gray.b
-                : baseColor["p"]
+            ? Colors.gray.b
+            : baseColor["p"]
         : light
-            ? gray
-                ? Colors.gray.b
-                : baseColor["p"]
-            : Colors.gray.w;
+        ? gray
+            ? Colors.gray.b
+            : baseColor["p"]
+        : Colors.gray.w;
     const bgColor = clear
         ? "transparent"
         : light
-            ? gray
-                ? Colors.gray["5"]
-                : baseColor["4"]
-            : gray
-                ? Colors.gray["1"]
-                : baseColor["p"];
+        ? gray
+            ? Colors.gray["5"]
+            : baseColor["4"]
+        : gray
+        ? Colors.gray["1"]
+        : baseColor["p"];
     const highlight = clear
         ? Colors.gray["5"]
         : light
-            ? gray
-                ? Colors.gray["4"]
-                : baseColor["3"]
-            : gray
-                ? Colors.gray["2"]
-                : baseColor["m"];
+        ? gray
+            ? Colors.gray["4"]
+            : baseColor["3"]
+        : gray
+        ? Colors.gray["2"]
+        : baseColor["m"];
 
     textStyles.color = textColor;
     textStyles.fontSize = fontSize ? fontSize : undefined;
     containerStyles.backgroundColor = bgColor;
     containerStyles.gap = 8;
+
+    if (iconReduce) {
+        textStyles.marginLeft = leftIcon ? iconReduce : 0;
+        textStyles.marginRight = rightIcon ? iconReduce : 0;
+    }
 
     if (!short) containerStyles.paddingVertical = 8;
 
@@ -164,8 +173,8 @@ export function Button({
         });
     };
 
-    const iconSize = short && text !== "" ? 10 : 20;
-    const spacerSize = short && text !== "" ? 0 : 8;
+    const iSize = iconSize ?? (short && text !== "" ? 10 : 20);
+    const spacerSize = iconReduce ? 0 : short && text !== "" ? 0 : 8;
 
     return (
         <Pressable
@@ -187,8 +196,8 @@ export function Button({
                         {leftIcon({
                             color: textColor,
                             preserveAspectRatio: "xMidYMid meet",
-                            height: iconSize,
-                            width: iconSize,
+                            height: iSize,
+                            width: iSize,
                         })}
                         <Spacer direction="row" size={spacerSize} />
                     </>
@@ -210,8 +219,8 @@ export function Button({
                         {rightIcon({
                             color: textColor,
                             preserveAspectRatio: "xMidYMid meet",
-                            height: iconSize,
-                            width: iconSize,
+                            height: iSize,
+                            width: iSize,
                         })}
                     </>
                 )}

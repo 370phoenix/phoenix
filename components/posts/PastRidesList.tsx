@@ -25,7 +25,7 @@ export default function PastRidesList() {
         send({ type: "LOAD", postIDs: completed ? Object.keys(completed) : [] });
     }
 
-    if (!userInfo)
+    if (!userInfo || !posts)
         return (
             <View style={{ marginTop: 0 }}>
                 {
@@ -37,18 +37,14 @@ export default function PastRidesList() {
         );
 
     return (
-        <View style={{ marginTop: 20, marginBottom: 20 }}>
-            {posts && posts.length !== 0 && (
-                <FlatList
-                    scrollEnabled={true}
-                    data={posts}
-                    style={{ borderBottomWidth: 1, marginBottom: 16, marginTop: 8 }}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => {
-                        return <PastPostsCard post={item} />;
-                    }}
-                />
-            )}
-        </View>
+        <FlatList
+            scrollEnabled={true}
+            data={posts}
+            style={{ marginBottom: 36, marginTop: 28 }}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => {
+                return <PastPostsCard post={item} />;
+            }}
+        />
     );
 }

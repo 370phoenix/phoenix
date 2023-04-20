@@ -17,13 +17,16 @@ export default function Header({ options }: HeaderProps) {
     const props = {
         tintColor: options.headerTintColor,
         canGoBack: true,
-        height: 30,
+        color: Colors.gray.w,
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.body}>
-                <View style={styles.leftBtn}>{headerLeft && headerLeft(props)}</View>
+                <View style={styles.leftBtn}>
+                    {headerLeft && headerLeft(props)}
+                    <View style={{ flex: 1 }} />
+                </View>
                 <LogoHorizontal color={Colors.gray.w} />
                 <View style={styles.rightBtn}>
                     <View style={{ flex: 1 }} />
@@ -60,12 +63,12 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         alignItems: "flex-start",
-        paddingLeft: 8,
+        paddingLeft: 16,
     },
     rightBtn: {
         flex: 1,
         flexDirection: "row",
         alignItems: "flex-end",
-        paddingRight: 8,
+        paddingRight: 0,
     },
 });

@@ -38,6 +38,7 @@ import {
 import ErrorScreen from "../screens/ErrorScreen";
 import WaitingScreen from "../screens/WaitingScreen";
 import PastRidesScreen from "../screens/PastRidesScreen";
+import GoBackButton from "../components/shared/GoBackButton";
 
 export default function Navigation() {
     return (
@@ -111,17 +112,7 @@ function RootNavigator() {
                     component={MatchesScreen}
                     options={({ navigation }) => ({
                         title: "Matches",
-                        headerLeft: () => (
-                            <Button
-                                title="Go back"
-                                onPress={() => navigation.goBack()}
-                                leftIcon={Left}
-                                color="purple"
-                                light
-                                short
-                                clear
-                            />
-                        ),
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
                     })}
                 />
                 <Stack.Screen
@@ -129,17 +120,7 @@ function RootNavigator() {
                     component={ChatScreen}
                     options={({ navigation }) => ({
                         title: "Chat Screen",
-                        headerLeft: () => (
-                            <Button
-                                title="Go back"
-                                onPress={() => navigation.goBack()}
-                                leftIcon={Left}
-                                color="purple"
-                                light
-                                short
-                                clear
-                            />
-                        ),
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
                     })}
                 />
                 <Stack.Screen
@@ -147,17 +128,7 @@ function RootNavigator() {
                     component={PastRidesScreen}
                     options={({ navigation }) => ({
                         title: "Past Rides ",
-                        headerLeft: () => (
-                            <Button
-                                title="Go back"
-                                onPress={() => navigation.goBack()}
-                                leftIcon={Left}
-                                color="purple"
-                                light
-                                short
-                                clear
-                            />
-                        ),
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
                     })}
                 />
 
@@ -227,14 +198,12 @@ function BottomTabNavigator() {
                             onPress={() => {
                                 navigation.navigate("PastRides");
                             }}
+                            iconSize={28}
                             leftIcon={openBook}
                             color="purple"
                             light
                             short
                             clear
-                            style={{
-                                height: 17,
-                            }}
                         />
                     ),
                     headerRight: () => (
@@ -243,6 +212,7 @@ function BottomTabNavigator() {
                             onPress={() => {
                                 navigation.navigate("Matches");
                             }}
+                            iconSize={20}
                             leftIcon={Matches}
                             color="purple"
                             light
