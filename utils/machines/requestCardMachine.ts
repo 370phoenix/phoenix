@@ -92,16 +92,14 @@ const RequestCardMachine = {
             | {
                   type: "ACCEPT";
                   post: PostType;
-                  posterID: string;
-                  userInfo: UserInfo;
+                  requesterID: string;
                   onSuccessful: (post: FBPostType) => void;
                   onError: (error: Error) => void;
               }
             | {
                   type: "REJECT";
                   post: PostType;
-                  posterID: string;
-                  userInfo: UserInfo;
+                  requesterID: string;
                   onSuccessful: (post: PostType) => void;
                   onError: (error: Error) => void;
               },
@@ -122,7 +120,7 @@ export const getRequestCardMachine = () =>
                     try {
                         const acceptUser = getFunctions().httpsCallable("acceptUser");
                         const res = await acceptUser({
-                            requesterID: context.userID,
+                            requesterID: event.requesterID,
                             post: event.post,
                         });
                         event.onSuccessful(res.data);
@@ -136,7 +134,7 @@ export const getRequestCardMachine = () =>
                     try {
                         const rejectUser = getFunctions().httpsCallable("rejectUser");
                         const res = await rejectUser({
-                            requesterID: context.userID,
+                            requesterID: event.requesterID,
                             post: event.post,
                         });
                         event.onSuccessful(res.data);

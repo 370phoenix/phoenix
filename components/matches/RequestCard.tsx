@@ -37,8 +37,7 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                         const type = isAccept ? "ACCEPT" : "REJECT";
                         send(type, {
                             post: PostToFBSchema.parse(post),
-                            posterID,
-                            userInfo,
+                            requesterID,
                             onSuccessful: (post: FBPostType) => {
                                 authService.send("UPDATE POST", {
                                     post: FBToPostSchema.parse(post),
