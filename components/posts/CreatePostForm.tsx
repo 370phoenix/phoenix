@@ -153,7 +153,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
 
                 <Button
                     disabled={submitting}
-                    onPress={onSubmit}
+                    onPress={() => onSubmit()}
                     color="navy"
                     title="Post"
                     style={{ height: headerHeight + 32 }}
