@@ -53,6 +53,10 @@ const AuthMachine = {
                     target: "#New Authentication Machine.Signing Out",
                     actions: "clearInfo",
                 },
+                "SIGNED OUT": {
+                    target: "#New Authentication Machine.Init",
+                    actions: "clearInfo",
+                },
             },
             initial: "Init",
             states: {
@@ -198,6 +202,7 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
+    | { type: "SIGNED OUT" }
     | { type: "UPDATE POST"; post: PostType }
     | { type: "ERROR"; error: Error };
 
@@ -219,7 +224,7 @@ export const authMachine = createMachine(AuthMachine, {
         setUserListener: () => (callback) => {
             const authSubscriber = auth().onAuthStateChanged((user) => {
                 if (user) callback({ type: "USER CHANGED", user: user });
-                else callback({ type: "SIGN OUT" });
+                else callback({ type: "SIGNED OUT" });
             });
 
             return authSubscriber;
