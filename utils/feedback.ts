@@ -1,11 +1,12 @@
 import { firebase } from "@react-native-firebase/database";
 import { FeedbackEntryType } from "./auth";
+import { getDB } from "./db";
 
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+const dbRef = getDB().ref("feedback/");
 
 export async function pushFeedback(
-    feedback: FeedbackEntryType //need to make this different?
+    feedback: FeedbackEntryType
 ): Promise<void> {
-    const fbRef = db.ref("feedback/").push();
+    const fbRef = dbRef.push();
     await fbRef.set(feedback);
 }

@@ -29,11 +29,11 @@ export default function MoreInfo({ post }: { post: PostType }) {
             setButtonText("Submitted");
             await pushFeedback({
                 message: notes,
-                postID,
-                userID,
+                postID: postID,
+                userID: userID,
                 timestamp: Date.now(),
             });
-        } catch (e: any) {}
+        } catch (e: any) { }
     };
 
     // changed ride info --> ride feedback
