@@ -19,6 +19,7 @@ export default function PastRidesList() {
     const { completed } = userInfo;
     const [state, send] = useMachine(multipleCompletedMachine);
     const { posts } = state.context;
+    console.log(state.context);
 
     if (state.matches("Start")) {
         send({ type: "LOAD", postIDs: completed ? Object.keys(completed) : [] });
