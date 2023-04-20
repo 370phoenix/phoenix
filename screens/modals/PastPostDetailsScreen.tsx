@@ -1,19 +1,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, ScrollView, Alert } from "react-native";
-import { firebase } from "@react-native-firebase/database";
+import React, { useContext, useState } from "react";
+import { StyleSheet, ScrollView } from "react-native";
 
-import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
+import { View, Text, Spacer } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
-// import { UserInfo, FeedbackEntryType } from "../../utils/auth"; //dont need this here anymore
-import { PostType } from "../../utils/postValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { useMachine, useSelector } from "@xstate/react";
-import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
-import { pushFeedback } from "../../utils/feedback";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 import MoreInfo from "../../components/completed/MoreInfo";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">;

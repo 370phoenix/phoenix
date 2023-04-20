@@ -5,46 +5,35 @@ import { firebase } from "@react-native-firebase/database";
 
 import { View, Text, Spacer, Button, TextArea } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { FeedbackEntryType } from "../../utils/auth";
 import { PostType } from "../../utils/postValidation";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { useMachine, useSelector } from "@xstate/react";
-import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
+import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { useSelector } from "@xstate/react";
 import { pushFeedback } from "../../utils/feedback";
 import UserList from "./UserList";
 
 export default function MoreInfo({ post }: { post: PostType }) {
-    const [state, send] = useMachine(multipleUserMachine);
-    const { riders, error } = state.context;
-    const [notes, setNotes] = useState();
-
-    const authService: any = useContext(AuthContext);
-    const id = useSelector(authService, userIDSelector);
-    const userID = id ? id : "No user found";
-
+    const [notes, setNotes] = useState("");
+    const [error, setError] = useState("");
     const [buttonText, setButtonText] = useState("Submit");
 
+    const authService = useContext(AuthContext);
+    const userID = useSelector(authService, userIDSelector);
+
+    if (!userID) throw new Error("MORE INFO NO USER: SHOULD NEVER HAPPEN");
+
     const postID = post.postID;
-
-    const timestamp = Date.now();
-
-    if (state.matches("Start")) {
-        const ids = post.riders ? post.riders : [];
-        if (!ids.includes(post.user)) ids.push(post.user);
-        send("LOAD", { ids });
-    }
+    const riders = post.riders ? Object.keys(post.riders) : [];
 
     const onSubmit = async () => {
-        const feedback: FeedbackEntryType = {
-            message: notes,
-            postID: postID,
-            userID: userID,
-            timestamp: timestamp,
-        };
-
-        setButtonText("Submitted");
-
-        pushFeedback(feedback);
+        try {
+            setButtonText("Submitted");
+            await pushFeedback({
+                message: notes,
+                postID,
+                userID,
+                timestamp: Date.now(),
+            });
+        } catch (e: any) {}
     };
 
     // changed ride info --> ride feedback

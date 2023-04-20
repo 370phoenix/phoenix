@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Pressable } from "react-native";
 
-import { View, Text, Spacer } from "../shared/Themed";
+import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
 import { PostType } from "../../utils/postValidation";
 import { convertDate } from "../../utils/convertPostTypes";
@@ -14,7 +14,6 @@ type Props = {
 };
 
 export default function PastPostsCard({ post }: Props) {
-    //what do we use instead of props?
     const navigation = useNavigation();
     const colorPurple = Colors.purple.p;
 
@@ -45,7 +44,6 @@ export default function PastPostsCard({ post }: Props) {
                         {post.dropoff}
                     </Text>
                 </View>
-                {/* <Spacer direction="column" size={16} /> */}
 
                 <View style={styles.iconRow}>
                     <Text textStyle="label" style={{ color: colorPurple }}>
@@ -109,9 +107,7 @@ const styles = StyleSheet.create({
     iconRow: {
         flex: 1,
         flexDirection: "row",
-        justifyContent: "space-between", //flex-start, flex-end, center, space-between, space-around, and space-evenly
-        alignItems: "center", //flex-start, flex-end, center, and baseline.
-
-        //add padding to card, arrow and destination in same row
+        justifyContent: "space-between",
+        alignItems: "center",
     },
 });

@@ -36,6 +36,7 @@ import {
 } from "../utils/machines/authMachine";
 import ErrorScreen from "../screens/ErrorScreen";
 import WaitingScreen from "../screens/WaitingScreen";
+import PastRidesScreen from "../screens/PastRidesScreen";
 
 export default function Navigation() {
     return (
@@ -127,6 +128,24 @@ function RootNavigator() {
                     component={ChatScreen}
                     options={({ navigation }) => ({
                         title: "Chat Screen",
+                        headerLeft: () => (
+                            <Button
+                                title="Go back"
+                                onPress={() => navigation.goBack()}
+                                leftIcon={Left}
+                                color="purple"
+                                light
+                                short
+                                clear
+                            />
+                        ),
+                    })}
+                />
+                <Stack.Screen
+                    name="PastRides"
+                    component={PastRidesScreen}
+                    options={({ navigation }) => ({
+                        title: "Past Rides ",
                         headerLeft: () => (
                             <Button
                                 title="Go back"

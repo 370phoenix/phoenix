@@ -54,6 +54,13 @@ export async function signIn(
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 
+export type FeedbackEntryType = {
+    message: string;
+    postID: string;
+    userID: string;
+    timestamp: number;
+};
+
 /**
  * Used to overwrite the user info.
  *

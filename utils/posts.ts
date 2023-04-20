@@ -62,7 +62,7 @@ export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
     return posts;
 }
 export async function fetchSomeCompleted(ids: string[]): Promise<PostType[]> {
-    const postsRef = db.ref("completed");
+    const postsRef = getDB().ref("completed");
     const posts: PostType[] = [];
 
     for (const id of ids) {

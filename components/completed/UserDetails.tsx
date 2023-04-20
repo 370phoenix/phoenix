@@ -1,39 +1,43 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, ScrollView, Alert } from "react-native";
-import { firebase } from "@react-native-firebase/database";
+import React, { useState } from "react";
+import { StyleSheet } from "react-native";
 
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/userValidation";
 import { PostType } from "../../utils/postValidation";
+import { getDB } from "../../utils/db";
+import { useMachine } from "@xstate/react";
+import { usernameMachine } from "../../utils/machines/usernameMachine";
 
-export default function UserDetails({
-    user,
-    post,
-}: {
-    user: UserInfo;
+interface Props {
+    userID: string;
     num: number;
     post: PostType;
-}) {
-    const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
-
-    const userID = user.userID;
-    const postID = post.postID;
-
-    const rnsRef = db.ref("noShow").child(userID).child(postID);
+}
+export default function UserDetails({ userID, post }: Props) {
+    const { postID } = post;
 
     const [title, setTitle] = useState("REPORT NO SHOW");
+    const [error, setError] = useState<Error | null>(null);
+
+    const [state, send] = useMachine(usernameMachine);
+    if (state.matches("Start")) send({ type: "LOAD", id: userID });
+
+    const { username } = state.context;
 
     const onSubmit = async () => {
-        setTitle("REPORTED");
-        rnsRef.set(true);
+        try {
+            setTitle("REPORTED");
+            const rnsRef = getDB().ref("noShow").child(userID).child(postID);
+            await rnsRef.set(true);
+        } catch (e: any) {
+            setError(e);
+        }
     };
 
     return (
         <View>
-            <Text textStyle="header">{user.username}</Text>
+            <Text textStyle="header">{username}</Text>
             <Spacer direction="row" size={16} />
             <Button title={title} onPress={onSubmit} color="purple" />
         </View>
