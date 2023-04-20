@@ -45,7 +45,7 @@ export type PostDetailsParamList = {
 };
 
 export type PastPostDetailsParamList = {
-    post: PostType;
+    post: FBPostType;
 };
 
 export type ChangeInfoParamList = {

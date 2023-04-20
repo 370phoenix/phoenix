@@ -2,13 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet } from "react-native";
 
-//import PostList from "../components/posts/PostList";
 import PastRidesList from "../components/posts/PastRidesList";
-// import PastPostsCard from "../components/posts/PastPostsCard";
-import { Button, View } from "../components/shared/Themed";
+import { View } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { RootStackParamList } from "../types";
-import { Text } from "../components/shared/Themed";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastRides">;
 

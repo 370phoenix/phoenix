@@ -6,6 +6,10 @@ import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machi
 import { useMachine, useSelector } from "@xstate/react";
 import { useContext } from "react";
 import { multipleCompletedMachine } from "../../utils/machines/multipleCompletedMachine";
+// import { useTimer } from "../completed/FeedbackForm";
+import { createContext } from "react";
+
+export const TimerContext = createContext(null);
 
 export default function PastRidesList() {
     const authService = useContext(AuthContext);
@@ -19,7 +23,7 @@ export default function PastRidesList() {
     const { completed } = userInfo;
     const [state, send] = useMachine(multipleCompletedMachine);
     const { posts } = state.context;
-    console.log(state.context);
+    // const timer = useTimer();
 
     if (state.matches("Start")) {
         send({ type: "LOAD", postIDs: completed ? Object.keys(completed) : [] });
@@ -48,3 +52,4 @@ export default function PastRidesList() {
         />
     );
 }
+//isDisabled={isDisabled} startTimer={startTimer} for line 51

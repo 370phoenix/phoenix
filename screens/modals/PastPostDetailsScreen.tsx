@@ -3,33 +3,21 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useContext, useState } from "react";
 import { StyleSheet, ScrollView } from "react-native";
 
-import { View, Text, Spacer } from "../../components/shared/Themed";
+import { View, Spacer } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
-import { useSelector } from "@xstate/react";
-import MoreInfo from "../../components/completed/MoreInfo";
+import FeedbackForm from "../../components/completed/FeedbackForm";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">;
 export default function DetailsModal({ route }: Props) {
     if (!route.params) return <></>;
     const post = route.params.post;
 
-    const [message, setMessage] = useState<string | null>(null);
-    const authService = useContext(AuthContext);
-    const userID = useSelector(authService, userIDSelector);
-
     return (
         <View style={styles.infoContainer}>
             <ScrollView directionalLockEnabled style={styles.container}>
-                {message && (
-                    <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                        {message}
-                    </Text>
-                )}
-
-                {post && <MoreInfo post={post} />}
+                {post && <FeedbackForm post={post} />}
                 <Spacer direction="column" size={32} />
             </ScrollView>
             <View

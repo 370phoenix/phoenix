@@ -3,7 +3,7 @@ import { StyleSheet, Pressable } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../utils/postValidation";
+import { FBPostType, PostToFBSchema, PostType } from "../../utils/postValidation";
 import { convertDate } from "../../utils/convertPostTypes";
 import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
@@ -11,9 +11,13 @@ import FeedbackExclaim from "../../assets/icons/feedbackExclaim";
 
 type Props = {
     post: PostType;
+    // startTimer: () => void;
+    // isDisabled: boolean;
 };
 
 export default function PastPostsCard({ post }: Props) {
+    //isDisabled, for with { post } in 18
+    //startTimer,
     const navigation = useNavigation();
     const colorPurple = Colors.purple.p;
 
@@ -21,7 +25,12 @@ export default function PastPostsCard({ post }: Props) {
 
     return (
         <Pressable
-            onPress={() => navigation.navigate("PastPostDetails", { post })}
+            onPress={() =>
+                navigation.navigate("PastPostDetails", {
+                    post: PostToFBSchema.parse(post),
+                    // isDisabled,
+                })
+            }
             style={({ pressed }) => [
                 styles.cardContainer,
                 {

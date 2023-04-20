@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../utils/postValidation";
+import { FBPostType } from "../../utils/postValidation";
 import { getDB } from "../../utils/db";
 import { useMachine } from "@xstate/react";
 import { usernameMachine } from "../../utils/machines/usernameMachine";
@@ -12,7 +12,7 @@ import { usernameMachine } from "../../utils/machines/usernameMachine";
 interface Props {
     userID: string;
     num: number;
-    post: PostType;
+    post: FBPostType;
 }
 export default function UserDetails({ userID, post }: Props) {
     const { postID } = post;

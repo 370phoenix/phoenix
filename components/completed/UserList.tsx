@@ -3,7 +3,7 @@ import React from "react";
 
 import { View, Text, Spacer } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { PostType } from "../../utils/postValidation";
+import { FBPostType } from "../../utils/postValidation";
 import UserDetails from "./UserDetails";
 
 export default function UserList({
@@ -13,7 +13,7 @@ export default function UserList({
 }: {
     riders: string[];
     message: string | null;
-    post: PostType;
+    post: FBPostType;
 }) {
     return (
         <View style={{ marginTop: riders.length > 0 ? 0 : 20 }}>
