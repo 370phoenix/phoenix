@@ -14,6 +14,7 @@ import { AuthContext, userInfoSelector } from "../../utils/machines/authMachine"
 import { useSelector } from "@xstate/react";
 import SuccessfulPost from "../shared/SuccessPage";
 import { z } from "zod";
+import { logError } from "../../utils/errorHandling";
 
 // FIXME: too much state going on here
 export default function CreatePostForm({ navigation }: { navigation: any }) {
@@ -84,6 +85,7 @@ export default function CreatePostForm({ navigation }: { navigation: any }) {
             }, 500);
         } catch (e: any) {
             setSubmitting(false);
+            logError(e);
             setError(e);
         }
     };
