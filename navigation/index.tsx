@@ -15,6 +15,7 @@ import { Button } from "../components/shared/Themed";
 import Colors from "../constants/Colors";
 import { getHeaderTitle } from "@react-navigation/elements";
 import Header from "./Header";
+import openBook from "../assets/icons/openBook";
 import Matches from "../assets/icons/Matches";
 import MatchesScreen from "../screens/matches/MatchesScreen";
 import { Left } from "../assets/icons/Chevron";
@@ -23,6 +24,7 @@ import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
 import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
 import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
+import PastPostDetailsScreen from "../screens/modals/PastPostDetailsScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import ChatScreen from "../screens/matches/ChatScreen";
 import auth from "@react-native-firebase/auth";
@@ -35,6 +37,8 @@ import {
 } from "../utils/machines/authMachine";
 import ErrorScreen from "../screens/ErrorScreen";
 import WaitingScreen from "../screens/WaitingScreen";
+import PastRidesScreen from "../screens/PastRidesScreen";
+import GoBackButton from "../components/shared/GoBackButton";
 
 export default function Navigation() {
     return (
@@ -108,17 +112,7 @@ function RootNavigator() {
                     component={MatchesScreen}
                     options={({ navigation }) => ({
                         title: "Matches",
-                        headerLeft: () => (
-                            <Button
-                                title="Go back"
-                                onPress={() => navigation.goBack()}
-                                leftIcon={Left}
-                                color="purple"
-                                light
-                                short
-                                clear
-                            />
-                        ),
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
                     })}
                 />
                 <Stack.Screen
@@ -126,17 +120,15 @@ function RootNavigator() {
                     component={ChatScreen}
                     options={({ navigation }) => ({
                         title: "Chat Screen",
-                        headerLeft: () => (
-                            <Button
-                                title="Go back"
-                                onPress={() => navigation.goBack()}
-                                leftIcon={Left}
-                                color="purple"
-                                light
-                                short
-                                clear
-                            />
-                        ),
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
+                    })}
+                />
+                <Stack.Screen
+                    name="PastRides"
+                    component={PastRidesScreen}
+                    options={({ navigation }) => ({
+                        title: "Past Rides ",
+                        headerLeft: () => <GoBackButton navigation={navigation} />,
                     })}
                 />
 
@@ -148,6 +140,7 @@ function RootNavigator() {
                     <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
                     <Stack.Screen name="CreatePost" component={CreatePostScreen} />
                     <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+                    <Stack.Screen name="PastPostDetails" component={PastPostDetailsScreen} />
                 </Stack.Group>
             </>
         );
@@ -201,12 +194,27 @@ function BottomTabNavigator() {
                 component={ViewPostsScreen}
                 options={({ navigation }: RootTabScreenProps<"Feed">) => ({
                     tabBarIcon: ({ color }) => <TabBarIcon name="rss" color={color} />,
+                    headerLeft: () => (
+                        <Button
+                            title=""
+                            onPress={() => {
+                                navigation.navigate("PastRides");
+                            }}
+                            iconSize={28}
+                            leftIcon={openBook}
+                            color="purple"
+                            light
+                            short
+                            clear
+                        />
+                    ),
                     headerRight: () => (
                         <Button
                             title=""
                             onPress={() => {
                                 navigation.navigate("Matches");
                             }}
+                            iconSize={20}
                             leftIcon={Matches}
                             color="purple"
                             light

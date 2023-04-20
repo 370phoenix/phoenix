@@ -61,6 +61,23 @@ export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
 
     return posts;
 }
+export async function fetchSomeCompleted(ids: string[]): Promise<PostType[]> {
+    const postsRef = getDB().ref("completed");
+    const posts: PostType[] = [];
+
+    for (const id of ids) {
+        if (!id) continue;
+        const postRef = postsRef.child(id);
+        const snapshot = await postRef.once("value");
+        if (snapshot.exists()) {
+            safeRun(() => {
+                posts.push(valToPost(snapshot.val()));
+            });
+        }
+    }
+
+    return posts;
+}
 
 type PostUpdateParams = {
     onChildChanged: (data: PostType) => void;
