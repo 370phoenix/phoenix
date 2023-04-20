@@ -83,7 +83,7 @@ export async function writeUser(userID: string | null, userInfo: UserInfo | null
  */
 export function getUserUpdates(
     userID: string,
-    onUpdate: (data: UserInfo) => void,
+    onUpdate: (data: UserInfo | null) => void,
     onError: (error: Error) => void
 ): Unsubscribe {
     const userRef = getDB().ref("users/" + userID);
@@ -95,6 +95,8 @@ export function getUserUpdates(
             } catch (e: any) {
                 onError(e);
             }
+        } else {
+            onUpdate(null);
         }
     });
     const unsub = () => {
