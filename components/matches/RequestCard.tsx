@@ -3,7 +3,7 @@ import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/userValidation";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";

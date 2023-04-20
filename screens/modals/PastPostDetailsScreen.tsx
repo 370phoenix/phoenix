@@ -7,13 +7,16 @@ import { firebase } from "@react-native-firebase/database";
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
 import { RootStackParamList } from "../../types";
-import { UserInfo, FeedbackEntryType } from "../../utils/auth";
+// import { UserInfo, FeedbackEntryType } from "../../utils/auth"; //dont need this here anymore
 import { PostType } from "../../utils/postValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import { pushFeedback } from "../../utils/feedback";
+import MoreInfo from "./MoreInfo";
+import UserList from "./UserList";
+import UserDetails from "./UserDetails";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -24,7 +27,7 @@ export default function DetailsModal({ route }: Props) {
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
 
-    const [notes, setNotes] = useState("");
+    // const [notes, setNotes] = useState("");
     const onSubmit = useState<string>;
 
     return (
@@ -47,122 +50,6 @@ export default function DetailsModal({ route }: Props) {
                 }}>
                 <Spacer direction="column" size={24} />
             </View>
-        </View>
-    );
-}
-
-function MoreInfo({ post }: { post: PostType }) {
-    const [state, send] = useMachine(multipleUserMachine);
-    const { riders, error } = state.context;
-    const [notes, setNotes] = useState("");
-
-    const authService: any = useContext(AuthContext);
-    const id = useSelector(authService, userIDSelector);
-    const userID = id ? id : "No user found";
-
-    const [buttonText, setButtonText] = useState("Submit");
-
-    const postID = post.postID;
-
-    const timestamp = Date.now();
-
-    if (state.matches("Start")) {
-        const ids = post.riders ? post.riders : [];
-        if (!ids.includes(post.user)) ids.push(post.user);
-        send("LOAD", { ids });
-    }
-
-    const onSubmit = async () => {
-        const feedback: FeedbackEntryType = {
-            message: notes,
-            postID: postID,
-            userID: userID,
-            timestamp: timestamp,
-        };
-
-        setButtonText("Submitted");
-
-        pushFeedback(feedback);
-    };
-
-    // changed ride info --> ride feedback
-    //commented out everything up until notes
-    return (
-        <View style={styles.infoContainer}>
-            <Spacer direction="column" size={16} />
-            <Text textStyle="header" styleSize="l">
-                Ride Feedback
-            </Text>
-            <Spacer direction="column" size={16} />
-            <Text textStyle="label" styleSize="l">
-                Notes:
-            </Text>
-            <Spacer direction="column" size={16} />
-            <TextArea
-                label=""
-                inputState={[notes, setNotes]}
-                placeholder="Type feedback here..."
-                placeholderTextColor={Colors.gray[2]}
-            />
-            <Button onPress={onSubmit} title={buttonText} color="purple" />
-            <Spacer direction="column" size={48} />
-            {riders && <UserList riders={riders} message={error} post={post} />}
-        </View>
-    );
-}
-
-//need this
-function UserList({
-    riders,
-    message,
-    post,
-}: {
-    riders: UserInfo[];
-    message: string | null;
-    post: PostType;
-}) {
-    let i = 1;
-    //const onSubmit = useState<string>;
-    return (
-        <View style={{ marginTop: riders.length > 0 ? 0 : 20 }}>
-            {message && (
-                <Text textStyle="label" style={{ color: Colors.red.p, textAlign: "center" }}>
-                    {message}
-                </Text>
-            )}
-            {riders.length > 0 &&
-                riders.map((match) => {
-                    return (
-                        <View key={Math.random()}>
-                            <UserDetails num={i++} user={match} post={post} />
-                            <Spacer direction="column" size={32} />
-                        </View>
-                    );
-                })}
-        </View>
-    );
-}
-
-function UserDetails({ user, num, post }: { user: UserInfo; num: number; post: PostType }) {
-    const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
-
-    const userID = user.userID;
-    const postID = post.postID;
-
-    const rnsRef = db.ref("noShow").child(userID).child(postID);
-
-    const [title, setTitle] = useState("REPORT NO SHOW");
-
-    const onSubmit = async () => {
-        setTitle("REPORTED");
-        rnsRef.set(true);
-    };
-
-    return (
-        <View>
-            <Text textStyle="header">{user.username}</Text>
-            <Spacer direction="row" size={16} />
-            <Button title={title} onPress={onSubmit} color="purple" />
         </View>
     );
 }

@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMachine } from "@xstate/react";
 import { Platform, Pressable, StyleSheet } from "react-native";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/userValidation";
 import { chatHeaderMachine } from "../../utils/machines/chatHeaderMachine";
 import { PostType, PostToFBSchema } from "../../utils/postValidation";
 import { PostCardGuts } from "./PostCardShared";
@@ -14,10 +14,10 @@ interface ProfilePostCardProps {
 export default function ProfilePostCard({ post, userInfo }: ProfilePostCardProps) {
     // Don't show your own posts in the feed
     const navigation = useNavigation();
+    const [state, send] = useMachine(chatHeaderMachine);
     if (!userInfo) return <></>;
     if (!post.dropoff) return <></>;
 
-    const [state, send] = useMachine(chatHeaderMachine);
     if (state.matches("Start")) send({ type: "INIT", postID: post.postID });
     const { header } = state.context;
 

@@ -1,8 +1,9 @@
 import { assign, createMachine } from "xstate";
-import { getUserOnce, UserInfo } from "../auth";
+import { getUserOnce } from "../auth";
 import { logError } from "../errorHandling";
 import { handleAcceptReject } from "../posts";
 import { PostType } from "../postValidation";
+import { UserInfo } from "../userValidation";
 
 const RequestCardMachine = {
     id: "Request Card Machine",
@@ -89,19 +90,19 @@ const RequestCardMachine = {
         events: {} as
             | { type: "LOAD INFO"; id: string }
             | {
-                type: "ACCEPT";
-                post: PostType;
-                posterID: string;
-                userInfo: UserInfo;
-                onSuccessful: (post: PostType) => void;
-            }
+                  type: "ACCEPT";
+                  post: PostType;
+                  posterID: string;
+                  userInfo: UserInfo;
+                  onSuccessful: (post: PostType) => void;
+              }
             | {
-                type: "REJECT";
-                post: PostType;
-                posterID: string;
-                userInfo: UserInfo;
-                onSuccessful: (post: PostType) => void;
-            },
+                  type: "REJECT";
+                  post: PostType;
+                  posterID: string;
+                  userInfo: UserInfo;
+                  onSuccessful: (post: PostType) => void;
+              },
     },
     context: { requesterInfo: null, userID: null },
     predictableActionArguments: true,

@@ -1,9 +1,10 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { createContext } from "react";
 import { assign, createMachine, InterpreterFrom } from "xstate";
-import { getUserUpdates, UserInfo } from "../auth";
+import { getUserUpdates } from "../auth";
 import { fetchSomePosts } from "../posts";
 import { registerForPushNotificationsAsync } from "../notifications";
+import { UserInfo } from "../userValidation";
 import { PostType } from "../postValidation";
 import { logError } from "../errorHandling";
 
@@ -32,6 +33,10 @@ const AuthMachine = {
                 id: "setUserInfoListener",
             },
             on: {
+                "USER CHANGED": {
+                    target: "#New Authentication Machine.Init",
+                    actions: "assignUser",
+                },
                 "SIGN OUT": {
                     target: "#New Authentication Machine.Init",
                     actions: "clearInfo",
@@ -41,7 +46,6 @@ const AuthMachine = {
             states: {
                 "Init": {
                     always: [
-                        { target: "Waiting", cond: "noRunYet" },
                         {
                             target: "Info Updated",
                             cond: "userInfoExists",
@@ -57,6 +61,10 @@ const AuthMachine = {
                             target: "Init",
                             actions: "assignUserInfo",
                         },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
+                        },
                     },
                 },
                 "Info Updated": {
@@ -65,6 +73,10 @@ const AuthMachine = {
                         "USER INFO CHANGED": {
                             target: "Init",
                             actions: "assignUserInfo",
+                        },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
                         },
                     },
                     states: {
@@ -116,13 +128,7 @@ const AuthMachine = {
                                 },
                                 onError: {
                                     target: "Start",
-                                    actions: "logError",
-                                },
-                            },
-                            on: {
-                                "USER INFO CHANGED": {
-                                    target: "#New Authentication Machine.Init",
-                                    actions: "assignUserInfo",
+                                    actions: "assignError",
                                 },
                             },
                         },
@@ -133,6 +139,10 @@ const AuthMachine = {
                         "USER INFO CHANGED": {
                             target: "Init",
                             actions: "assignUserInfo",
+                        },
+                        "ERROR": {
+                            target: "Init",
+                            actions: "assignError",
                         },
                     },
                 },
@@ -167,7 +177,7 @@ type AuthMachineContext = {
     user: FirebaseAuthTypes.User | null;
     userInfo: UserInfo | null;
     ranOnce: boolean;
-    error: string | null;
+    error: Error | null;
     posts: PostType[] | null;
     updatedToken: boolean;
 };
@@ -176,12 +186,13 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
-    | { type: "UPDATE POST"; post: PostType };
+    | { type: "UPDATE POST"; post: PostType }
+    | { type: "ERROR"; error: Error };
 
 export const stateSelector = (state: any) => state;
 export const signedInSelector = (state: any) => state.matches("FB Signed In");
-export const needsInfoSelector = (state: any) =>
-    ["FB Signed In.Needs Profile", "FB Signed In.Waiting"].some(state.matches);
+export const needsInfoSelector = (state: any) => state.matches("FB Signed In.Needs Profile");
+export const waitingSelector = (state: any) => state.matches("FB Signed In.Waiting");
 export const userIDSelector = (state: any) =>
     state.context.user ? (state.context.user.uid as string) : null;
 export const userInfoSelector = (state: any) =>
@@ -204,15 +215,19 @@ export const authMachine = createMachine(AuthMachine, {
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
                 console.log("MISSING USER IN FB SIGNED IN");
-                return () => { };
+                return () => {};
             }
             try {
-                return getUserUpdates(context.user.uid, (data) => {
-                    callback({ type: "USER INFO CHANGED", userInfo: data });
-                });
+                return getUserUpdates(
+                    context.user.uid,
+                    (data) => {
+                        callback({ type: "USER INFO CHANGED", userInfo: data });
+                    },
+                    (error) => callback({ type: "ERROR", error })
+                );
             } catch (e: any) {
                 logError(e);
-                return () => { };
+                return () => {};
             }
         },
         loadUserPosts: async (context) => {
@@ -221,7 +236,7 @@ export const authMachine = createMachine(AuthMachine, {
             const { posts: postIDs } = userInfo;
             if (!postIDs) return [];
 
-            return await fetchSomePosts(postIDs);
+            return await fetchSomePosts(Object.keys(postIDs));
         },
         setToken: async (context) => {
             const { user, userInfo } = context;
@@ -235,22 +250,23 @@ export const authMachine = createMachine(AuthMachine, {
     },
     actions: {
         assignUser: assign({
-            user: (context, event) =>
-                event.type === "USER CHANGED"
-                    ? event.user
-                        ? event.user
-                        : context.user
-                    : context.user,
+            user: (_, event) => {
+                if (event.type !== "USER CHANGED") return null;
+                console.log("ASSIGNING USER: ", event.user ? event.user.uid : "null");
+                return event.user;
+            },
         }),
         assignUserInfo: assign({
             ranOnce: true,
             userInfo: (context, event) =>
                 event.type === "USER INFO CHANGED" ? event.userInfo : context.userInfo,
+            error: null,
         }),
         clearInfo: assign({
             user: null,
             userInfo: null,
             ranOnce: false,
+            error: null,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
@@ -270,6 +286,12 @@ export const authMachine = createMachine(AuthMachine, {
         }),
         updateUserInfoTokenSet: assign({
             updatedToken: true,
+        }),
+        assignError: assign({
+            ranOnce: true,
+            userInfo: null,
+            updatedToken: true,
+            error: (_, event: any) => (event.type === "ERROR" ? event.error : null),
         }),
         logError: (_, event: any) => logError(event.data),
     },
@@ -291,11 +313,11 @@ function checkPostChanges(context: AuthMachineContext) {
 
     // Check for changes in old posts
     for (const id of postIDs) {
-        if (!userInfo.posts.includes(id)) return true;
+        return userInfo.posts[id] === true;
     }
 
     // Check for changes in new posts
-    for (const id of userInfo.posts) {
+    for (const id of Object.keys(userInfo.posts)) {
         if (!postIDs.includes(id)) return true;
     }
 

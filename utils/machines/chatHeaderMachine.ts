@@ -1,9 +1,7 @@
-import { firebase } from "@react-native-firebase/database";
 import { createMachine, assign } from "xstate";
 
 import { ChatHeader } from "../chat";
-
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
+import { getDB } from "../db";
 
 const ChatHeaderMachine = {
     initial: "Start",
@@ -46,32 +44,34 @@ const ChatHeaderMachine = {
         error: null,
     },
     schema: {
-        context: {} as { header: ChatHeader | null; postID: string; error: string | null },
-        events: {} as Init | Error | Leave | Update,
+        context: {} as { header: ChatHeader | null; postID: string; error: Error | null },
+        events: {} as Init | ErrorEvent | Leave | Update,
     },
     predictableActionArguments: true,
     preserveActionOrder: true,
 };
 type Init = { type: "INIT"; postID: string };
 type Update = { type: "UPDATE"; data: ChatHeader };
-type Error = { type: "ERROR"; error: string };
+type ErrorEvent = { type: "ERROR"; error: Error };
 type Leave = { type: "LEAVE" };
 
 export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
     services: {
         loadHeader: (context) => (callback) => {
             const { postID } = context;
-            const res = db.ref(`chats/${postID}`).on("value", (snapshot) => {
-                if (snapshot.exists()) {
-                    const header = snapshot.val();
-                    callback({ type: "UPDATE", data: header });
-                } else {
-                    callback({ type: "ERROR", error: "Chat does not exist" });
-                }
-            });
+            const res = getDB()
+                .ref(`chats/${postID}`)
+                .on("value", (snapshot) => {
+                    if (snapshot.exists()) {
+                        const header = snapshot.val();
+                        callback({ type: "UPDATE", data: header });
+                    } else {
+                        callback({ type: "ERROR", error: new Error("Chat does not exist") });
+                    }
+                });
 
             return () => {
-                db.ref(`chats/${postID}`).off("value", res);
+                getDB().ref(`chats/${postID}`).off("value", res);
             };
         },
     },
@@ -83,7 +83,7 @@ export const chatHeaderMachine = createMachine(ChatHeaderMachine, {
             header: (_, event) => (event as Update).data,
         }),
         assignError: assign({
-            error: (_, event) => (event as Error).error,
+            error: (_, event) => (event as ErrorEvent).error,
         }),
     },
 });

@@ -7,13 +7,13 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import { UserInfo } from "./utils/auth";
 import { ChatHeader } from "./utils/chat";
-import { FBPostType, PostType } from "./utils/postValidation";
+import { FBPostType } from "./utils/postValidation";
+import { UserInfo } from "./utils/userValidation";
 
 declare global {
     namespace ReactNavigation {
-        interface RootParamList extends RootStackParamList { }
+        interface RootParamList extends RootStackParamList {}
     }
 }
 
@@ -31,6 +31,8 @@ export type RootStackParamList = {
     //MatchDetails: MatchDetailsParamList | undefined;
     PastRides: undefined;
     ChatScreen: ChatScreenParamList | undefined;
+    Error: undefined;
+    Waiting: undefined;
 };
 
 export type ChatScreenParamList = {
@@ -44,7 +46,7 @@ export type PostDetailsParamList = {
 
 export type PastPostDetailsParamList = {
     post: PostType;
-}
+};
 
 export type ChangeInfoParamList = {
     userInfo: UserInfo;

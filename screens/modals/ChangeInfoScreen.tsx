@@ -14,18 +14,22 @@ import { deleteAccount } from "../../utils/auth";
 import Colors from "../../constants/Colors";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
+import { AuthContext, userIDSelector, userSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { createProfileMachine } from "../../utils/machines/createProfileMachine";
 import Dropdown from "../../components/shared/Dropdown";
 import Pronouns from "../../constants/Pronouns.json";
+import { z } from "zod";
+import { ErrorBox } from "../../components/posts/CreatePostForm";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ChangeInfo">;
 export default function ChangeInfoScreen({ route, navigation }: Props) {
     const headerheight = useHeaderHeight();
 
     const authService = useContext(AuthContext);
-    const userID = useSelector(authService, userIDSelector);
+    const user = useSelector(authService, userSelector);
+    if (!user) throw new Error("User not found");
+    const userID = user.uid;
     const { userInfo } = route.params ? route.params : { userInfo: null };
 
     const [state, send] = useMachine(createProfileMachine);
@@ -37,28 +41,27 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
     const [grad, setGrad] = useState(userInfo ? String(userInfo.gradYear) : "");
     const [pronouns, setPronouns] = useState(
         Pronouns[
-        userInfo
-            ? Pronouns.indexOf(userInfo.pronouns) != -1
-                ? Pronouns.indexOf(userInfo.pronouns)
+            userInfo
+                ? Pronouns.indexOf(userInfo.pronouns) != -1
+                    ? Pronouns.indexOf(userInfo.pronouns)
+                    : 0
                 : 0
-            : 0
         ]
     );
 
     const [message, setMessage] = useState<string | null>(null);
 
     const allowChange = state.matches("Information Valid") && state.context.infoChanged;
-    console.log(state.matches("Information Valid"), state.context.infoChanged);
 
     useEffect(() => {
-        if (!userID || !userInfo) return;
+        if (!userID) return;
         send("UPDATE INFO", {
             userID: userID,
             info: {
                 username: name.trim(),
                 major: major.trim(),
                 gradString: grad.trim(),
-                phone: null,
+                phone: user.phoneNumber,
                 pronouns,
             },
         });
@@ -68,7 +71,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to make these changes?", [
             {
                 text: "Cancel",
-                onPress: () => { },
+                onPress: () => {},
             },
             {
                 text: "Confirm",
@@ -84,7 +87,7 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
         Alert.alert("Confirm Action", "Are you sure you want to delete your account?", [
             {
                 text: "Cancel",
-                onPress: () => { },
+                onPress: () => {},
             },
             {
                 text: "Confirm",
@@ -108,6 +111,15 @@ export default function ChangeInfoScreen({ route, navigation }: Props) {
                 <Text textStyle="header" styleSize="m" style={{ marginBottom: 32 }}>
                     Tap to Change Information
                 </Text>
+
+                {state.context.error &&
+                    (state.context.error instanceof z.ZodError ? (
+                        state.context.error.issues.map((issue) => (
+                            <ErrorBox message={issue.message} />
+                        ))
+                    ) : (
+                        <ErrorBox message={state.context.error.message} />
+                    ))}
 
                 <TextField style={styles.input} label={"name"} inputState={[name, setName]} />
                 <TextField style={styles.input} label={"major"} inputState={[major, setMajor]} />

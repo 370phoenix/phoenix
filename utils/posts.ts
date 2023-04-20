@@ -1,6 +1,8 @@
-import { firebase } from "@react-native-firebase/database";
+import { getDB } from "./db";
+import { UserInfo } from "./userValidation";
+import { getUserOnce, writeUser } from "./auth";
+import * as Clipboard from "expo-clipboard";
 
-import { getUserOnce, UserInfo, writeUser } from "./auth";
 import { safeRun } from "./errorHandling";
 import {
     FBPostType,
@@ -10,14 +12,6 @@ import {
     PostToFBSchema,
     PostType,
 } from "./postValidation";
-
-const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
-
-///////////////////////////////////////////
-///////////////////////////////////////////
-//////////////// TYPES ////////////////////
-///////////////////////////////////////////
-///////////////////////////////////////////
 
 export type Unsubscribe = () => void;
 
@@ -35,7 +29,9 @@ export type Unsubscribe = () => void;
  * @throws ZodError when validation fails
  */
 export async function fetchPost(postID: string): Promise<PostType> {
-    const snapshot = await db.ref("posts/" + postID).once("value");
+    const snapshot = await getDB()
+        .ref("posts/" + postID)
+        .once("value");
     if (snapshot.exists()) return valToPost(snapshot.val());
     else throw Error("Post does not exist.");
 }
@@ -44,12 +40,12 @@ export async function fetchPost(postID: string): Promise<PostType> {
  * Fetch some number of posts.
  *
  * @param ids (PostID[]): Array of ids to fetch
- * @returns (Success<PostType[] | ErrorMessage) Posts or an Error Message.
+ * @returns (Promise<PostType[]>) Posts or an Error Message.
  *
  * @throws Error from Firebase
  */
 export async function fetchSomePosts(ids: string[]): Promise<PostType[]> {
-    const postsRef = db.ref("posts");
+    const postsRef = getDB().ref("posts");
     const posts: PostType[] = [];
 
     for (const id of ids) {
@@ -103,7 +99,7 @@ export function getAllPostUpdates({
     onChildChanged,
     onChildRemoved,
 }: PostUpdateParams): Unsubscribe {
-    const postsRef = db.ref("posts");
+    const postsRef = getDB().ref("posts");
 
     const onAdd = postsRef.on(
         "child_added",
@@ -164,25 +160,26 @@ export async function createPost(post: FreshPostType, userInfo: UserInfo | null)
     const { user: userID } = post;
 
     // Add post to DB
-    const postRef = db.ref("posts/").push();
+    const postRef = getDB().ref("posts/").push();
     if (!postRef.key) throw new Error("No key generated.");
     const postID = postRef.key;
     const newPost: FBPostType = FirebasePostSchema.parse({ postID, ...post });
     await postRef.set(newPost);
 
     // Add post to user info
-    const posts: string[] = userInfo.posts ? userInfo.posts : [];
-    posts.push(postID);
-    userInfo.posts = posts;
+    if (userInfo.posts) userInfo.posts[postID] = true;
+    else userInfo.posts = { [postID]: true };
     await writeUser(userID, userInfo);
 
     // Add a chat header
-    await db.ref(`chats/${postID}`).set({
-        postID,
-        title: post.dropoff,
-        displayNames: { [userID]: userInfo.username },
-        lastMessage: undefined,
-    });
+    await getDB()
+        .ref(`chats/${postID}`)
+        .set({
+            postID,
+            title: post.dropoff,
+            displayNames: { [userID]: userInfo.username },
+            lastMessage: undefined,
+        });
 }
 
 ///////////////////////////////////////////
@@ -200,7 +197,7 @@ export async function createPost(post: FreshPostType, userInfo: UserInfo | null)
  * @throws (FirebaseError) from Firebase
  */
 export async function writePostData(post: PostType): Promise<void> {
-    const postRef = db.ref("posts/" + post.postID);
+    const postRef = getDB().ref("posts/" + post.postID);
     await postRef.set(PostToFBSchema.parse(post));
 }
 
@@ -234,35 +231,39 @@ export async function handleAcceptReject({
     post,
 }: ARParams): Promise<PostType> {
     if (!userInfo || !requesterInfo) throw new Error("Missing User Info.");
-
     const { postID } = post;
 
     // Update Requester Info
     // Remove from requester pending for accept or deny
     if (requesterInfo.pending) {
-        const i = requesterInfo.pending.indexOf(postID);
-        if (i != -1 && requesterInfo.pending) requesterInfo.pending.splice(i, 1);
-    }
+        requesterInfo.pending[postID] = null;
+    } else throw Error("No pending requests found on requester.");
+
     // Add to matches for accept
-    if (isAccept)
-        requesterInfo.matches = requesterInfo.matches
-            ? [...requesterInfo.matches, postID]
-            : [postID];
+    if (isAccept) {
+        if (requesterInfo.matches) requesterInfo.matches[postID] = true;
+        else requesterInfo.matches = { [postID]: true };
+    }
     await writeUser(requesterID, requesterInfo);
 
     // Update Post Info
     // Remove from post pending for accept or deny
     if (post.pending) {
-        const j = post.pending.indexOf(requesterID);
-        if (j != -1 && post.pending) post.pending.splice(j, 1);
-    }
+        post.pending[requesterID] = null;
+    } else throw Error("No pending requests found on post.");
+
     // Add to post riders if accept
-    if (isAccept) post.riders = post.riders ? [...post.riders, requesterID] : [requesterID];
+    if (isAccept) {
+        if (post.riders) post.riders[requesterID] = true;
+        else post.riders = { [requesterID]: true };
+    }
     await writePostData(post);
 
     if (isAccept) {
         console.log(`Adding ${requesterInfo.username} to chat ${postID}`);
-        await db.ref(`chats/${postID}/displayNames/${requesterID}`).set(requesterInfo.username);
+        await getDB()
+            .ref(`chats/${postID}/displayNames/${requesterID}`)
+            .set(requesterInfo.username);
     }
     return post;
 }
@@ -282,13 +283,14 @@ export async function matchPost(userID: string, post: PostType): Promise<void> {
     if (!requesterInfo) throw new Error("No requester info found.");
 
     // Update requester to have pending
-    requesterInfo.pending = requesterInfo.pending
-        ? [...requesterInfo.pending, post.postID]
-        : [post.postID];
+    if (requesterInfo.pending) requesterInfo.pending[post.postID] = true;
+    else requesterInfo.pending = { [post.postID]: true };
+
     await writeUser(userID, requesterInfo);
 
     // Update Post Info to have pending
-    post.pending = post.pending ? [...post.pending, userID] : [userID];
+    if (post.pending) post.pending[userID] = true;
+    else post.pending = { [userID]: true };
     await writePostData(post);
 }
 
@@ -310,30 +312,14 @@ export async function matchPost(userID: string, post: PostType): Promise<void> {
 export async function unmatchPost(userID: string, post: PostType): Promise<void> {
     // remove postID from user.matches
     const userInfo = await getUserOnce(userID);
-    if (!userInfo) throw new Error("No user info found.");
-
-    const newMatches = userInfo.matches;
-    if (!newMatches) throw Error("Error fetching user matches");
-
-    const postIndex = newMatches.indexOf(post.postID);
-    if (postIndex === -1) throw Error("Post not found in user matches");
-
-    if (newMatches.length === 1) newMatches.shift();
-    else newMatches.splice(postIndex, 1);
-    userInfo.matches = newMatches;
+    if (!userInfo || !userInfo.matches) throw new Error("No user info found.");
+    userInfo.matches[post.postID] = null;
 
     // update user to remove post
     await writeUser(userID, userInfo);
 
-    // remove userID from post.riders
-    const newRiders = post.riders;
-    if (!newRiders) throw Error("Error fetching users from post");
-
-    const userIndex = newRiders.indexOf(userID);
-    if (userIndex === -1) throw Error("User not found in post riders");
-    if (newRiders.length === 1) newRiders.shift();
-    newRiders.splice(userIndex, 1);
-    post.riders = newRiders;
+    if (post.riders) post.riders[userID] = null;
+    else throw Error("No riders found on post.");
 
     // update post to remove user
     await writePostData(post);
@@ -355,4 +341,8 @@ function valToPost(val: any) {
         riders: val.riders,
         pending: val.pending,
     });
+}
+
+export async function copyToClipboard(text: string) {
+    await Clipboard.setStringAsync(text);
 }

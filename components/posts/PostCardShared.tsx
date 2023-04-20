@@ -3,7 +3,7 @@ import functions from "@react-native-firebase/functions";
 
 import Colors from "../../constants/Colors";
 import { Spacer, Text } from "../shared/Themed";
-import { UserInfo } from "../../utils/auth";
+import { UserInfo } from "../../utils/userValidation";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { PostType } from "../../utils/postValidation";
 import RoundTrip from "../../assets/icons/RoundTrip";
@@ -72,9 +72,9 @@ type BadgeProps = {
 };
 function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
     const total = post.totalSpots;
-    const postRiders = post.riders ? post.riders.filter((val) => val != null) : [];
+    const postRiders = post.riders ? Object.keys(post.riders as object) : [];
     const filled = postRiders.length + 1;
-    const pending = post.pending ? post.pending.length : 0;
+    const pending = post.pending ? Object.keys(post.pending as object).length : 0;
     const riders = Array<number>(total);
     const rows = Array<Array<number>>(isProfile ? 1 : total > 4 ? 2 : 1);
 
@@ -104,7 +104,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
         Alert.alert("Confirm Delete", "Are you sure you want to delete this post?", [
             {
                 text: "Confirm",
-                onPress: async () => {
+                onPress: () => {
                     const { userID } = userInfo;
                     if (userID) {
                         const fullPostDelete = functions().httpsCallable("fullPostDelete");
@@ -112,7 +112,7 @@ function RiderBadge({ post, isProfile, userInfo, isMatched }: BadgeProps) {
                             postID: post.postID,
                         })
                             .then(() => {
-                                console.log("Post Deleted");
+                                console.log(`Post (${post.postID}) Deleted`);
                             })
                             .catch((e) => {
                                 console.error(e);
