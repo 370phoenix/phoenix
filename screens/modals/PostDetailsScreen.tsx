@@ -12,12 +12,13 @@ import { RootStackParamList } from "../../types";
 import { convertDate, convertTime } from "../../utils/convertPostTypes";
 import { UserInfo } from "../../utils/userValidation";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { copyToClipboard, matchPost } from "../../utils/posts";
+import { copyToClipboard } from "../../utils/posts";
 import { AuthContext, userIDSelector } from "../../utils/machines/authMachine";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import SuccessfulPost from "../../components/shared/SuccessPage";
 import { FBToPostSchema, PostType } from "../../utils/postValidation";
 import { logError } from "../../utils/errorHandling";
+import { getFunctions } from "../../utils/functions";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PostDetails">;
 export default function DetailsModal({ route, navigation }: Props) {
@@ -48,7 +49,8 @@ export default function DetailsModal({ route, navigation }: Props) {
                         const filled = post.riders ? Object.keys(post.riders).length + 1 : 1;
                         if (filled >= post.totalSpots) return;
 
-                        await matchPost(userID, post);
+                        const matchPost = getFunctions().httpsCallable("matchPost");
+                        await matchPost({ userID, post });
                         setMatchComplete(true);
                         setTimeout(() => navigation.goBack(), 1000);
                     } catch (e: any) {

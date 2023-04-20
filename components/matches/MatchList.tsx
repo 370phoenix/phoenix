@@ -60,14 +60,7 @@ export default function MatchList({ userID }: Props) {
                 style={styles.list}
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
-                    return (
-                        <RequestCard
-                            post={item[0]}
-                            requesterID={item[1]}
-                            userInfo={userInfo}
-                            posterID={userID}
-                        />
-                    );
+                    return <RequestCard post={item[0]} requesterID={item[1]} />;
                 }}
             />
             <Text textStyle="header" styleSize="l" style={styles.title}>

@@ -1,9 +1,9 @@
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
-import functions from "@react-native-firebase/functions";
 import { Unsubscribe } from "./posts";
 import { getDB } from "./db";
 
 import { UserInfo, UserSchema } from "./userValidation";
+import { getFunctions } from "./functions";
 
 ///////////////////////////////////////////
 ///////////////////////////////////////////
@@ -146,6 +146,6 @@ export async function getUserOnce(userID: string | null): Promise<UserInfo | nul
  * @throws (FirebaseError): If Firebase error
  */
 export async function deleteAccount(): Promise<void> {
-    await functions().httpsCallable("deleteUser")();
+    await getFunctions().httpsCallable("deleteUser")();
     await auth().signOut();
 }

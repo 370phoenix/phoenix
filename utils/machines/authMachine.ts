@@ -27,6 +27,18 @@ const AuthMachine = {
                 },
             ],
         },
+        "Signing Out": {
+            invoke: {
+                src: "signOut",
+                id: "signOut",
+                onDone: {
+                    target: "FB Signed Out",
+                },
+                onError: {
+                    target: "FB Signed Out",
+                },
+            },
+        },
         "FB Signed In": {
             invoke: {
                 src: "setUserInfoListener",
@@ -38,6 +50,10 @@ const AuthMachine = {
                     actions: "assignUser",
                 },
                 "SIGN OUT": {
+                    target: "#New Authentication Machine.Signing Out",
+                    actions: "clearInfo",
+                },
+                "SIGNED OUT": {
                     target: "#New Authentication Machine.Init",
                     actions: "clearInfo",
                 },
@@ -186,6 +202,7 @@ type AuthMachineEvents =
     | { type: "USER CHANGED"; user: FirebaseAuthTypes.User | null }
     | { type: "USER INFO CHANGED"; userInfo: UserInfo | null }
     | { type: "SIGN OUT" }
+    | { type: "SIGNED OUT" }
     | { type: "UPDATE POST"; post: PostType }
     | { type: "ERROR"; error: Error };
 
@@ -207,10 +224,13 @@ export const authMachine = createMachine(AuthMachine, {
         setUserListener: () => (callback) => {
             const authSubscriber = auth().onAuthStateChanged((user) => {
                 if (user) callback({ type: "USER CHANGED", user: user });
-                else callback({ type: "SIGN OUT" });
+                else callback({ type: "SIGNED OUT" });
             });
 
             return authSubscriber;
+        },
+        signOut: () => async () => {
+            await auth().signOut();
         },
         setUserInfoListener: (context) => (callback) => {
             if (!context.user) {
@@ -267,13 +287,18 @@ export const authMachine = createMachine(AuthMachine, {
             userInfo: null,
             ranOnce: false,
             error: null,
+            posts: null,
+            updatedToken: false,
         }),
         assignPosts: assign({
             posts: (_, event: any) => event.data,
         }),
         updatePost: assign({
+            error: (_, event) =>
+                event.type === "UPDATE POST" && !event.post ? Error("Missing Post") : null,
             posts: (context, event) => {
                 if (event.type !== "UPDATE POST") return context.posts;
+                if (!event.post) return context.posts;
                 if (!context.posts) return context.posts;
 
                 const i = context.posts.findIndex((post) => post.postID === event.post.postID);

@@ -1,24 +1,22 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { StyleSheet, Pressable, Alert } from "react-native";
 
 import { View, Text } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { UserInfo } from "../../utils/userValidation";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";
-import { requestCardMachine } from "../../utils/machines/requestCardMachine";
-import { PostType } from "../../utils/postValidation";
+import { getRequestCardMachine } from "../../utils/machines/requestCardMachine";
+import { FBPostType, FBToPostSchema, PostToFBSchema, PostType } from "../../utils/postValidation";
 import { AuthContext } from "../../utils/machines/authMachine";
 
 export type Props = {
     requesterID: string;
-    posterID: string;
-    userInfo: UserInfo | null;
     post: PostType;
 };
-export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
-    const [state, send] = useMachine(requestCardMachine);
+export default function RequestCard({ requesterID, post }: Props) {
+    const machine = useRef(getRequestCardMachine());
+    const [state, send] = useMachine(machine.current);
     const authService = useContext(AuthContext);
     const { requesterInfo } = state.context;
     let shouldRender = true;
@@ -33,17 +31,18 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                 {
                     text: "Confirm",
                     onPress: () => {
-                        send(isAccept ? "ACCEPT" : "REJECT", {
-                            post,
-                            posterID,
-                            userInfo,
-                            onSuccessful: (post: PostType) => {
-                                authService.send("UPDATE POST", { post });
+                        const type = isAccept ? "ACCEPT" : "REJECT";
+                        send(type, {
+                            post: PostToFBSchema.parse(post),
+                            requesterID,
+                            onSuccessful: (post: FBPostType) => {
+                                authService.send("UPDATE POST", {
+                                    post: FBToPostSchema.parse(post),
+                                });
                             },
+                            onError: (error: Error) => Alert.alert("Error", error.message),
                         });
                         shouldRender = false;
-                        // TODO: Send notification to alert requester of accepted/rejected ride
-                        // TODO: If accept, notification to alert matched riders of new match
                     },
                 },
                 {

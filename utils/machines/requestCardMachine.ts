@@ -1,8 +1,8 @@
 import { assign, createMachine } from "xstate";
 import { getUserOnce } from "../auth";
 import { logError } from "../errorHandling";
-import { handleAcceptReject } from "../posts";
-import { PostType } from "../postValidation";
+import { getFunctions } from "../functions";
+import { FBPostType, PostType } from "../postValidation";
 import { UserInfo } from "../userValidation";
 
 const RequestCardMachine = {
@@ -92,16 +92,16 @@ const RequestCardMachine = {
             | {
                   type: "ACCEPT";
                   post: PostType;
-                  posterID: string;
-                  userInfo: UserInfo;
-                  onSuccessful: (post: PostType) => void;
+                  requesterID: string;
+                  onSuccessful: (post: FBPostType) => void;
+                  onError: (error: Error) => void;
               }
             | {
                   type: "REJECT";
                   post: PostType;
-                  posterID: string;
-                  userInfo: UserInfo;
+                  requesterID: string;
                   onSuccessful: (post: PostType) => void;
+                  onError: (error: Error) => void;
               },
     },
     context: { requesterInfo: null, userID: null },
@@ -109,43 +109,46 @@ const RequestCardMachine = {
     preserveActionOrder: true,
 };
 
-export const requestCardMachine = createMachine(RequestCardMachine, {
-    services: {
-        getUserInfo: async (context) => {
-            return await getUserOnce(context.userID);
+export const getRequestCardMachine = () =>
+    createMachine(RequestCardMachine, {
+        services: {
+            getUserInfo: async (context) => {
+                return await getUserOnce(context.userID);
+            },
+            acceptUser: async (context, event) => {
+                if (context.userID && event.type === "ACCEPT") {
+                    try {
+                        const acceptUser = getFunctions().httpsCallable("acceptUser");
+                        const res = await acceptUser({
+                            requesterID: event.requesterID,
+                            post: event.post,
+                        });
+                        event.onSuccessful(res.data);
+                    } catch (e: any) {
+                        event.onError(e);
+                    }
+                } else throw new Error("No info attached to event or Missing ID.");
+            },
+            rejectUser: async (context, event) => {
+                if (context.userID && event.type === "ACCEPT") {
+                    try {
+                        const rejectUser = getFunctions().httpsCallable("rejectUser");
+                        const res = await rejectUser({
+                            requesterID: event.requesterID,
+                            post: event.post,
+                        });
+                        event.onSuccessful(res.data);
+                    } catch (e: any) {
+                        event.onError(e);
+                    }
+                } else throw new Error("No info attached to event or Missing ID.");
+            },
         },
-        acceptUser: async (context, event) => {
-            if (context.userID && event.type === "ACCEPT") {
-                const newPost = await handleAcceptReject({
-                    isAccept: true,
-                    userInfo: event.userInfo,
-                    requesterID: context.userID,
-                    requesterInfo: context.requesterInfo,
-                    post: event.post,
-                    posterID: event.posterID,
-                });
-                event.onSuccessful(newPost);
-            } else throw Error("No info attached to event or Missing ID.");
+        actions: {
+            logRequestError: (_, event: any) => {
+                logError(event.data);
+            },
+            assignID: assign((_, event: any) => ({ userID: event.id })),
+            assignRequesterInfo: assign({ requesterInfo: (_, event: any) => event.data }),
         },
-        rejectUser: async (context, event) => {
-            if (context.userID && event.type === "REJECT") {
-                const newPost = await handleAcceptReject({
-                    isAccept: false,
-                    userInfo: event.userInfo,
-                    requesterID: context.userID,
-                    requesterInfo: context.requesterInfo,
-                    post: event.post,
-                    posterID: event.posterID,
-                });
-                event.onSuccessful(newPost);
-            } else throw Error("No info attached to event or Missing ID.");
-        },
-    },
-    actions: {
-        logRequestError: (_, event: any) => {
-            logError(event.data);
-        },
-        assignID: assign((_, event: any) => ({ userID: event.id })),
-        assignRequesterInfo: assign({ requesterInfo: (_, event: any) => event.data }),
-    },
-});
+    });
