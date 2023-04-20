@@ -7,7 +7,7 @@ import { UserInfo } from "../../utils/userValidation";
 import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";
-import { requestCardMachine } from "../../utils/machines/requestCardMachine";
+import { getRequestCardMachine } from "../../utils/machines/requestCardMachine";
 import { FBPostType, FBToPostSchema, PostToFBSchema, PostType } from "../../utils/postValidation";
 import { AuthContext } from "../../utils/machines/authMachine";
 
@@ -18,7 +18,7 @@ export type Props = {
     post: PostType;
 };
 export default function RequestCard({ requesterID, posterID, post, userInfo }: Props) {
-    const [state, send] = useMachine(requestCardMachine);
+    const [state, send] = useMachine(getRequestCardMachine());
     const authService = useContext(AuthContext);
     const { requesterInfo } = state.context;
     let shouldRender = true;
