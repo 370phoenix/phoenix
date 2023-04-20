@@ -24,8 +24,6 @@ import CreateProfileScreen from "../screens/auth/CreateProfileScreen";
 import ChangeInfoScreen from "../screens/modals/ChangeInfoScreen";
 import CreatePostScreen from "../screens/modals/CreatePostScreen";
 import PostDetailsScreen from "../screens/modals/PostDetailsScreen";
-// import PastPostDetailsScreen from "../screens/modals/PastPostDetailsScreen"; //these arent used in this file?
-// import PastRidesScreen from "../screens/PastRidesScreen";
 import ModalHeader from "../components/shared/ModalHeader";
 import ChatScreen from "../screens/matches/ChatScreen";
 import auth from "@react-native-firebase/auth";

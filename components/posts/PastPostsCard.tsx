@@ -9,9 +9,9 @@ import RoundTrip from "../../assets/icons/RoundTrip";
 import { Right } from "../../assets/icons/Arrow";
 import FeedbackExclaim from "../../assets/icons/feedbackExclaim";
 
-// export type Props = {
-//     post: PostType;
-// };
+type Props = {
+    post: PostType;
+};
 
 export default function PastPostsCard({ post }: Props) {
     //what do we use instead of props?

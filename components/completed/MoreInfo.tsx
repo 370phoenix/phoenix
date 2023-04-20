@@ -3,21 +3,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, ScrollView, Alert } from "react-native";
 import { firebase } from "@react-native-firebase/database";
 
-import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
+import { View, Text, Spacer, Button, TextArea } from "../shared/Themed";
 import Colors from "../../constants/Colors";
-import { RootStackParamList } from "../../types";
 import { FeedbackEntryType } from "../../utils/auth";
-import { UserInfo } from "../../utils/userValidation";
 import { PostType } from "../../utils/postValidation";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import { pushFeedback } from "../../utils/feedback";
 import UserList from "./UserList";
-import UserDetails from "./UserDetails";
-
-//NOTE: SHOULD THIS FILE BE HERE OR IN ANOTHER SECTION? THIS FILE IS IN THIS LOCATION TEMPORARILY
 
 export default function MoreInfo({ post }: { post: PostType }) {
     const [state, send] = useMachine(multipleUserMachine);

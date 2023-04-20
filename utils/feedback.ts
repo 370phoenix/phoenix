@@ -1,7 +1,9 @@
 import { firebase } from "@react-native-firebase/database";
 import { SuccessMessage, ErrorMessage, MessageType } from "./auth"; //didnt we get rid of this?
+import { getUserOnce } from "./auth"; //does this substitute for the line above?^
 // import { FeedbackEntryType } from "../constants/DataTypes";
 // import { UserID, PostID } from "../constants/DataTypes";
+import { TouchableNativeFeedback } from "react-native";
 
 const db = firebase.app().database("https://phoenix-370-default-rtdb.firebaseio.com");
 

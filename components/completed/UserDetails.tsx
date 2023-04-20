@@ -6,22 +6,11 @@ import { firebase } from "@react-native-firebase/database";
 
 import { View, Text, Spacer, Button, TextArea } from "../../components/shared/Themed";
 import Colors from "../../constants/Colors";
-import { RootStackParamList } from "../../types";
 import { UserInfo } from "../../utils/userValidation";
 import { PostType } from "../../utils/postValidation";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machines/authMachine";
-import { useMachine, useSelector } from "@xstate/react";
-import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
-import { pushFeedback } from "../../utils/feedback";
-import MoreInfo from "./MoreInfo";
-import UserList from "./UserList";
-
-//NOTE: SHOULD THIS FILE BE HERE OR IN ANOTHER SECTION? THIS FILE IS IN THIS LOCATION TEMPORARILY
 
 export default function UserDetails({
     user,
-    num,
     post,
 }: {
     user: UserInfo;

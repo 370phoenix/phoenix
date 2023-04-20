@@ -14,9 +14,7 @@ import { AuthContext, userIDSelector, userInfoSelector } from "../../utils/machi
 import { useMachine, useSelector } from "@xstate/react";
 import { multipleUserMachine } from "../../utils/machines/multipleUserMachine";
 import { pushFeedback } from "../../utils/feedback";
-import MoreInfo from "./MoreInfo";
-import UserList from "./UserList";
-import UserDetails from "./UserDetails";
+import MoreInfo from "../../components/completed/MoreInfo";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PastPostDetails">;
 export default function DetailsModal({ route }: Props) {
@@ -26,9 +24,6 @@ export default function DetailsModal({ route }: Props) {
     const [message, setMessage] = useState<string | null>(null);
     const authService = useContext(AuthContext);
     const userID = useSelector(authService, userIDSelector);
-
-    // const [notes, setNotes] = useState("");
-    const onSubmit = useState<string>;
 
     return (
         <View style={styles.infoContainer}>
