@@ -8,7 +8,7 @@ import Accept from "../../assets/icons/Accept";
 import Reject from "../../assets/icons/Reject";
 import { useMachine } from "@xstate/react";
 import { requestCardMachine } from "../../utils/machines/requestCardMachine";
-import { FBPostType, PostToFBSchema, PostType } from "../../utils/postValidation";
+import { FBPostType, FBToPostSchema, PostToFBSchema, PostType } from "../../utils/postValidation";
 import { AuthContext } from "../../utils/machines/authMachine";
 
 export type Props = {
@@ -35,12 +35,12 @@ export default function RequestCard({ requesterID, posterID, post, userInfo }: P
                     onPress: () => {
                         const type = isAccept ? "ACCEPT" : "REJECT";
                         send(type, {
-                            post,
+                            post: PostToFBSchema.parse(post),
                             posterID,
                             userInfo,
                             onSuccessful: (post: FBPostType) => {
                                 authService.send("UPDATE POST", {
-                                    post: PostToFBSchema.parse(post),
+                                    post: FBToPostSchema.parse(post),
                                 });
                             },
                             onError: (error: Error) => Alert.alert("Error", error.message),
