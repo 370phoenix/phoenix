@@ -4,6 +4,7 @@ import { logError } from "../errorHandling";
 import { getFunctions } from "../functions";
 import { FBPostType, PostType } from "../postValidation";
 import { UserInfo } from "../userValidation";
+import { getAllRequestUpdates } from "../posts";
 
 const RequestCardMachine = {
     id: "Request Card Machine",

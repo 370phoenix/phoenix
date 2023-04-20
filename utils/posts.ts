@@ -123,6 +123,38 @@ export function getAllPostUpdates({
     };
 }
 
+type RequestUpdateParams = {
+    onChildAdded: (data: PostType) => void;
+    userID: string;
+};
+/**
+ * Get all request updates.
+ *
+ * @param onChildAdded (PostType => void): Callback for when a post is added.
+ *
+ * @returns (Unsubscribe): Function to unsubscribe from all updates.
+ * @throws Error from Firebase
+ */
+export function getAllRequestUpdates({ onChildAdded, userID }: RequestUpdateParams): Unsubscribe {
+    const postsRef = getDB().ref(`users/${userID}/posts/pending`);
+
+    const onAdd = postsRef.on(
+        "child_added",
+        (snapshot) => {
+            if (snapshot.exists()) {
+                safeRun(() => {
+                    onChildAdded(valToPost(snapshot.val()));
+                });
+            }
+        },
+        (_) => {} // TODO: HANDLE (ERROR) => {}
+    );
+
+    return () => {
+        postsRef.off("child_added", onAdd);
+    };
+}
+
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 ///////////// CREATE POSTS ////////////////
